@@ -532,8 +532,7 @@
                                                 Visualizar
                                             </button>
 
-                                            <a href="{{ asset('storage/'.$arq->path) }}"
-                                               download
+                                            <a href="{{ route('arquivo.download', $arq->id) }}"
                                                class="flex-1 bg-[#00E500] hover:bg-green-500 text-black py-2 rounded-xl font-black uppercase text-[10px] text-center transition">
                                                 Baixar
                                             </a>
