@@ -239,7 +239,7 @@
                                 @if($base->arquivo_zip)
 
                                     <a href="{{ asset('storage/' . $base->arquivo_zip) }}"
-                                       download
+                                       download="{{ $base->nome }}.zip"
                                        class="bg-[#004A7C] hover:bg-[#003055] text-white px-5 py-2 rounded-xl text-xs uppercase font-bold transition">
                                         Download
                                     </a>
