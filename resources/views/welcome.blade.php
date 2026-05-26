@@ -85,7 +85,7 @@
 
                     <!-- Logo -->
                     <img 
-                        src="{{ asset('images/logo-completa.png') }}"
+                        src="{{ asset('images/logo-completa.png') }}?v={{ file_exists(public_path('images/logo-completa.png')) ? filemtime(public_path('images/logo-completa.png')) : time() }}"
                         alt="TopoGest"
                         class="relative z-10 w-[420px] md:w-[520px] h-auto object-contain drop-shadow-2xl"
                     >
