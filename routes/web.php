@@ -9,6 +9,8 @@ use App\Http\Controllers\PastaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\MarcoController;
+use App\Http\Controllers\SigefMapaController;
+use App\Http\Controllers\AdminGeradorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +18,8 @@ use App\Http\Controllers\MarcoController;
 |--------------------------------------------------------------------------
 */
 
-// --- Rotas Públicas ---
+
+
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
@@ -95,6 +98,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/notificacoes/{id}/ler', [NotificacaoController::class, 'marcarComoLida'])->name('notificacoes.ler');
 
     Route::get('/arquivo/{id}/download', [ArquivoController::class, 'download'])->name('arquivo.download');
+    Route::get('/pasta/{id}/mapa-sigef', [SigefMapaController::class, 'parsear'])->name('pasta.mapa-sigef');
+    Route::get('/pasta/{id}/memorial-descritivo', [SigefMapaController::class, 'gerarMemorial'])->name('pasta.memorial-descritivo');
+    Route::get('/pasta/{id}/dxf', [SigefMapaController::class, 'gerarDxf'])->name('pasta.dxf');
     Route::get('/documentos/recentes/json', function () {
         $userId = auth()->id();
         
@@ -199,9 +205,13 @@ Route::post('/admin/imagens', [AdminController::class, 'storeImagens'])->name('a
 
 Route::post('/admin/pastas/{id}/solicitar', [AdminController::class, 'solicitarExclusao'])->name('admin.pastas.solicitar');
 
-// Verifique se esta linha existe no seu web.php
 Route::post('/admin/pastas/{id}/solicitar', [AdminController::class, 'solicitarExclusao'])->name('admin.pastas.solicitar');
 
+    // Gerador Express de Planta e Memorial
+    Route::get('/admin/gerador-express', [AdminGeradorController::class, 'index'])->name('admin.gerador.index');
+    Route::post('/admin/gerador-express', [AdminGeradorController::class, 'processar'])->name('admin.gerador.processar');
+    Route::get('/admin/gerador-express/{tempId}/dxf', [AdminGeradorController::class, 'dxf'])->name('admin.gerador.dxf');
+    Route::get('/admin/gerador-express/{tempId}/txt', [AdminGeradorController::class, 'txt'])->name('admin.gerador.txt');
 
 });
 

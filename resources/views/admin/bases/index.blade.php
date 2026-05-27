@@ -7,6 +7,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         ::-webkit-scrollbar {
@@ -267,6 +268,17 @@
                                         Mapa
                                     </a>
 
+                                    @if($base->google_maps_url)
+                                        <button type="button"
+                                                onclick="shareBaseLocation('{{ $base->nome }}', '{{ $base->google_maps_url }}')"
+                                                class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-black uppercase transition flex items-center justify-center gap-1.5 shadow-md">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l4.636-2.318M8.684 13.258l4.636 2.318M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Compartilhar
+                                        </button>
+                                    @endif
+
                                     <form action="{{ route('admin.bases.destroy', $base->id) }}"
                                           method="POST"
                                           onsubmit="return confirm('Deseja excluir esta base?')">
@@ -441,5 +453,37 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function shareBaseLocation(nome, url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Localização da Base: ' + nome,
+                    text: 'Confira a localização da base "' + nome + '" no Google Maps.',
+                    url: url
+                }).catch(err => {
+                    console.log('Erro ao compartilhar:', err);
+                });
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    Swal.fire({
+                        title: 'Link Copiado!',
+                        text: 'O link do Google Maps para a base "' + nome + '" foi copiado para a área de transferência.',
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        background: '#003366',
+                        color: '#fff',
+                        borderRadius: 20
+                    });
+                    setTimeout(() => {
+                        window.open(url, '_blank');
+                    }, 1000);
+                }).catch(err => {
+                    window.open(url, '_blank');
+                });
+            }
+        }
+    </script>
 </body>
 </html>

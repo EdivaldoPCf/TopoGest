@@ -12,6 +12,13 @@
     <!-- Alpine -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- proj4js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+
     <style>
         [x-cloak] {
             display: none !important;
@@ -113,6 +120,61 @@
                 padding-bottom: 2rem;
             }
         }
+
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                font-family: Arial, sans-serif !important;
+            }
+            /* Reset wrapper paddings and width for print */
+            #main-wrapper {
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                box-shadow: none !important;
+            }
+            /* Hide non-printable elements */
+            .fixed, .modal-overlay, header, #sigef-mapa-section header, #sigef-mapa-section #sigef-footer, .flex.gap-2, button, a {
+                display: none !important;
+            }
+            #sigef-mapa-section {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: white !important;
+                color: black !important;
+            }
+            #leaflet-mapa {
+                width: 100% !important;
+                height: 550px !important;
+                border: 2px solid black !important;
+            }
+            #sigef-meta {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                background: #f3f4f6 !important;
+                border: 2px solid black !important;
+                border-top: none !important;
+                padding: 15px !important;
+                color: black !important;
+                margin-bottom: 20px !important;
+            }
+            #sigef-meta div p {
+                color: black !important;
+            }
+            #print-table-section {
+                display: block !important;
+                page-break-inside: avoid !important;
+            }
+        }
+        #print-table-section {
+            display: none;
+        }
     </style>
 </head>
 
@@ -134,7 +196,8 @@
         </div>
     </div>
 
-    <div x-data="app()" 
+    <div id="main-wrapper"
+         x-data="app()" 
          @keydown.escape.window="closeModal('createFolderModal'); closeModal('uploadModal'); closeModal('pendenciaModal'); deleteModal = false; previewModal = false; openSigefModal = false; finalizeModal = false; revertModal = false" 
          class="relative w-full max-w-7xl mx-auto px-4 md:px-8 py-8 animate-fade">
 
@@ -556,6 +619,112 @@
                 </div>
                 @endif
 
+                <!-- ============================================================ -->
+                <!-- MAPA SIGEF (carregado automaticamente se houver arquivo ODS) -->
+                <!-- ============================================================ -->
+                @if($pasta->parent_id && $pasta->parent?->parent_id)
+                <div id="sigef-mapa-section" class="hidden glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl animate-fade">
+
+                    <!-- Header -->
+                    <div class="px-8 py-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-3xl shrink-0">
+                                🗺️
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-3 flex-wrap">
+                                    <span class="uppercase tracking-[3px] text-xs text-[#00E500] font-black">Planta de Situação</span>
+                                    <span class="bg-emerald-500/25 text-[#00E500] text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">SIGEF / INCRA</span>
+                                </div>
+                                <h2 id="sigef-titulo" class="text-2xl font-black italic uppercase mt-1">
+                                    Carregando dados...
+                                </h2>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button @click="openMemorial"
+                                class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 shadow-md">
+                                📄 Memorial Descritivo
+                            </button>
+                            <a href="{{ route('pasta.dxf', $pasta->id) }}"
+                               class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 shadow-md">
+                                📐 Baixar DXF (CAD)
+                            </a>
+                            <button onclick="window.print()"
+                                class="bg-[#004A7C] hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 border border-white/10 shadow-md">
+                                🖨️ Imprimir Planta
+                            </button>
+                            <button id="btn-satelite" onclick="alternarCamada()"
+                                class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 border border-white/5 shadow-md">
+                                🛰️ Satélite
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Metadados -->
+                    <div id="sigef-meta" class="hidden px-8 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-white/10 bg-white/5">
+                        <div>
+                            <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Denominação</p>
+                            <p id="meta-imovel" class="text-sm font-black text-white mt-0.5 truncate">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Detentor</p>
+                            <p id="meta-detentor" class="text-sm font-black text-white mt-0.5 truncate">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Município</p>
+                            <p id="meta-municipio" class="text-sm font-black text-white mt-0.5 truncate">—</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Área</p>
+                            <p id="meta-area" class="text-sm font-black text-[#00E500] mt-0.5">—</p>
+                        </div>
+                    </div>
+
+                    <!-- Mapa Leaflet -->
+                    <div id="leaflet-mapa" style="height: 520px; z-index: 1;"></div>
+
+                    <!-- TABELA TÉCNICA DE IMPRESSÃO (apenas visível ao imprimir) -->
+                    <div id="print-table-section" class="p-6 bg-white text-black border-t-2 border-black">
+                        <h3 class="text-sm font-black uppercase mb-3 border-b-2 border-black pb-1">Tabela de Dados Técnicos (Vértices)</h3>
+                        <table class="w-full text-[10px] text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-black font-bold uppercase">
+                                    <th class="py-1">Vértice</th>
+                                    <th class="py-1">Norte (Y)</th>
+                                    <th class="py-1">Este (X)</th>
+                                    <th class="py-1">Altitude (Z)</th>
+                                    <th class="py-1">Confrontante</th>
+                                    <th class="py-1">Limite</th>
+                                </tr>
+                            </thead>
+                            <tbody id="print-table-body">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Rodapé -->
+                    <div id="sigef-footer" class="hidden px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-white/10 bg-white/5">
+                        <div class="flex items-center gap-6">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 rounded-full bg-[#00E500] border-2 border-white/20 shadow"></div>
+                                <span id="footer-vertices" class="text-xs font-bold text-white/80">0 vértices</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-3 rounded bg-blue-500/40 border-2 border-blue-400"></div>
+                                <span class="text-xs font-bold text-white/80">Perímetro do Imóvel</span>
+                            </div>
+                        </div>
+                        <a id="footer-link-sigef" href="#" target="_blank"
+                           class="hidden bg-[#00E500] hover:bg-green-400 text-black px-5 py-2 rounded-xl font-black uppercase text-xs tracking-wider shadow transition flex items-center gap-2">
+                            Ver no SIGEF ↗
+                        </a>
+                    </div>
+
+                </div>
+                @endif
+
             </main>
 
         <!-- CREATE FOLDER MODAL -->
@@ -969,6 +1138,55 @@
             </div>
         </div>
 
+        <!-- MEMORIAL MODAL -->
+        <div x-show="memorialModal"
+             x-transition
+             class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
+             x-cloak>
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl max-w-4xl flex flex-col text-white max-h-[90vh]">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-3xl font-black uppercase italic text-[#00E500]">
+                            Memorial Descritivo
+                        </h2>
+                        <p class="text-white/60 text-xs mt-1 uppercase font-bold tracking-wider">
+                            Gerado a partir do perímetro SIGEF
+                        </p>
+                    </div>
+                    <button @click="memorialModal = false"
+                            class="text-white/40 hover:text-white text-3xl leading-none">
+                        ×
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-auto bg-black/40 border border-white/10 rounded-2xl p-6 mb-6 font-mono text-sm leading-relaxed whitespace-pre-wrap select-all relative min-h-[300px] max-h-[50vh]">
+                    <div x-show="loadingMemorial" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="w-8 h-8 border-4 border-[#00E500] border-t-transparent rounded-full animate-spin"></div>
+                            <span class="text-xs uppercase font-bold tracking-widest text-[#00E500]">Gerando Memorial...</span>
+                        </div>
+                    </div>
+                    <div x-text="memorialTexto"></div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button @click="copiarMemorial"
+                            :disabled="loadingMemorial"
+                            class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white py-3.5 rounded-2xl font-black uppercase transition flex items-center justify-center gap-2 shadow-lg">
+                        📋 Copiar Texto
+                    </button>
+                    <a href="{{ route('pasta.memorial-descritivo', [$pasta->id, 'download' => 'txt']) }}"
+                       class="flex-1 bg-[#00E500] hover:bg-green-500 text-black py-3.5 rounded-2xl font-black uppercase transition flex items-center justify-center gap-2 text-center shadow-lg">
+                        💾 Baixar TXT
+                    </a>
+                    <button @click="memorialModal = false"
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-2xl font-black uppercase transition shadow-lg">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -987,6 +1205,38 @@
                 previewUrl: '',
                 previewType: '',
                 previewName: '',
+                memorialModal: false,
+                memorialTexto: '',
+                loadingMemorial: false,
+
+                async openMemorial() {
+                    this.loadingMemorial = true;
+                    this.memorialModal = true;
+                    try {
+                        const resp = await fetch('{{ route("pasta.memorial-descritivo", $pasta->id) }}');
+                        const data = await resp.json();
+                        this.memorialTexto = data.texto;
+                    } catch (e) {
+                        this.memorialTexto = "Erro ao carregar o memorial descritivo.";
+                    } finally {
+                        this.loadingMemorial = false;
+                    }
+                },
+
+                copiarMemorial() {
+                    navigator.clipboard.writeText(this.memorialTexto).then(() => {
+                        Swal.fire({
+                            title: 'Copiado!',
+                            text: 'O Memorial Descritivo foi copiado para a área de transferência.',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            background: '#003366',
+                            color: '#fff',
+                            borderRadius: 25
+                        });
+                    });
+                },
 
                 openPreviewModal(url, type, name) {
                     this.previewUrl = url
@@ -1021,6 +1271,181 @@
                 }
             }
         }
+    </script>
+
+    <!-- ================================================= -->
+    <!-- JavaScript: Mapa SIGEF com Leaflet.js              -->
+    <!-- ================================================= -->
+    <script>
+        const PASTA_ID      = {{ $pasta->id }};
+        const SIGEF_MAPA_URL = '{{ route("pasta.mapa-sigef", $pasta->id) }}';
+        @if($pasta->codigo_sigef)
+        const CODIGO_SIGEF  = '{{ $pasta->codigo_sigef }}';
+        @else
+        const CODIGO_SIGEF  = null;
+        @endif
+
+        let leafletMap    = null;
+        let camadaAtual   = 'streets';
+        let camadaStreets = null;
+        let camadaSateli  = null;
+
+        function definirProjecaoUtm(zona) {
+            const match = String(zona).match(/(\d+)([NS]?)/i);
+            if (!match) return null;
+            const num = parseInt(match[1]);
+            const hem = (match[2] || 'S').toUpperCase();
+            const projStr = `+proj=utm +zone=${num} +${hem === 'S' ? 'south' : 'north'} +ellps=GRS80 +towgs84=0,0,0 +units=m +no_defs`;
+            const epsg = `EPSG:319${num < 10 ? '0' + num : num}S`;
+            proj4.defs(epsg, projStr);
+            return epsg;
+        }
+
+        function utmParaLatLon(E, N, zona) {
+            const epsg = definirProjecaoUtm(zona);
+            if (!epsg) return null;
+            try {
+                const [lon, lat] = proj4(epsg, 'WGS84', [E, N]);
+                return { lat, lon };
+            } catch(e) { return null; }
+        }
+
+        function converterVertices(vertices) {
+            return vertices.map(v => {
+                if (v.tipo === 'geodesica') return [v.N, v.E];
+                const zona = v.zona || '23S';
+                const conv = utmParaLatLon(v.E, v.N, zona);
+                return conv ? [conv.lat, conv.lon] : null;
+            }).filter(p => p !== null);
+        }
+
+        function calcularAreaHa(coords) {
+            if (coords.length < 3) return 0;
+            let area = 0;
+            const n = coords.length;
+            const R = 6371000;
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                area += (coords[j][1] - coords[i][1]) * Math.PI / 180
+                    * (2 + Math.sin(coords[i][0] * Math.PI / 180) + Math.sin(coords[j][0] * Math.PI / 180));
+            }
+            return (Math.abs(area * R * R / 2) / 10000).toFixed(4);
+        }
+
+        function inicializarMapa(coords, dados) {
+            if (!leafletMap) {
+                leafletMap = L.map('leaflet-mapa', { zoomControl: true, scrollWheelZoom: true });
+                camadaStreets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>', maxZoom: 20
+                });
+                camadaSateli = L.tileLayer(
+                    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                    { attribution: 'Tiles © Esri', maxZoom: 20 }
+                );
+                camadaStreets.addTo(leafletMap);
+            }
+
+            leafletMap.eachLayer(layer => {
+                if (layer !== camadaStreets && layer !== camadaSateli) leafletMap.removeLayer(layer);
+            });
+
+            if (coords.length < 3) return;
+
+            const poligono = L.polygon(coords, {
+                color: '#00E500', weight: 2.5, fillColor: '#00E500', fillOpacity: 0.15,
+            }).addTo(leafletMap);
+
+            dados.vertices.forEach((v, i) => {
+                const coord = coords[i];
+                if (!coord) return;
+                const icon = L.divIcon({
+                    className: '',
+                    html: `<div style="width:10px;height:10px;background:#00E500;border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.5);"></div>`,
+                    iconSize: [10, 10], iconAnchor: [5, 5],
+                });
+                L.marker(coord, { icon })
+                    .bindTooltip(`<b>${v.codigo || ('M-' + (i + 1))}</b><br>Lat: ${coord[0].toFixed(6)}<br>Lon: ${coord[1].toFixed(6)}`, { permanent: false, direction: 'top' })
+                    .addTo(leafletMap);
+            });
+
+            leafletMap.fitBounds(poligono.getBounds(), { padding: [30, 30] });
+
+            document.getElementById('sigef-titulo').innerText = dados.imovel || 'Imóvel Georreferenciado';
+
+            const meta = document.getElementById('sigef-meta');
+            if (dados.imovel || dados.detentor || dados.municipio || dados.area_ha) {
+                if (dados.imovel)    document.getElementById('meta-imovel').innerText = dados.imovel;
+                if (dados.detentor)  document.getElementById('meta-detentor').innerText = dados.detentor;
+                if (dados.municipio) document.getElementById('meta-municipio').innerText = dados.municipio;
+                document.getElementById('meta-area').innerText = (dados.area_ha ? dados.area_ha + ' ha' : calcularAreaHa(coords) + ' ha (calc.)');
+                meta.classList.remove('hidden');
+            }
+
+            // Preencher tabela de impressão técnica
+            const body = document.getElementById('print-table-body');
+            if (body && dados.vertices) {
+                body.innerHTML = '';
+                dados.vertices.forEach((v, i) => {
+                    const coord = coords[i] || [0, 0];
+                    body.innerHTML += `
+                        <tr class="border-b border-gray-300">
+                            <td class="py-1.5 font-bold">${v.codigo || ('M-' + (i + 1))}</td>
+                            <td class="py-1.5">${v.tipo === 'utm' ? parseFloat(v.N).toLocaleString('pt-BR', {minimumFractionDigits: 3}) + ' m' : coord[0].toFixed(6) + '° (Lat)'}</td>
+                            <td class="py-1.5">${v.tipo === 'utm' ? parseFloat(v.E).toLocaleString('pt-BR', {minimumFractionDigits: 3}) + ' m' : coord[1].toFixed(6) + '° (Lng)'}</td>
+                            <td class="py-1.5">${v.altitude} m</td>
+                            <td class="py-1.5 text-gray-700 font-medium">${v.confrontante}</td>
+                            <td class="py-1.5 text-gray-500">${v.limite}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const footer = document.getElementById('sigef-footer');
+            footer.classList.remove('hidden');
+            document.getElementById('footer-vertices').innerText = dados.vertices.length + ' vértices';
+
+            if (CODIGO_SIGEF) {
+                const linkSigef = document.getElementById('footer-link-sigef');
+                linkSigef.href = `https://sigef.incra.gov.br/geo/parcela/detalhe/${CODIGO_SIGEF}/`;
+                linkSigef.classList.remove('hidden');
+            }
+        }
+
+        function alternarCamada() {
+            if (!leafletMap) return;
+            const btn = document.getElementById('btn-satelite');
+            if (camadaAtual === 'streets') {
+                leafletMap.removeLayer(camadaStreets);
+                camadaSateli.addTo(leafletMap);
+                camadaAtual = 'satellite';
+                btn.textContent = '🗺️ Mapa';
+            } else {
+                leafletMap.removeLayer(camadaSateli);
+                camadaStreets.addTo(leafletMap);
+                camadaAtual = 'streets';
+                btn.textContent = '🛰️ Satélite';
+            }
+        }
+
+        async function carregarMapaSigef() {
+            try {
+                const resp = await fetch(SIGEF_MAPA_URL, { headers: { 'Accept': 'application/json' } });
+                if (!resp.ok) return;
+                const dados = await resp.json();
+                if (!dados.vertices || dados.vertices.length === 0) return;
+                const coords = converterVertices(dados.vertices);
+                if (coords.length < 3) return;
+                const mapSection = document.getElementById('sigef-mapa-section');
+                if (mapSection) {
+                    mapSection.classList.remove('hidden');
+                    setTimeout(() => inicializarMapa(coords, dados), 100);
+                }
+            } catch(err) {
+                console.error('Erro ao carregar mapa SIGEF:', err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', carregarMapaSigef);
     </script>
 
 </body>

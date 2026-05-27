@@ -12,6 +12,9 @@
     <!-- Alpine -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -162,6 +165,16 @@
                 <!-- BOTÕES -->
                 <div class="flex items-center gap-3">
 
+                    @if($base->google_maps_url)
+                        <button onclick="shareBaseLocation('{{ $base->nome }}', '{{ $base->google_maps_url }}')"
+                                class="bg-emerald-600 hover:bg-emerald-700 transition px-5 py-3 rounded-2xl font-black uppercase text-xs shadow-lg flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l4.636-2.318M8.684 13.258l4.636 2.318M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Compartilhar
+                        </button>
+                    @endif
+
                     <button onclick="toggleFullscreen()"
                             class="bg-[#003366] hover:bg-[#004A7C] transition px-5 py-3 rounded-2xl font-black uppercase text-xs shadow-lg">
 
@@ -205,6 +218,18 @@
                 <p class="text-sm text-white/70 mt-2 leading-relaxed">
                     Visualização geográfica da base topográfica cadastrada no sistema.
                 </p>
+
+                @if($base->google_maps_url)
+                    <div class="mt-4">
+                        <button onclick="shareBaseLocation('{{ $base->nome }}', '{{ $base->google_maps_url }}')"
+                                class="w-full bg-emerald-600 hover:bg-emerald-700 transition py-2.5 rounded-xl font-bold uppercase text-xs shadow-md flex items-center justify-center gap-1.5 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l4.636-2.318M8.684 13.258l4.636 2.318M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Compartilhar Base
+                        </button>
+                    </div>
+                @endif
 
                 @if(isset($searchNorte) && isset($searchEste) && $searchNorte !== null && $searchEste !== null)
                     <div class="mt-4 rounded-2xl border border-white/10 bg-[#00182f]/80 p-3 text-sm text-white/80">
@@ -470,6 +495,36 @@
                 elem.requestFullscreen();
             } else {
                 document.exitFullscreen();
+            }
+        }
+
+        function shareBaseLocation(nome, url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Localização da Base: ' + nome,
+                    text: 'Confira a localização da base "' + nome + '" no Google Maps.',
+                    url: url
+                }).catch(err => {
+                    console.log('Erro ao compartilhar:', err);
+                });
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    Swal.fire({
+                        title: 'Link Copiado!',
+                        text: 'O link do Google Maps para a base "' + nome + '" foi copiado para a área de transferência.',
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        background: '#003366',
+                        color: '#fff',
+                        borderRadius: 20
+                    });
+                    setTimeout(() => {
+                        window.open(url, '_blank');
+                    }, 1000);
+                }).catch(err => {
+                    window.open(url, '_blank');
+                });
             }
         }
 

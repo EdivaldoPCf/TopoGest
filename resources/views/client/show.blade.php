@@ -7,6 +7,14 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Leaflet.js — Mapa Interativo -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- proj4js — Conversão UTM → WGS84 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
 
     <style>
         .custom-scrollbar::-webkit-scrollbar {
@@ -74,6 +82,58 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                font-family: Arial, sans-serif !important;
+            }
+            body > *:not(#sigef-mapa-section) {
+                display: none !important;
+            }
+            .fixed, .modal-overlay, #sigef-mapa-section header, #sigef-mapa-section .px-6, #sigef-mapa-section #sigef-footer, .flex.gap-2, button, a {
+                display: none !important;
+            }
+            #sigef-mapa-section {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: white !important;
+            }
+            #leaflet-mapa {
+                width: 100% !important;
+                height: 550px !important;
+                border: 2px solid black !important;
+            }
+            #sigef-meta {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                background: #f3f4f6 !important;
+                border: 2px solid black !important;
+                border-top: none !important;
+                padding: 15px !important;
+                color: black !important;
+                margin-bottom: 20px !important;
+            }
+            #sigef-meta div p {
+                color: black !important;
+            }
+            #print-table-section {
+                display: block !important;
+                page-break-inside: avoid !important;
+            }
+        }
+        #print-table-section {
+            display: none;
         }
     </style>
 </head>
@@ -398,6 +458,117 @@
 
                     </div>
 
+                    <!-- ============================================================ -->
+                    <!-- MAPA SIGEF (carregado automaticamente se houver arquivo ODS) -->
+                    <!-- ============================================================ -->
+                    <div id="sigef-mapa-section" class="hidden glass rounded-[36px] border border-white/40 shadow-2xl overflow-hidden animate-fade">
+
+                        <!-- Header do Card -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 md:p-8 border-b border-[#003366]/10">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center text-3xl shadow-inner border border-green-100 shrink-0">
+                                    🗺️
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-3 flex-wrap">
+                                        <span class="uppercase tracking-[3px] text-xs text-[#003366] font-black">Planta de Situação</span>
+                                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border border-emerald-200">SIGEF / INCRA</span>
+                                    </div>
+                                    <h2 id="sigef-titulo" class="text-xl md:text-2xl font-black text-[#003366] mt-1">
+                                        Carregando dados do imóvel...
+                                    </h2>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="openMemorial()"
+                                    class="bg-blue-600 hover:bg-blue-750 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 shadow">
+                                    📄 Memorial Descritivo
+                                </button>
+                                <a href="{{ route('pasta.dxf', $pasta->id) }}"
+                                   class="bg-emerald-600 hover:bg-emerald-705 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 shadow">
+                                    📐 Baixar DXF (CAD)
+                                </a>
+                                <button onclick="window.print()"
+                                    class="bg-[#003366] hover:bg-blue-900 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 shadow">
+                                    🖨️ Imprimir Planta
+                                </button>
+                                <button id="btn-satelite" onclick="alternarCamada()"
+                                    class="bg-white/10 hover:bg-white/20 text-[#003366] border border-white/40 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 shadow">
+                                    🛰️ Satélite
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Metadados do Imóvel -->
+                        <div id="sigef-meta" class="px-6 md:px-8 py-4 grid grid-cols-2 md:grid-cols-4 gap-3 bg-[#003366]/5 border-b border-[#003366]/10 hidden">
+                            <div class="text-center">
+                                <p class="text-[10px] uppercase tracking-widest text-[#003366]/60 font-bold">Denominação</p>
+                                <p id="meta-imovel" class="text-sm font-black text-[#003366] mt-0.5 truncate">—</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-[10px] uppercase tracking-widest text-[#003366]/60 font-bold">Detentor</p>
+                                <p id="meta-detentor" class="text-sm font-black text-[#003366] mt-0.5 truncate">—</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-[10px] uppercase tracking-widest text-[#003366]/60 font-bold">Município</p>
+                                <p id="meta-municipio" class="text-sm font-black text-[#003366] mt-0.5 truncate">—</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-[10px] uppercase tracking-widest text-[#003366]/60 font-bold">Área</p>
+                                <p id="meta-area" class="text-sm font-black text-[#003366] mt-0.5">—</p>
+                            </div>
+                        </div>
+
+                        <!-- Mapa -->
+                        <div id="leaflet-mapa" class="w-full" style="height: 500px; z-index: 1;"></div>
+
+                        <!-- TABELA TÉCNICA DE IMPRESSÃO (apenas visível ao imprimir) -->
+                        <div id="print-table-section" class="p-6 bg-white text-black border-t-2 border-black">
+                            <h3 class="text-sm font-black uppercase mb-3 border-b-2 border-black pb-1">Tabela de Dados Técnicos (Vértices)</h3>
+                            <table class="w-full text-[10px] text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-black font-bold uppercase">
+                                        <th class="py-1">Vértice</th>
+                                        <th class="py-1">Norte (Y)</th>
+                                        <th class="py-1">Este (X)</th>
+                                        <th class="py-1">Altitude (Z)</th>
+                                        <th class="py-1">Confrontante</th>
+                                        <th class="py-1">Limite</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="print-table-body">
+                                    <!-- Preenchido via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Rodapé do mapa com estatísticas -->
+                        <div id="sigef-footer" class="hidden px-6 md:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/60 border-t border-[#003366]/10">
+                            <div class="flex items-center gap-6">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded-full bg-[#003366] border-2 border-white shadow"></div>
+                                    <span id="footer-vertices" class="text-xs font-bold text-[#003366]">0 vértices</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-3 rounded bg-blue-500/40 border-2 border-blue-600"></div>
+                                    <span class="text-xs font-bold text-[#003366]">Perímetro do Imóvel</span>
+                                </div>
+                            </div>
+                            <a id="footer-link-sigef" href="#" target="_blank"
+                               class="hidden bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl font-black uppercase text-xs tracking-wider shadow transition flex items-center gap-2">
+                                Ver no SIGEF ↗
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <!-- Mensagem se não encontrou ODS -->
+                    <div id="sigef-nao-encontrado" class="hidden glass rounded-[36px] border border-dashed border-white/30 shadow p-6 md:p-8 text-center animate-fade">
+                        <span class="text-4xl mb-3 block">📋</span>
+                        <p class="text-white/60 text-sm font-semibold">Nenhum arquivo ODS do SIGEF encontrado nesta pasta.</p>
+                        <p class="text-white/40 text-xs mt-1">Faça upload do arquivo de georreferenciamento para visualizar o mapa do imóvel.</p>
+                    </div>
+
                 </section>
 
         </main>
@@ -540,6 +711,49 @@
 
     </div>
 
+    <!-- MEMORIAL MODAL -->
+    <div id="memorialModal"
+         class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay">
+        <div class="modal-container bg-[#003366] text-white rounded-[38px] p-8 md:p-10 w-full max-w-4xl shadow-2xl border border-white/10 animate-fade flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-2xl font-black italic uppercase text-yellow-400">
+                        Memorial Descritivo
+                    </h3>
+                    <p class="text-white/60 text-xs mt-1 uppercase font-bold tracking-wider">
+                        Gerado a partir do perímetro SIGEF
+                    </p>
+                </div>
+                <button type="button" onclick="closeModal('memorialModal')" class="text-white/60 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+
+            <div class="flex-1 overflow-auto bg-black/40 border border-white/10 rounded-2xl p-6 mb-6 font-mono text-sm leading-relaxed whitespace-pre-wrap select-all relative min-h-[300px] max-h-[50vh]">
+                <div id="loadingMemorial" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl hidden">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="w-8 h-8 border-4 border-[#00E500] border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-xs uppercase font-bold tracking-widest text-[#00E500]">Gerando Memorial...</span>
+                    </div>
+                </div>
+                <div id="memorialTextoContent">Carregando...</div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button type="button" onclick="copiarMemorial()"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-2xl font-black uppercase transition flex items-center justify-center gap-2 shadow-lg">
+                    📋 Copiar Texto
+                </button>
+                <a href="{{ route('pasta.memorial-descritivo', [$pasta->id, 'download' => 'txt']) }}"
+                   class="flex-1 bg-[#00E500] hover:bg-green-500 text-black py-3.5 rounded-2xl font-black uppercase transition flex items-center justify-center gap-2 text-center shadow-lg">
+                    💾 Baixar TXT
+                </a>
+                <button type="button" onclick="closeModal('memorialModal')"
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-2xl font-black uppercase transition shadow-lg">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function openUploadModal(nome) {
 
@@ -620,8 +834,293 @@
             if (e.key === 'Escape') {
                 closeModal('uploadModal');
                 closeModal('previewModal');
+                closeModal('memorialModal');
             }
         });
+
+        let memorialTextoCompleto = '';
+
+        async function openMemorial() {
+            const modal = document.getElementById('memorialModal');
+            const loading = document.getElementById('loadingMemorial');
+            const content = document.getElementById('memorialTextoContent');
+            
+            content.innerText = 'Carregando...';
+            loading.classList.remove('hidden');
+            modal.classList.add('open');
+            
+            try {
+                const resp = await fetch('{{ route("pasta.memorial-descritivo", $pasta->id) }}');
+                const data = await resp.json();
+                memorialTextoCompleto = data.texto;
+                content.innerText = data.texto;
+            } catch (e) {
+                content.innerText = "Erro ao carregar o memorial descritivo.";
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function copiarMemorial() {
+            navigator.clipboard.writeText(memorialTextoCompleto).then(() => {
+                Swal.fire({
+                    title: 'Copiado!',
+                    text: 'O Memorial Descritivo foi copiado para a área de transferência.',
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    background: '#003366',
+                    color: '#fff',
+                    borderRadius: 25
+                });
+            });
+        }
+    </script>
+
+    <!-- ================================================= -->
+    <!-- JavaScript: Carregamento e Renderização do Mapa SIGEF -->
+    <!-- ================================================= -->
+    <script>
+        const PASTA_ID = {{ $pasta->id }};
+        const SIGEF_MAPA_URL = '{{ route("pasta.mapa-sigef", $pasta->id) }}';
+        @if($codigoSigef)
+        const CODIGO_SIGEF = '{{ $codigoSigef }}';
+        @else
+        const CODIGO_SIGEF = null;
+        @endif
+
+        let leafletMap   = null;
+        let camadaAtual  = 'streets'; // 'streets' ou 'satellite'
+        let camadaStreets = null;
+        let camadaSateli  = null;
+
+        // ---- Definições proj4 para zonas UTM SIRGAS 2000 ----
+        function definirProjecaoUtm(zona) {
+            // Extrair número e hemisfério (ex: '23S' → 23, 'S')
+            const match = String(zona).match(/(\d+)([NS]?)/i);
+            if (!match) return null;
+            const num = parseInt(match[1]);
+            const hem = (match[2] || 'S').toUpperCase();
+            const projStr = `+proj=utm +zone=${num} +${hem === 'S' ? 'south' : 'north'} +ellps=GRS80 +towgs84=0,0,0 +units=m +no_defs`;
+            const epsg = `EPSG:319${num < 10 ? '0' + num : num}S`;
+            proj4.defs(epsg, projStr);
+            return epsg;
+        }
+
+        function utmParaLatLon(E, N, zona) {
+            const epsg = definirProjecaoUtm(zona);
+            if (!epsg) return null;
+            try {
+                const [lon, lat] = proj4(epsg, 'WGS84', [E, N]);
+                return { lat, lon };
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ---- Converte vértices para array de [lat, lon] ----
+        function converterVertices(vertices) {
+            return vertices.map(v => {
+                if (v.tipo === 'geodesica') {
+                    // E = Longitude, N = Latitude
+                    return [v.N, v.E];
+                } else {
+                    // UTM → WGS84
+                    const zona = v.zona || '23S';
+                    const conv = utmParaLatLon(v.E, v.N, zona);
+                    return conv ? [conv.lat, conv.lon] : null;
+                }
+            }).filter(p => p !== null);
+        }
+
+        // ---- Calcular área aproximada do polígono (ha) em WGS84 ----
+        function calcularAreaHa(coords) {
+            if (coords.length < 3) return 0;
+            let area = 0;
+            const n = coords.length;
+            const R = 6371000; // raio da Terra em metros
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                const lat1 = coords[i][0] * Math.PI / 180;
+                const lat2 = coords[j][0] * Math.PI / 180;
+                const dLon = (coords[j][1] - coords[i][1]) * Math.PI / 180;
+                area += (coords[j][1] - coords[i][1]) * Math.PI / 180
+                    * (2 + Math.sin(lat1) + Math.sin(lat2));
+            }
+            const areaMq = Math.abs(area * R * R / 2);
+            return (areaMq / 10000).toFixed(4); // m² → ha
+        }
+
+        // ---- Inicializa o mapa Leaflet ----
+        function inicializarMapa(coords, dados) {
+            if (!leafletMap) {
+                leafletMap = L.map('leaflet-mapa', {
+                    zoomControl: true,
+                    scrollWheelZoom: true,
+                });
+
+                camadaStreets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+                    maxZoom: 20,
+                });
+
+                camadaSateli = L.tileLayer(
+                    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                    {
+                        attribution: 'Tiles © Esri',
+                        maxZoom: 20,
+                    }
+                );
+
+                camadaStreets.addTo(leafletMap);
+            }
+
+            // Limpar camadas anteriores de polígono
+            leafletMap.eachLayer(layer => {
+                if (layer !== camadaStreets && layer !== camadaSateli) {
+                    leafletMap.removeLayer(layer);
+                }
+            });
+
+            if (coords.length < 3) return;
+
+            // Polígono principal
+            const poligono = L.polygon(coords, {
+                color: '#003366',
+                weight: 2.5,
+                fillColor: '#3B82F6',
+                fillOpacity: 0.25,
+            }).addTo(leafletMap);
+
+            // Marcadores nos vértices
+            dados.vertices.forEach((v, i) => {
+                const coord = coords[i];
+                if (!coord) return;
+
+                const icon = L.divIcon({
+                    className: '',
+                    html: `<div style="
+                        width: 10px; height: 10px;
+                        background: #003366;
+                        border: 2px solid white;
+                        border-radius: 50%;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+                    "></div>`,
+                    iconSize: [10, 10],
+                    iconAnchor: [5, 5],
+                });
+
+                L.marker(coord, { icon })
+                    .bindTooltip(`<b>${v.codigo || ('M-' + (i + 1))}</b><br>Lat: ${coord[0].toFixed(6)}<br>Lon: ${coord[1].toFixed(6)}`, {
+                        permanent: false,
+                        direction: 'top',
+                    })
+                    .addTo(leafletMap);
+            });
+
+            // Ajustar zoom para o polígono
+            leafletMap.fitBounds(poligono.getBounds(), { padding: [30, 30] });
+
+            // Atualizar metadados
+            document.getElementById('sigef-titulo').innerText = dados.imovel || 'Imóvel Georreferenciado';
+
+            const meta = document.getElementById('sigef-meta');
+            if (dados.imovel || dados.detentor || dados.municipio || dados.area_ha) {
+                if (dados.imovel)    document.getElementById('meta-imovel').innerText = dados.imovel;
+                if (dados.detentor)  document.getElementById('meta-detentor').innerText = dados.detentor;
+                if (dados.municipio) document.getElementById('meta-municipio').innerText = dados.municipio;
+
+                const areaExibir = dados.area_ha
+                    ? dados.area_ha + ' ha'
+                    : calcularAreaHa(coords) + ' ha (calc.)';
+                document.getElementById('meta-area').innerText = areaExibir;
+                meta.classList.remove('hidden');
+            }
+
+            // Preencher tabela de impressão técnica
+            const body = document.getElementById('print-table-body');
+            if (body && dados.vertices) {
+                body.innerHTML = '';
+                dados.vertices.forEach((v, i) => {
+                    const coord = coords[i] || [0, 0];
+                    body.innerHTML += `
+                        <tr class="border-b border-gray-300">
+                            <td class="py-1.5 font-bold">${v.codigo || ('M-' + (i + 1))}</td>
+                            <td class="py-1.5">${v.tipo === 'utm' ? parseFloat(v.N).toLocaleString('pt-BR', {minimumFractionDigits: 3}) + ' m' : coord[0].toFixed(6) + '° (Lat)'}</td>
+                            <td class="py-1.5">${v.tipo === 'utm' ? parseFloat(v.E).toLocaleString('pt-BR', {minimumFractionDigits: 3}) + ' m' : coord[1].toFixed(6) + '° (Lng)'}</td>
+                            <td class="py-1.5">${v.altitude} m</td>
+                            <td class="py-1.5 text-gray-700 font-medium">${v.confrontante}</td>
+                            <td class="py-1.5 text-gray-500">${v.limite}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Rodapé
+            const footer = document.getElementById('sigef-footer');
+            footer.classList.remove('hidden');
+            document.getElementById('footer-vertices').innerText = dados.vertices.length + ' vértices';
+
+            // Link para o SIGEF
+            if (CODIGO_SIGEF) {
+                const linkSigef = document.getElementById('footer-link-sigef');
+                linkSigef.href = `https://sigef.incra.gov.br/geo/parcela/detalhe/${CODIGO_SIGEF}/`;
+                linkSigef.classList.remove('hidden');
+            }
+        }
+
+        // ---- Alterna camada mapa/satélite ----
+        function alternarCamada() {
+            if (!leafletMap) return;
+            const btn = document.getElementById('btn-satelite');
+            if (camadaAtual === 'streets') {
+                leafletMap.removeLayer(camadaStreets);
+                camadaSateli.addTo(leafletMap);
+                camadaAtual = 'satellite';
+                btn.textContent = '🗺️ Mapa';
+            } else {
+                leafletMap.removeLayer(camadaSateli);
+                camadaStreets.addTo(leafletMap);
+                camadaAtual = 'streets';
+                btn.textContent = '🛰️ Satélite';
+            }
+        }
+
+        // ---- Carrega o mapa SIGEF via AJAX ----
+        async function carregarMapaSigef() {
+            try {
+                const resp = await fetch(SIGEF_MAPA_URL, {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!resp.ok) {
+                    // 404 → sem ODS, não exibir mensagem negativa por padrão
+                    // (pasta pode ser nível 2 sem ODS ainda)
+                    return;
+                }
+
+                const dados = await resp.json();
+
+                if (!dados.vertices || dados.vertices.length === 0) {
+                    return;
+                }
+
+                const coords = converterVertices(dados.vertices);
+
+                if (coords.length < 3) return;
+
+                // Exibir seção do mapa
+                document.getElementById('sigef-mapa-section').classList.remove('hidden');
+
+                // Aguardar DOM estar visível antes de inicializar Leaflet
+                setTimeout(() => inicializarMapa(coords, dados), 100);
+
+            } catch (err) {
+                console.error('Erro ao carregar mapa SIGEF:', err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', carregarMapaSigef);
     </script>
 
 </body>

@@ -314,6 +314,26 @@
                         </div>
                     </a>
 
+                    {{--
+                    <a href="{{ route('admin.gerador.index') }}"
+                       class="menu-gradient rounded-2xl px-6 py-5 flex items-center justify-between shadow-xl border border-white/10 card-hover">
+
+                        <div>
+                            <p class="text-xs uppercase tracking-[3px] text-white/50 font-bold">
+                                Ferramenta
+                            </p>
+
+                            <h3 class="text-lg font-black uppercase italic">
+                                Gerador Express
+                            </h3>
+                        </div>
+
+                        <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                            📐
+                        </div>
+                    </a>
+                    --}}
+
                     <a href="{{ route('admin.imagens.index') }}"
                        class="menu-gradient rounded-2xl px-6 py-5 flex items-center justify-between shadow-xl border border-white/10 card-hover">
 
