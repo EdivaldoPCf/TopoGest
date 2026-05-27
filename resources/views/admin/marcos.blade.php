@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Marcos - TopoGest</title>
+    <title>Gerenciador de Marcos - Getec Topografia</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -52,7 +52,7 @@
 
                 <div class="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-2xl">
                     <img src="{{ asset('images/logo-icon.png') }}"
-                         alt="TopoGest"
+                         alt="Getec Topografia"
                          class="w-full h-full object-contain p-2">
                 </div>
 
@@ -274,7 +274,7 @@
                             </h2>
 
                             <p class="text-white/70 text-sm uppercase tracking-[0.2em] mt-1">
-                                Banco de registros TopoGest
+                                Banco de registros Getec Topografia
                             </p>
                         </div>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sobre - TopoGest</title>
+    <title>Sobre - Getec Topografia</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -45,7 +45,7 @@
                     </h1>
 
                     <p class="text-lg md:text-xl leading-relaxed text-white/90 font-medium">
-                        O TopoGest conecta clientes, equipes técnicas e processos
+                        O Getec Topografia conecta clientes, equipes técnicas e processos
                         em uma única plataforma moderna, organizada e eficiente.
                     </p>
 
@@ -92,7 +92,7 @@
                         </div>
 
                         <div>
-                            <h2 class="text-3xl font-black">Sobre o TopoGest</h2>
+                            <h2 class="text-3xl font-black">Sobre o Getec Topografia</h2>
                             <p class="text-sm uppercase tracking-[0.2em] text-[#004A7C]/70 font-bold mt-1">
                                 Gestão moderna para topografia
                             </p>
@@ -104,7 +104,7 @@
                             {!! nl2br(e($conteudo['sobre'])) !!}
                         @else
                             <p>
-                                O <span class="font-black">TopoGest</span> é uma plataforma web
+                                O <span class="font-black">Getec Topografia</span> é uma plataforma web
                                 integrada desenvolvida para modernizar a gestão de serviços no
                                 setor de topografia.
                             </p>
@@ -230,7 +230,7 @@
 
                         <div>
                             <h2 class="text-3xl font-black">
-                                Por que escolher o TopoGest?
+                                Por que escolher o Getec Topografia?
                             </h2>
 
                             <p class="text-sm uppercase tracking-[0.2em] text-[#004A7C]/70 font-bold mt-1">

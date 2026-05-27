@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'TopoGest') }}</title>
+    <title>{{ config('app.name', 'Getec Topografia') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -59,7 +59,7 @@
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                     <img 
                         src="{{ asset('images/logo-text.png') }}" 
-                        alt="TopoGest"
+                        alt="Getec Topografia"
                         class="relative z-10 h-8 w-auto"
                     >
                 </div>
@@ -89,7 +89,7 @@
 
         <!-- Rodapé -->
         <footer class="w-full text-center text-sm text-white/70 py-5 tracking-wide">
-            © {{ date('Y') }} TopoGest • Sistema de Gestão Topográfica
+            © {{ date('Y') }} Getec Topografia • Sistema de Gestão Topográfica
         </footer>
 
     </div>

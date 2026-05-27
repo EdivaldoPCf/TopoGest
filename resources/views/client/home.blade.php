@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - TopoGest</title>
+    <title>Dashboard - Getec Topografia</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -41,13 +41,13 @@
 
                 <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
                     <img src="{{ asset('images/logo-icon.png') }}"
-                         alt="TopoGest"
+                         alt="Getec Topografia"
                          class="w-full h-full object-contain p-2">
                 </div>
 
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                     <img src="{{ asset('images/logo-text.png') }}"
-                         alt="TopoGest"
+                         alt="Getec Topografia"
                          class="relative z-10 h-8 w-auto">
                 </div>
             </a>
@@ -314,7 +314,7 @@
         <footer class="flex flex-col md:flex-row items-center justify-between gap-4 pt-8">
 
             <div class="text-white/80 text-sm font-medium tracking-wide">
-                © {{ date('Y') }} TopoGest — Todos os direitos reservados.
+                © {{ date('Y') }} Getec Topografia — Todos os direitos reservados.
             </div>
 
             <form method="POST" action="{{ route('logout', [], false) }}">

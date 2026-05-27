@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificação de Email - TopoGest</title>
+    <title>Verificação de Email - Getec Topografia</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -50,13 +50,13 @@
 
                 <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
                     <img src="{{ asset('images/logo-icon.png') }}"
-                         alt="TopoGest"
+                         alt="Getec Topografia"
                          class="w-full h-full object-contain p-2">
                 </div>
 
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                     <img src="{{ asset('images/logo-text.png') }}"
-                         alt="TopoGest"
+                         alt="Getec Topografia"
                          class="relative z-10 h-8 w-auto">
                 </div>
             </a>
@@ -127,7 +127,7 @@
                             </h1>
 
                             <p class="text-slate-600 text-sm md:text-base leading-relaxed max-w-xl mx-auto">
-                                Obrigado por se cadastrar na plataforma TopoGest.
+                                Obrigado por se cadastrar na plataforma Getec Topografia.
                                 Antes de continuar, confirme seu endereço de e-mail clicando
                                 no link que enviamos para sua caixa de entrada.
                             </p>
@@ -239,7 +239,7 @@
 
                 <!-- Footer -->
                 <div class="text-center mt-8 text-white/80 text-sm font-medium">
-                    © {{ date('Y') }} TopoGest — Todos os direitos reservados
+                    © {{ date('Y') }} Getec Topografia — Todos os direitos reservados
                 </div>
             </div>
         </main>

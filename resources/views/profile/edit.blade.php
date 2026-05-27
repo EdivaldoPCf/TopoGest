@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alterar Perfil • TopoGest</title>
+    <title>Alterar Perfil • Getec Topografia</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

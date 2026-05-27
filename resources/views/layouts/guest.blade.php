@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'TopoGest') }}</title>
+    <title>{{ config('app.name', 'Getec Topografia') }}</title>
 
     <!-- Fonte -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -70,7 +70,7 @@
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                     <img 
                         src="{{ asset('images/logo-text.png') }}" 
-                        alt="TopoGest"
+                        alt="Getec Topografia"
                         class="relative z-10 h-8 w-auto"
                     >
                 </div>
@@ -83,7 +83,7 @@
             <!-- Título opcional -->
             <div class="text-center mb-6">
                 <h1 class="text-3xl font-black uppercase italic tracking-tight text-white">
-                    TopoGest
+                    Getec Topografia
                 </h1>
 
                 <p class="text-white/70 text-sm mt-1">
@@ -97,7 +97,7 @@
 
         <!-- Rodapé -->
         <div class="mt-8 text-center text-white/60 text-xs tracking-wider uppercase">
-            © {{ date('Y') }} TopoGest • Todos os direitos reservados
+            © {{ date('Y') }} Getec Topografia • Todos os direitos reservados
         </div>
     </div>
 

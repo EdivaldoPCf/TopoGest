@@ -317,7 +317,7 @@
                 return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
             }
 
-            console.group('TopoGest Map Debug');
+            console.group('Getec Topografia Map Debug');
             console.log('map script loaded');
             console.log('map element', document.getElementById('map'));
             console.log('Leaflet loaded', typeof L !== 'undefined', typeof L);

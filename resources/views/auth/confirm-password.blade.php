@@ -22,13 +22,13 @@
 
                     <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
                         <img src="{{ asset('images/logo-icon.png') }}"
-                             alt="TopoGest"
+                             alt="Getec Topografia"
                              class="w-full h-full object-contain p-2">
                     </div>
 
                     <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                         <img src="{{ asset('images/logo-text.png') }}"
-                             alt="TopoGest"
+                             alt="Getec Topografia"
                              class="relative z-10 h-8">
                     </div>
 
@@ -147,7 +147,7 @@
 
             <!-- FOOTER -->
             <div class="mt-6 text-center text-white/60 text-xs uppercase tracking-[0.25em]">
-                TopoGest • Sistema Seguro
+                Getec Topografia • Sistema Seguro
             </div>
 
         </div>

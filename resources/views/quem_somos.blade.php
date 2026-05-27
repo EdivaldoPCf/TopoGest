@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quem Somos - TopoGest</title>
+    <title>Quem Somos - Getec Topografia</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -37,7 +37,7 @@
 
                 <div class="relative z-10 max-w-3xl">
                     <span class="inline-flex items-center px-5 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-bold uppercase tracking-[0.2em] mb-6">
-                        TopoGest
+                        Getec Topografia
                     </span>
 
                     <h1 class="text-4xl md:text-5xl font-black leading-tight mb-6">
@@ -99,7 +99,7 @@
                             {!! nl2br(e($conteudo['quem_somos'])) !!}
                         @else
                             <p>
-                                O <span class="font-black">TopoGest</span> nasceu com o propósito
+                                O <span class="font-black">Getec Topografia</span> nasceu com o propósito
                                 de modernizar a forma como serviços topográficos são organizados,
                                 acompanhados e entregues. Nossa plataforma centraliza informações,
                                 melhora a comunicação entre equipes e reduz falhas operacionais.

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TopoGest - Início</title>
+    <title>Getec Topografia - Início</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -87,7 +87,7 @@
                     <!-- Logo -->
                     <img 
                         src="{{ asset('images/logo-completa.png') }}?v={{ file_exists(public_path('images/logo-completa.png')) ? filemtime(public_path('images/logo-completa.png')) : time() }}"
-                        alt="TopoGest"
+                        alt="Getec Topografia"
                         class="relative z-10 w-[420px] md:w-[520px] h-auto object-contain drop-shadow-2xl"
                     >
 

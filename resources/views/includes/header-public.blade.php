@@ -8,7 +8,7 @@
         </div>
         
         <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <img src="{{ asset('images/logo-text.png') }}" alt="TopoGest" class="relative z-10 h-8 w-auto">
+            <img src="{{ asset('images/logo-text.png') }}" alt="Getec Topografia" class="relative z-10 h-8 w-auto">
         </div>
     </a>
 

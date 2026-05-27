@@ -16,7 +16,7 @@
 
                     <div class="relative flex items-center h-12 px-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
                         <img src="{{ asset('images/logo-text.png') }}" 
-                             alt="TopoGest" 
+                             alt="Getec Topografia" 
                              class="relative z-10 h-6 w-auto">
                     </div>
 
