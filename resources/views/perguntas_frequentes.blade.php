@@ -109,20 +109,24 @@
                 @php
                     $faqItems = $conteudo['faq'] ?? [
                         [
-                            'question' => 'Como acompanho o progresso do meu serviço?',
-                            'answer' => 'Basta acessar o seu painel e clicar em “Meus Serviços”. O status é atualizado em tempo real pela nossa equipe, mostrando cada etapa do processo como: “Equipe em Campo”, “Em fase de Desenho” ou “Finalizado”.',
+                            'question' => 'O que é Georreferenciamento de Imóveis Rurais (SIGEF/INCRA)?',
+                            'answer' => 'É o processo de definição da exata forma, dimensão e localização de uma propriedade rural através de métodos de levantamento topográfico de alta precisão. É obrigatório por lei para desmembramentos, parcelamentos, remembramentos e transferências.',
                         ],
                         [
-                            'question' => 'Onde encontro meus arquivos finais?',
-                            'answer' => 'Todos os arquivos ficam disponíveis permanentemente na área “Meus Arquivos”. Você poderá baixar documentos em formatos como PDF, DWG e memoriais técnicos sempre que precisar, sem custo adicional.',
+                            'question' => 'Qual a diferença entre CAR e Georreferenciamento?',
+                            'answer' => 'O CAR (Cadastro Ambiental Rural) é um registro eletrônico focado nas informações ambientais da propriedade (APPs, Reserva Legal, etc). Já o Georreferenciamento foca nos limites físicos e dominiais do terreno perante o INCRA e cartórios.',
                         ],
                         [
-                            'question' => 'Como envio a documentação inicial?',
-                            'answer' => 'Ao iniciar um novo serviço, o sistema abrirá automaticamente um campo de upload de arquivos, permitindo enviar fotos, PDFs ou documentos diretamente pelo celular, tablet ou computador.',
+                            'question' => 'Quanto tempo demora um levantamento topográfico?',
+                            'answer' => 'Depende do tamanho da área, da complexidade do terreno (vegetação fechada, relevo) e das condições climáticas. O trabalho de campo pode levar de um dia a várias semanas. Após o campo, realizamos o processamento dos dados e geração das plantas.',
                         ],
                         [
-                            'question' => 'Posso agendar uma visita técnica?',
-                            'answer' => 'Sim. Na área do cliente, utilize o botão “Agendar Horário” para visualizar datas e horários disponíveis em nosso calendário de atendimento técnico.',
+                            'question' => 'Como acompanho o andamento do meu serviço?',
+                            'answer' => 'Como nosso cliente, você tem acesso exclusivo a esta plataforma. Basta entrar com seu login para ver o status em tempo real (ex: "Equipe em Campo", "Desenhando Planta"), baixar seus PDFs, memoriais e arquivos DWG sempre que precisar.',
+                        ],
+                        [
+                            'question' => 'Vocês atuam em áreas urbanas?',
+                            'answer' => 'Sim! Realizamos levantamentos planialtimétricos, desdobros, locação de obras e retificação de área para terrenos urbanos, auxiliando em projetos arquitetônicos e regularização na prefeitura.',
                         ],
                     ];
                 @endphp

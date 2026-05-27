@@ -41,12 +41,12 @@
                     </span>
 
                     <h1 class="text-4xl md:text-5xl font-black leading-tight mb-6">
-                        Tecnologia e precisão para a gestão topográfica moderna
+                        Tecnologia, experiência e precisão a serviço do seu patrimônio
                     </h1>
 
                     <p class="text-lg md:text-xl leading-relaxed text-white/90 font-medium">
-                        Conectamos equipes de campo, clientes e processos técnicos
-                        em uma plataforma inteligente, organizada e transparente.
+                        Somos especialistas em georreferenciamento e topografia. 
+                        Medimos propriedades com o rigor técnico exigido pelas leis brasileiras.
                     </p>
 
                     @if(!empty($conteudo['whatsapp']))
@@ -99,21 +99,20 @@
                             {!! nl2br(e($conteudo['quem_somos'])) !!}
                         @else
                             <p>
-                                O <span class="font-black">Getec Topografia</span> nasceu com o propósito
-                                de modernizar a forma como serviços topográficos são organizados,
-                                acompanhados e entregues. Nossa plataforma centraliza informações,
-                                melhora a comunicação entre equipes e reduz falhas operacionais.
+                                A <span class="font-black">Getec Topografia</span> nasceu com o propósito
+                                de entregar a mais alta precisão em medições cartográficas. Nosso foco principal é garantir que as propriedades 
+                                dos nossos clientes estejam devidamente regularizadas e seguras contra litígios.
                             </p>
 
                             <p>
-                                Transformamos processos técnicos tradicionais em fluxos digitais
-                                inteligentes, proporcionando mais eficiência para profissionais e
-                                transparência total para os clientes.
+                                Através de anos de experiência atuando a campo e em trâmites nos cartórios de registro de imóveis, 
+                                o engenheiro Edivaldo Rodrigues lidera uma equipe comprometida com a exatidão, agilidade e clareza em cada levantamento realizado.
                             </p>
 
                             <p>
-                                Com um ambiente intuitivo e seguro, oferecemos controle completo
-                                sobre arquivos, solicitações, pendências e acompanhamento em tempo real.
+                                Do campo à prancha final, nosso trabalho é blindar o seu direito de propriedade. 
+                                Combinamos o rigor da engenharia com tecnologias GNSS/RTK avançadas para atender 
+                                as normas mais exigentes do INCRA e da legislação brasileira.
                             </p>
                         @endif
                     </div>
@@ -140,8 +139,8 @@
                         </div>
 
                         <p class="text-lg leading-relaxed font-medium text-[#003366]/90">
-                            Proporcionar autonomia, precisão e eficiência na gestão de serviços
-                            geográficos, integrando tecnologia, organização e excelência técnica.
+                            Garantir a segurança jurídica e patrimonial dos nossos clientes através de serviços de 
+                            topografia e georreferenciamento executados com excelência, ética e precisão absoluta.
                         </p>
                     </div>
 
@@ -163,8 +162,8 @@
                         </div>
 
                         <p class="text-lg leading-relaxed font-medium text-[#003366]/90">
-                            Ser referência em inovação e integração digital para o setor topográfico,
-                            aproximando clientes, equipes técnicas e gestão operacional.
+                            Ser a empresa de engenharia topográfica mais confiável e recomendada da região, 
+                            reconhecida pela inovação digital no atendimento e extrema qualidade técnica.
                         </p>
                     </div>
                 </section>
@@ -203,11 +202,11 @@
                             </div>
 
                             <h3 class="text-2xl font-black mb-4">
-                                Precisão
+                                Exatidão
                             </h3>
 
                             <p class="text-lg leading-relaxed font-medium text-[#003366]/80">
-                                Rigor técnico em cada funcionalidade e em cada etapa do processo.
+                                Rigor técnico milimétrico em cada marco plantado e em cada linha desenhada.
                             </p>
                         </div>
 
@@ -218,11 +217,11 @@
                             </div>
 
                             <h3 class="text-2xl font-black mb-4">
-                                Transparência
+                                Ética
                             </h3>
 
                             <p class="text-lg leading-relaxed font-medium text-[#003366]/80">
-                                Informações claras, acessíveis e atualizadas em tempo real.
+                                Conduta irrepreensível na definição de limites e relacionamento transparente com confrontantes.
                             </p>
                         </div>
 
@@ -237,7 +236,7 @@
                             </h3>
 
                             <p class="text-lg leading-relaxed font-medium text-[#003366]/80">
-                                Tecnologia aplicada para resolver desafios reais do setor.
+                                Aplicação dos melhores equipamentos (RTK, Vants) e softwares digitais do mercado.
                             </p>
                         </div>
 

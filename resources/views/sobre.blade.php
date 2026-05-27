@@ -37,16 +37,15 @@
 
                 <div class="relative z-10 max-w-3xl">
                     <span class="inline-flex items-center px-5 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-bold uppercase tracking-[0.2em] mb-6">
-                        Plataforma Inteligente
+                        Engenharia & Topografia
                     </span>
 
                     <h1 class="text-4xl md:text-5xl font-black leading-tight mb-6">
-                        Transformando a gestão topográfica com tecnologia
+                        Excelência e precisão em serviços de Georreferenciamento
                     </h1>
 
                     <p class="text-lg md:text-xl leading-relaxed text-white/90 font-medium">
-                        O Getec Topografia conecta clientes, equipes técnicas e processos
-                        em uma única plataforma moderna, organizada e eficiente.
+                        A Getec Topografia oferece soluções completas em Georreferenciamento, Levantamentos Planialtimétricos, Loteamentos e Regularização Fundiária.
                     </p>
 
                     @if(!empty($conteudo['whatsapp']))
@@ -104,22 +103,18 @@
                             {!! nl2br(e($conteudo['sobre'])) !!}
                         @else
                             <p>
-                                O <span class="font-black">Getec Topografia</span> é uma plataforma web
-                                integrada desenvolvida para modernizar a gestão de serviços no
-                                setor de topografia.
+                                A <span class="font-black">Getec Topografia</span> é uma empresa de engenharia e serviços cartográficos
+                                dedicada a garantir a segurança jurídica da sua propriedade através de medições precisas e tecnologia de ponta.
                             </p>
 
                             <p>
-                                Nossa proposta é substituir processos manuais e descentralizados
-                                por uma solução digital robusta, transparente e eficiente,
-                                proporcionando mais controle operacional e melhor experiência
-                                para clientes e equipes técnicas.
+                                Atuamos com Georreferenciamento de Imóveis Rurais (SIGEF/INCRA), Cadastro Ambiental Rural (CAR),
+                                Desmembramentos, Unificações, e Retificação de Área para propriedades urbanas e rurais.
                             </p>
 
                             <p>
-                                Através de um ambiente intuitivo e inteligente, organizamos
-                                documentos, acompanhamentos, arquivos técnicos e comunicação
-                                em tempo real dentro de um único sistema.
+                                Contamos com equipamentos GNSS/RTK de altíssima precisão e uma equipe técnica credenciada e altamente qualificada,
+                                entregando rapidez e total transparência aos nossos clientes através da nossa plataforma digital exclusiva.
                             </p>
                         @endif
                     </div>
@@ -169,13 +164,12 @@
                             </div>
 
                             <h3 class="text-2xl font-black mb-5">
-                                Para o Cliente
+                                Propriedades Rurais
                             </h3>
 
                             <p class="text-lg leading-relaxed font-medium text-[#003366]/85">
-                                Oferecemos total autonomia através de um portal exclusivo
-                                onde o cliente pode enviar documentos, acompanhar o progresso
-                                dos serviços, acessar arquivos e gerenciar solicitações em tempo real.
+                                Regularização completa perante o INCRA, Receita Federal e Cartórios. Georreferenciamento (SIGEF), 
+                                CAR, CCIR e laudos técnicos especializados para garantir a conformidade da sua fazenda ou sítio.
                             </p>
 
                         </div>
@@ -197,13 +191,12 @@
                             </div>
 
                             <h3 class="text-2xl font-black mb-5">
-                                Para a Equipe Técnica
+                                Projetos Urbanos
                             </h3>
 
                             <p class="text-lg leading-relaxed font-medium text-[#003366]/85">
-                                Centralizamos a operação técnica, facilitando a organização
-                                de arquivos, controle de campo e gerenciamento inteligente
-                                de dados topográficos sem duplicidades.
+                                Levantamentos planialtimétricos cadastrais para projetos de engenharia e arquitetura, 
+                                demarcação de lotes, desdobros, locação de obras e retificação de áreas em áreas urbanas.
                             </p>
 
                         </div>
@@ -249,11 +242,11 @@
                                 </div>
 
                                 <h3 class="text-2xl font-black mb-3">
-                                    Menos retrabalho
+                                    Agilidade
                                 </h3>
 
                                 <p class="text-white/85 text-lg leading-relaxed">
-                                    Processos organizados e integrados para reduzir falhas operacionais.
+                                    Equipe técnica experiente que domina os processos de aprovação em cartórios e órgãos públicos.
                                 </p>
                             </div>
 
@@ -263,11 +256,11 @@
                                 </div>
 
                                 <h3 class="text-2xl font-black mb-3">
-                                    Mais transparência
+                                    Tecnologia de Ponta
                                 </h3>
 
                                 <p class="text-white/85 text-lg leading-relaxed">
-                                    Informações centralizadas e atualizadas em tempo real.
+                                    Utilizamos equipamentos RTK de última geração e softwares avançados para garantir precisão milimétrica.
                                 </p>
                             </div>
 
@@ -277,11 +270,11 @@
                                 </div>
 
                                 <h3 class="text-2xl font-black mb-3">
-                                    Gestão inteligente
+                                    Acompanhamento Online
                                 </h3>
 
                                 <p class="text-white/85 text-lg leading-relaxed">
-                                    Tecnologia aplicada para otimizar operações topográficas.
+                                    Portal exclusivo onde o cliente visualiza andamentos, mapas e memoriais em tempo real.
                                 </p>
                             </div>
 
@@ -289,10 +282,9 @@
 
                         <div class="border-t border-white/20 pt-8">
                             <p class="text-xl leading-relaxed text-white/90 font-medium">
-                                Acreditamos que a inovação deve resolver problemas reais.
-                                Por isso, unimos ferramentas de atendimento, organização operacional
-                                e rigor técnico para entregar uma experiência moderna,
-                                eficiente e confiável.
+                                Acreditamos que a topografia vai além de medir terras. Trata-se de garantir a 
+                                proteção do patrimônio das famílias e empresas. Por isso, aliamos rigor técnico 
+                                à tecnologia para entregar a você o melhor serviço de engenharia cartográfica da região.
                             </p>
                         </div>
 
