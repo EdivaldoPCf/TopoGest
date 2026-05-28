@@ -18,15 +18,13 @@ class PastaController extends Controller
     // Lista as pastas de ano na tela principal
     public function index(Request $request)
     {
-        $status = $request->query('status', 'pendente');
-        
         $pastas = Pasta::whereNull('parent_id')
-                    ->where('tipo_servico', $status)
-                    ->orderBy('nome', 'desc')
+                    ->orderByRaw("tipo_servico = 'pendente' DESC")
+                    ->orderBy('nome', 'asc')
                     ->get();
 
         return response()
-            ->view('admin.pastas.index', compact('pastas', 'status'))
+            ->view('admin.pastas.index', compact('pastas'))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
             ->header('Pragma', 'no-cache');
     }
@@ -82,7 +80,10 @@ class PastaController extends Controller
 
     // Abre o diretório e carrega subpastas, arquivos e pendências
     public function show($id) {
-        $pasta = Pasta::with(['subpastas.cliente', 'arquivos', 'pendencias', 'parent.parent'])->findOrFail($id);
+        $pasta = Pasta::with(['subpastas' => function($q) {
+            $q->orderByRaw("tipo_servico = 'pendente' DESC")
+              ->orderBy('nome', 'asc');
+        }, 'subpastas.cliente', 'arquivos', 'pendencias', 'parent.parent'])->findOrFail($id);
         return response()
             ->view('admin.pastas.show', compact('pasta'))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
@@ -254,6 +255,34 @@ class PastaController extends Controller
         $pasta->update($request->only('codigo_sigef'));
 
         return back()->with('success', 'Código SIGEF atualizado com sucesso!');
+    }
+
+    public function vincularCpf(Request $request, $id)
+    {
+        $pasta = Pasta::findOrFail($id);
+        
+        $request->validate([
+            'identificador_cliente' => 'required|string|max:11|min:11',
+        ]);
+
+        $cpfNumerico = preg_replace('/[^0-9]/', '', $request->identificador_cliente);
+        
+        $pasta->identificador_cliente = $cpfNumerico;
+
+        // Tenta achar um cliente já existente
+        $cliente = User::where('cpf', $cpfNumerico)
+                       ->orWhere('cnpj', $cpfNumerico)
+                       ->first();
+
+        if ($cliente) {
+            $pasta->cliente_id = $cliente->id;
+        } else {
+            $pasta->cliente_id = null;
+        }
+        
+        $pasta->save();
+
+        return back()->with('success', 'CPF vinculado com sucesso!');
     }
 
     // Gatilho para a Exclusão Sensível entre Admins

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Base;
 use App\Models\Pasta;
 use App\Models\Arquivo;
+use App\Models\Marco;
 use App\Rules\CpfValido;
 use Illuminate\Http\Request;
 use App\Notifications\StatusPermissaoNotification;
@@ -31,8 +32,11 @@ class AdminController extends Controller
         $totalClientes = User::where('role', 'cliente')->count();
         $totalServicosPendentes = Pasta::where('tipo_servico', 'pendente')->count();
         $totalBases = Base::count();
+        
+        $totalBca = Marco::where('credencial', 'BCA')->count();
+        $totalEmes = Marco::where('credencial', 'EMES')->count();
 
-        return view('admin.dashboard', compact('temPendentes', 'totalClientes', 'totalServicosPendentes', 'totalBases'));
+        return view('admin.dashboard', compact('temPendentes', 'totalClientes', 'totalServicosPendentes', 'totalBases', 'totalBca', 'totalEmes'));
     }
 
     /**

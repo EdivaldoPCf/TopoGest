@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Arquivo extends Model
 {
-    protected $fillable = ['nome', 'nome_original', 'path', 'caminho', 'tamanho', 'tipo', 'pasta_id'];
+    protected $fillable = ['nome', 'nome_original', 'path', 'caminho', 'tamanho', 'tipo', 'pasta_id', 'oculto'];
 
     protected $casts = [
         'detalhes' => 'array',
+        'oculto' => 'boolean',
     ];
 
     public function pasta()

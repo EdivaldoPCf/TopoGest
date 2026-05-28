@@ -634,3 +634,10 @@ Artisan::command('pastas:import {directory}', function ($directory) {
     $this->info("Marcos identificados e salvos: {$totalMarcosCreated}");
     return 0;
 })->purpose('Importa o fluxo de pastas, arquivos e marcos de um ano a partir de um diretório local.');
+
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('pastas:sync-pendentes')
+    ->hourly()
+    ->between('00:00', '06:00')
+    ->appendOutputTo(storage_path('logs/sync_pendentes.log'));

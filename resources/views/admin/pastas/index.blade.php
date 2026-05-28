@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        {{ $status === 'pronto' ? 'Serviços Prontos' : 'Serviços Pendentes' }} - Getec Topografia
+        Serviços - Getec Topografia
     </title>
 
     <!-- Tailwind -->
@@ -180,7 +180,7 @@
                     Painel Administrativo
                 </p>
                 <h1 class="text-3xl md:text-4xl font-black italic uppercase tracking-tight">
-                    {{ $status === 'pronto' ? 'Serviços Prontos' : 'Serviços Pendentes' }}
+                    Serviços
                 </h1>
             </div>
         </div>
@@ -249,8 +249,8 @@
                             </div>
 
                             <div class="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-white/5">
-                                <span class="px-3 py-1 rounded-full text-[10px] uppercase font-black border {{ $status === 'pronto' ? 'bg-green-500/20 text-green-300 border-green-500/20' : 'bg-yellow-500/20 text-yellow-300 border-yellow-500/20' }}">
-                                    {{ $status === 'pronto' ? 'Concluído' : 'Pendente' }}
+                                <span class="px-3 py-1 rounded-full text-[10px] uppercase font-black border {{ $pasta->tipo_servico === 'pronto' ? 'bg-green-500/20 text-green-300 border-green-500/20' : 'bg-yellow-500/20 text-yellow-300 border-yellow-500/20' }}">
+                                    {{ $pasta->tipo_servico === 'pronto' ? 'Concluído' : 'Pendente' }}
                                 </span>
 
                                 <div class="flex items-center gap-2">
@@ -311,7 +311,7 @@
             <!-- FORM -->
             <form action="{{ route('pasta.store') }}" method="POST">
                 @csrf
-                <input type="hidden" name="tipo_servico" value="{{ $status }}">
+                <input type="hidden" name="tipo_servico" value="pendente">
 
                 <!-- INPUT -->
                 <div class="mb-8">

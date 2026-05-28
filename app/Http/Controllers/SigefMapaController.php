@@ -53,6 +53,56 @@ class SigefMapaController extends Controller
             return response()->json(['erro' => 'Nenhum vértice encontrado na planilha ODS.'], 422);
         }
 
+        // =========================================================================
+        // Auto-save/update de marcos na base global
+        // =========================================================================
+        $imovelName = $identificacao['imovel'] ?? 'Imóvel Desconhecido';
+        foreach ($vertices as $v) {
+            $codigo = trim($v['codigo']);
+            if (preg_match('/^([A-Z0-9]+)\-([A-Z])\-(.+)$/i', $codigo, $mParts)) {
+                $cred = strtoupper($mParts[1]);
+                $tipo = strtoupper($mParts[2]);
+                $num = str_pad($mParts[3], 4, '0', STR_PAD_LEFT);
+
+                $marcoExistente = \App\Models\Marco::where('credencial', $cred)
+                    ->where('tipo', $tipo)
+                    ->where('numero', $num)
+                    ->first();
+
+                if ($marcoExistente) {
+                    // Já existe. Atualiza apenas se NÃO tiver coordenada.
+                    if (is_null($marcoExistente->latitude) && is_null($marcoExistente->easting)) {
+                        if ($v['tipo'] === 'geodesica') {
+                            $marcoExistente->latitude = $v['N'];
+                            $marcoExistente->longitude = $v['E'];
+                        } else {
+                            $marcoExistente->easting = $v['E'];
+                            $marcoExistente->northing = $v['N'];
+                        }
+                        $marcoExistente->save();
+                    }
+                } else {
+                    // Não existe. Insere novo.
+                    $novoMarco = new \App\Models\Marco();
+                    $novoMarco->user_id = auth()->id() ?? 1;
+                    $novoMarco->credencial = $cred;
+                    $novoMarco->tipo = $tipo;
+                    $novoMarco->numero = $num;
+                    $novoMarco->imovel = substr($imovelName, 0, 100);
+
+                    if ($v['tipo'] === 'geodesica') {
+                        $novoMarco->latitude = $v['N'];
+                        $novoMarco->longitude = $v['E'];
+                    } else {
+                        $novoMarco->easting = $v['E'];
+                        $novoMarco->northing = $v['N'];
+                    }
+                    $novoMarco->save();
+                }
+            }
+        }
+        // =========================================================================
+
         return response()->json([
             'arquivo_id'   => $arquivoOds->id,
             'arquivo_nome' => $arquivoOds->nome ?? $arquivoOds->nome_original,

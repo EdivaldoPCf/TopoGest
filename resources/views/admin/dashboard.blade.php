@@ -224,39 +224,21 @@
                 <!-- MENU ITEMS -->
                 <nav class="space-y-4">
 
-                    <a href="{{ route('admin.pastas.index', ['status' => 'pronto']) }}"
+                    <a href="{{ route('admin.pastas.index') }}"
                        class="menu-gradient rounded-2xl px-6 py-5 flex items-center justify-between shadow-xl border border-white/10 card-hover">
 
                         <div>
                             <p class="text-xs uppercase tracking-[3px] text-white/50 font-bold">
-                                Serviços
+                                Gestão
                             </p>
 
                             <h3 class="text-lg font-black uppercase italic">
-                                Prontos
+                                Serviços
                             </h3>
                         </div>
 
                         <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                            ✓
-                        </div>
-                    </a>
-
-                    <a href="{{ route('admin.pastas.index', ['status' => 'pendente']) }}"
-                       class="menu-gradient rounded-2xl px-6 py-5 flex items-center justify-between shadow-xl border border-white/10 card-hover">
-
-                        <div>
-                            <p class="text-xs uppercase tracking-[3px] text-white/50 font-bold">
-                                Serviços
-                            </p>
-
-                            <h3 class="text-lg font-black uppercase italic">
-                                Pendentes
-                            </h3>
-                        </div>
-
-                        <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                            ⏳
+                            📁
                         </div>
                     </a>
 
@@ -275,6 +257,24 @@
 
                         <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
                             👥
+                        </div>
+                    </a>
+
+                    <a href="{{ route('admin.importacao.index') }}"
+                       class="menu-gradient rounded-2xl px-6 py-5 flex items-center justify-between shadow-xl border border-white/10 card-hover">
+
+                        <div>
+                            <p class="text-xs uppercase tracking-[3px] text-white/50 font-bold">
+                                Sincronização
+                            </p>
+
+                            <h3 class="text-lg font-black uppercase italic">
+                                Importar
+                            </h3>
+                        </div>
+
+                        <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                            🔄
                         </div>
                     </a>
 
@@ -417,7 +417,7 @@
                 </div>
 
                 <!-- DASHBOARD CARDS -->
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <div class="bg-gradient-to-br from-[#003366] to-[#004A7C] rounded-3xl p-6 border border-white/10 shadow-2xl">
                         <p class="text-sm uppercase tracking-[3px] text-white/50 mb-3">
@@ -484,6 +484,34 @@
                                 <span class="text-white/60 text-sm uppercase font-bold">
                                     no sistema
                                 </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-[#003366] to-[#004A7C] rounded-3xl p-6 border border-white/10 shadow-2xl">
+                        <p class="text-sm uppercase tracking-[3px] text-white/50 mb-3">
+                            Marcos
+                        </p>
+
+                        <h3 class="text-2xl font-black italic uppercase mb-6">
+                            Sistema
+                        </h3>
+
+                        <div class="flex justify-between items-end gap-4">
+                            <span class="text-5xl font-black">
+                                📌
+                            </span>
+
+                            <div class="flex items-center gap-3 text-right">
+                                <div class="flex flex-col">
+                                    <p class="text-2xl font-black text-[#00E500] leading-none">{{ $totalBca }}</p>
+                                    <span class="text-white/60 text-[10px] uppercase font-bold">BCA</span>
+                                </div>
+                                <div class="w-[1px] h-6 bg-white/20"></div>
+                                <div class="flex flex-col">
+                                    <p class="text-2xl font-black text-[#00E500] leading-none">{{ $totalEmes }}</p>
+                                    <span class="text-white/60 text-[10px] uppercase font-bold">EMES</span>
+                                </div>
                             </div>
                         </div>
                     </div>

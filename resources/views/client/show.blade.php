@@ -312,7 +312,10 @@
                     @endif
 
                     <!-- PASTAS (SUBPASTAS) -->
-                    @if($pasta->subpastas->isNotEmpty())
+                    @php
+                        $subpastasExibiveis = $pasta->subpastas->filter(fn($s) => !$s->oculto);
+                    @endphp
+                    @if($subpastasExibiveis->isNotEmpty())
                     <div class="glass rounded-[36px] border border-white/40 shadow-2xl p-6 md:p-8 animate-fade">
 
                         <div class="flex items-center justify-between mb-6 border-b border-[#003366]/10 pb-4">
@@ -322,12 +325,12 @@
                                 </span>
                             </div>
                             <div class="text-[#003366] font-bold text-xs">
-                                {{ $pasta->subpastas->count() }} pasta(s)
+                                {{ $subpastasExibiveis->count() }} pasta(s)
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            @foreach($pasta->subpastas as $sub)
+                            @foreach($subpastasExibiveis as $sub)
                                 <div class="bg-white/90 border border-white/50 rounded-3xl p-5 shadow-lg flex flex-col justify-between hover:scale-[1.01] transition">
                                     <div class="flex items-center gap-4">
                                         <div class="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center text-2xl shrink-0">
@@ -369,7 +372,7 @@
                                 </span>
                             </div>
                             <div class="text-[#003366] font-bold text-xs">
-                                {{ $pasta->arquivos->count() }} arquivo(s) • {{ $pasta->pendencias->count() }} pendência(s)
+                                {{ $pasta->arquivos->filter(fn($a) => strtolower($a->tipo) !== 'ods' && !$a->oculto)->count() }} arquivo(s) • {{ $pasta->pendencias->count() }} pendência(s)
                             </div>
                         </div>
 
@@ -414,7 +417,7 @@
                             <div class="space-y-4">
                                 <h4 class="text-xs uppercase tracking-wider font-bold text-[#003366]/70">Documentos Disponíveis</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    @forelse($pasta->arquivos as $arq)
+                                    @forelse($pasta->arquivos->filter(fn($a) => strtolower($a->tipo) !== 'ods' && !$a->oculto) as $arq)
                                         <div class="bg-white/95 border border-white/60 rounded-3xl p-5 shadow-lg flex flex-col justify-between hover:scale-[1.01] transition">
                                             <div class="flex items-start gap-4 mb-4">
                                                 <div class="w-12 h-12 rounded-2xl bg-[#003366]/10 flex items-center justify-center text-2xl shrink-0">

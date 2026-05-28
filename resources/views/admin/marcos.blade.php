@@ -384,6 +384,11 @@
                                         <div class="font-bold italic text-lg">
                                             {{ $marco->imovel }}
                                         </div>
+                                        <div class="mt-2">
+                                            <a href="{{ route('admin.marcos.mapa', ['imovel' => urlencode($marco->imovel), 'highlight' => $marco->id]) }}" class="text-xs bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-bold shadow-sm hover:bg-blue-200 transition-colors" title="Ver no Mapa">
+                                                <i class="fas fa-map-marker-alt mr-1"></i> Ver Mapa
+                                            </a>
+                                        </div>
 
                                     </td>
 
@@ -475,6 +480,49 @@
 
             </div>
 
+        </section>
+
+        <!-- ESTATÍSTICAS DO SISTEMA -->
+        <section class="max-w-7xl mx-auto mt-10">
+            <div class="glass rounded-[32px] p-8 border border-white/20 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+                
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-[#003366] flex items-center justify-center shadow-lg border border-white/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-white text-xl font-black uppercase tracking-widest">Resumo do Sistema</h3>
+                        <p class="text-white/70 text-sm font-semibold">Total de marcos registrados (Todos os tipos)</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-6">
+                    <!-- Total BCA -->
+                    <div class="bg-white/90 px-6 py-4 rounded-2xl shadow-inner flex flex-col items-center min-w-[120px]">
+                        <span class="text-[#003366] font-black text-2xl">{{ number_format($totalBca, 0, ',', '.') }}</span>
+                        <span class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Marcos BCA</span>
+                    </div>
+
+                    <div class="text-white/40 font-light text-3xl hidden sm:block">+</div>
+
+                    <!-- Total EMES -->
+                    <div class="bg-white/90 px-6 py-4 rounded-2xl shadow-inner flex flex-col items-center min-w-[120px]">
+                        <span class="text-[#003366] font-black text-2xl">{{ number_format($totalEmes, 0, ',', '.') }}</span>
+                        <span class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Marcos EMES</span>
+                    </div>
+
+                    <div class="text-white/40 font-light text-3xl hidden sm:block">=</div>
+
+                    <!-- Total Geral -->
+                    <div class="bg-[#003366] border border-white/20 px-8 py-4 rounded-2xl shadow-2xl flex flex-col items-center min-w-[140px] transform hover:scale-110 transition-all cursor-default">
+                        <span class="text-yellow-400 font-black text-3xl">{{ number_format($totalBca + $totalEmes, 0, ',', '.') }}</span>
+                        <span class="text-white/80 text-xs font-bold uppercase tracking-widest mt-1">TOTAL GERAL</span>
+                    </div>
+                </div>
+
+            </div>
         </section>
 
         <!-- FOOTER -->

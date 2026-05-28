@@ -153,6 +153,20 @@ Route::middleware('auth')->group(function () {
     // Painel Principal
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     
+    Route::post('/gerador-mapa/pdf', [AdminController::class, 'generateMapPdf'])->name('admin.gerador.pdf');
+
+    // Importação de Trabalhos
+    Route::get('/importacao', [\App\Http\Controllers\AdminImportacaoController::class, 'index'])->name('admin.importacao.index');
+    Route::post('/importacao/buscar', [\App\Http\Controllers\AdminImportacaoController::class, 'buscarPastas'])->name('admin.importacao.buscar');
+    Route::post('/importacao/processar', [\App\Http\Controllers\AdminImportacaoController::class, 'processarPasta'])->name('admin.importacao.processar');
+    Route::post('/importacao/upload-web', [\App\Http\Controllers\AdminImportacaoController::class, 'uploadWeb'])->name('admin.importacao.uploadWeb');
+    Route::post('/importacao/sync-settings', [\App\Http\Controllers\AdminImportacaoController::class, 'salvarConfiguracaoSync'])->name('admin.importacao.syncSettings');
+    Route::post('/importacao/sync-now', [\App\Http\Controllers\AdminImportacaoController::class, 'syncAgora'])->name('admin.importacao.syncNow');
+    Route::get('/importacao/sync-progress', [\App\Http\Controllers\AdminImportacaoController::class, 'getSyncProgress'])->name('admin.importacao.syncProgress');
+    Route::post('/pastas/{pasta}/sync', [\App\Http\Controllers\AdminImportacaoController::class, 'syncPastaUnica'])->name('admin.pastas.sync');
+    Route::post('/admin/arquivos/{id}/toggle-oculto', [\App\Http\Controllers\AdminImportacaoController::class, 'toggleArquivoOculto'])->name('admin.arquivos.toggle-oculto');
+    Route::post('/admin/pastas/{id}/toggle-oculto', [\App\Http\Controllers\AdminImportacaoController::class, 'togglePastaOculto'])->name('admin.pastas.toggle-oculto');
+
     // Gestão de Clientes e Permissões
     Route::get('/admin/clientes', [AdminController::class, 'clientes'])->name('admin.clientes');
     Route::put('/admin/clientes/{id}', [AdminController::class, 'update'])->name('admin.clientes.update');
@@ -166,6 +180,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/marcos', [MarcoController::class, 'store'])->name('admin.marcos.store');
     Route::delete('/admin/marcos/{id}', [MarcoController::class, 'destroy'])->name('admin.marcos.destroy');
     Route::post('/admin/marcos/destroy-multiple', [MarcoController::class, 'destroyMultiple'])->name('admin.marcos.destroy-multiple');
+    Route::get('/admin/marcos/mapa/{imovel}', [MarcoController::class, 'mapa'])->name('admin.marcos.mapa');
 
     // Processamento da Dupla Aprovação
     Route::post('/admin/pastas/processar-exclusao', [AdminController::class, 'processarExclusao'])->name('admin.pastas.processar_exclusao');
@@ -186,7 +201,8 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/admin/pastas/{id}/tornar-pendente', [\App\Http\Controllers\PastaController::class, 'tornarPendente'])->name('admin.pastas.tornar-pendente');
 
-    Route::patch('/admin/pastas/{id}/sigef', [PastaController::class, 'updateSigef'])->name('admin.pastas.update-sigef');
+    Route::patch('/admin/pastas/{id}/sigef', [\App\Http\Controllers\PastaController::class, 'updateSigef'])->name('admin.pastas.update-sigef');
+    Route::post('/admin/pastas/{id}/cpf', [\App\Http\Controllers\PastaController::class, 'vincularCpf'])->name('admin.pastas.vincularCpf');
 
     Route::get('/admin/clientes/{id}', [App\Http\Controllers\AdminController::class, 'gestaoCliente'])->name('admin.clientes.gestao');
 

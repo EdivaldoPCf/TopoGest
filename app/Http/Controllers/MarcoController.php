@@ -30,9 +30,15 @@ class MarcoController extends Controller
             ->orderBy('numero', 'desc')
             ->paginate(20)
             ->withQueryString();
-        $ultimo = Marco::where('credencial', $credencial)->where('tipo', $tipo)->latest('numero')->first();
+        $ultimo = Marco::where('credencial', $credencial)
+            ->where('tipo', $tipo)
+            ->orderByRaw('CAST(numero AS UNSIGNED) DESC')
+            ->first();
 
-        return view('admin.marcos', compact('marcos', 'ultimo', 'credencial', 'tipo'));
+        $totalBca = Marco::where('credencial', 'BCA')->count();
+        $totalEmes = Marco::where('credencial', 'EMES')->count();
+
+        return view('admin.marcos', compact('marcos', 'ultimo', 'credencial', 'tipo', 'totalBca', 'totalEmes'));
     }
 
     public function store(Request $request)
@@ -139,4 +145,23 @@ class MarcoController extends Controller
 
     return ['status' => 'success'];
 }
+
+    public function mapa(Request $request, $imovel)
+    {
+        $imovelDecoded = urldecode($imovel);
+        $highlightId = $request->query('highlight');
+        
+        // Fetch all marcos for this imovel that have coordinates
+        $marcos = Marco::where('imovel', $imovelDecoded)
+            ->where(function ($q) {
+                $q->whereNotNull('latitude')->orWhereNotNull('easting');
+            })
+            ->get();
+
+        if ($marcos->isEmpty()) {
+            return back()->with('error', 'Nenhum marco com coordenada encontrada para este imóvel.');
+        }
+
+        return view('admin.marcos_mapa', compact('marcos', 'imovelDecoded', 'highlightId'));
+    }
 }

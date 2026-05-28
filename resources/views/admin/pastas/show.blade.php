@@ -12,6 +12,9 @@
     <!-- Alpine -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Leaflet.js -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -198,7 +201,7 @@
 
     <div id="main-wrapper"
          x-data="app()" 
-         @keydown.escape.window="closeModal('createFolderModal'); closeModal('uploadModal'); closeModal('pendenciaModal'); deleteModal = false; previewModal = false; openSigefModal = false; finalizeModal = false; revertModal = false" 
+         @keydown.escape.window="closeModal('createFolderModal'); closeModal('uploadModal'); closeModal('pendenciaModal'); deleteModal = false; previewModal = false; openSigefModal = false; finalizeModal = false; revertModal = false; openCpfModal = false" 
          class="relative w-full max-w-7xl mx-auto px-4 md:px-8 py-8 animate-fade">
 
         <!-- HEADER -->
@@ -335,84 +338,7 @@
                     $isLevel3 = $pasta->parent_id && $pasta->parent?->parent_id && !$pasta->parent?->parent?->parent_id;
                 @endphp
 
-                <!-- CONTROLE DO SERVIÇO (Nível 3) -->
-                @if($isLevel3)
-                <div class="glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 animate-fade">
-                    <div class="flex items-start gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-[#003366] flex items-center justify-center text-3xl shrink-0">
-                            ⚙️
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-3">
-                                <span class="uppercase tracking-[3px] text-xs text-[#00E500] font-black">Status do Serviço</span>
-                                <span class="px-3 py-1 rounded-full text-[10px] uppercase font-black border {{ $pasta->tipo_servico === 'pronto' ? 'bg-green-500/20 text-green-300 border-green-500/20' : 'bg-yellow-500/20 text-yellow-300 border-yellow-500/20' }}">
-                                    {{ $pasta->tipo_servico === 'pronto' ? 'Concluído' : 'Pendente' }}
-                                </span>
-                            </div>
-                            <h2 class="text-2xl font-black mt-1">Controle do Serviço</h2>
-                            <p class="text-sm text-white/50 mt-1">Defina se este serviço está concluído ou pendente no sistema.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        @if($pasta->tipo_servico === 'pendente')
-                            <button @click="finalizeModal = true" 
-                                    class="bg-[#00E500] hover:bg-green-500 text-black px-6 py-4 rounded-2xl font-black uppercase text-sm transition whitespace-nowrap shadow-lg">
-                                Finalizar Serviço
-                            </button>
-                        @else
-                            <button @click="revertModal = true" 
-                                    class="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-4 rounded-2xl font-black uppercase text-sm transition whitespace-nowrap shadow-lg">
-                                Retornar para Pendente
-                            </button>
-                        @endif
-                    </div>
-                </div>
-                @endif
 
-                <!-- SIGEF INTEGRATION CARD -->
-                @if($isLevel3)
-                <div class="glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 animate-fade">
-                    <div class="flex items-start gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-[#003366] flex items-center justify-center text-3xl shrink-0">
-                            🌐
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-3">
-                                <span class="uppercase tracking-[3px] text-xs text-[#00E500] font-black">Integração SIGEF</span>
-                                @if($pasta->codigo_sigef)
-                                    <span class="bg-emerald-500/25 text-[#00E500] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Vinculado</span>
-                                @else
-                                    <span class="bg-yellow-500/25 text-yellow-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Pendente</span>
-                                @endif
-                            </div>
-                            <h2 class="text-2xl font-black mt-1">Código da Parcela (SIGEF)</h2>
-                            @if($pasta->codigo_sigef)
-                                <p class="text-sm font-mono text-white/60 mt-1 select-all">{{ $pasta->codigo_sigef }}</p>
-                            @else
-                                <p class="text-sm text-white/40 mt-1">Nenhum código SIGEF vinculado a este imóvel.</p>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        @if($pasta->codigo_sigef)
-                            <a href="https://sigef.incra.gov.br/geo/parcela/detalhe/{{ $pasta->codigo_sigef }}/" 
-                               target="_blank" 
-                               class="bg-[#004A7C] hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-black uppercase text-xs transition whitespace-nowrap">
-                                Visualizar no SIGEF
-                            </a>
-                            <button @click="openSigefModal = true" 
-                                    class="bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-black uppercase text-xs transition whitespace-nowrap">
-                                Alterar Código
-                            </button>
-                        @else
-                            <button @click="openSigefModal = true" 
-                                    class="bg-[#00E500] hover:bg-green-500 text-black px-5 py-3 rounded-2xl font-black uppercase text-xs transition whitespace-nowrap">
-                                Vincular Código
-                            </button>
-                        @endif
-                    </div>
-                </div>
-                @endif
 
                 <!-- SUBPASTAS -->
                 <div class="glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl">
@@ -426,12 +352,51 @@
                                 Organização do serviço
                             </p>
                         </div>
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            @if($isLevel3)
+                                <button @click="sincronizarPastaUnica({{ $pasta->id }})" :disabled="syncLocalExecutando" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2.5 rounded-xl text-xs transition border border-white/10 uppercase flex items-center gap-2 disabled:opacity-50">
+                                    <span x-show="!syncLocalExecutando">🔄 Sincronizar</span>
+                                    <span x-show="syncLocalExecutando">Sincronizando...</span>
+                                </button>
+
+                                <button @click="{{ $pasta->tipo_servico === 'pendente' ? 'finalizeModal = true' : 'revertModal = true' }}"
+                                        title="Controle do Serviço"
+                                        class="w-10 h-10 bg-white/5 hover:bg-white/10 flex items-center justify-center rounded-xl text-lg shadow-sm transition">
+                                    ⚙️
+                                </button>
+                                
+                                <button @click="openCpfModal = true"
+                                        title="Cliente / Proprietário"
+                                        class="w-10 h-10 bg-white/5 hover:bg-white/10 flex items-center justify-center rounded-xl text-lg shadow-sm transition relative">
+                                    👥
+                                    <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-[#00111f] {{ $pasta->cliente_id ? 'bg-emerald-500' : ($pasta->identificador_cliente ? 'bg-yellow-400' : 'bg-rose-500') }}"></div>
+                                </button>
+                                
+                                <button @click="openSigefModal = true"
+                                        title="Integração SIGEF"
+                                        class="w-10 h-10 bg-white/5 hover:bg-white/10 flex items-center justify-center rounded-xl text-lg shadow-sm transition relative">
+                                    🌐
+                                    <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-[#00111f] {{ $pasta->codigo_sigef ? 'bg-emerald-500' : 'bg-yellow-400' }}"></div>
+                                </button>
+                            @endif
+
                             <button @click="openCreateModal"
-                                    class="bg-[#00E500] hover:bg-green-600 text-black font-black uppercase px-5 py-2.5 rounded-xl text-xs shadow-lg transition flex items-center gap-1.5">
+                                    class="bg-[#00E500] hover:bg-green-600 text-black font-black uppercase px-5 py-2.5 rounded-xl text-xs shadow-lg transition flex items-center gap-1.5 ml-2">
                                 <span>+ {{ $isLevel2 ? 'Novo Imóvel' : 'Nova Pasta' }}</span>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Barra de Progresso da Sincronização Local -->
+                    <div x-show="syncLocalExecutando" x-cloak class="mx-8 mt-6 bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2 animate-fade">
+                        <div class="flex items-center justify-between text-xs font-bold">
+                            <span class="text-white/60 uppercase tracking-wider">Progresso da Sincronização</span>
+                            <span class="text-[#00E500]" x-text="syncPercent + '% (' + syncCurrent + '/' + syncTotal + ')'">0%</span>
+                        </div>
+                        <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-[#00E500] h-2.5 rounded-full transition-all duration-300 shadow-[0_0_10px_#00E500]" :style="'width: ' + syncPercent + '%'"></div>
+                        </div>
+                        <div class="text-[10px] text-white/40 truncate" x-text="syncLastFile ? 'Processando: ' + syncLastFile : 'Calculando arquivos na pasta física...'"></div>
                     </div>
 
                     <div class="p-8">
@@ -492,6 +457,14 @@
                                            class="bg-[#003366] hover:bg-[#004A7C] transition px-4 py-2 rounded-xl text-xs uppercase font-black shadow-lg">
                                             Abrir
                                         </a>
+
+                                        <button
+                                            type="button"
+                                            onclick="togglePastaOculto({{ $sub->id }}, this)"
+                                            class="p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 transition flex items-center justify-center {{ $sub->oculto ? 'bg-amber-600 text-white hover:bg-amber-500' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10' }}"
+                                            title="{{ $sub->oculto ? 'Esta pasta está oculta do cliente. Clique para mostrar.' : 'Esta pasta está visível para o cliente. Clique para ocultar.' }}">
+                                            <span>{{ $sub->oculto ? '🙈 Oculta' : '👁️ Visível' }}</span>
+                                        </button>
 
                                         <button
                                             @click="openDeleteModal('{{ route('admin.pastas.destroy', $sub->id) }}', '{{ addslashes($sub->nome) }}')"
@@ -574,9 +547,28 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 @forelse($pasta->arquivos as $arq)
                                     <div class="glass border border-white/5 rounded-3xl p-6 flex flex-col justify-between hover:scale-[1.01] transition animate-fade">
+                                        @php
+                                            $icon = '📄';
+                                            $bgClass = 'bg-gray-500/20 border-gray-500/20';
+                                            switch (strtolower($arq->tipo)) {
+                                                case 'pdf': $icon = '📕'; $bgClass = 'bg-red-500/20 border-red-500/20'; break;
+                                                case 'doc':
+                                                case 'docx': $icon = '📘'; $bgClass = 'bg-blue-500/20 border-blue-500/20'; break;
+                                                case 'xls':
+                                                case 'xlsx':
+                                                case 'ods': $icon = '📗'; $bgClass = 'bg-green-500/20 border-green-500/20'; break;
+                                                case 'dwg':
+                                                case 'dxf': $icon = '📐'; $bgClass = 'bg-indigo-500/20 border-indigo-500/20'; break;
+                                                case 'jpg':
+                                                case 'jpeg':
+                                                case 'png': $icon = '🖼️'; $bgClass = 'bg-yellow-500/20 border-yellow-500/20'; break;
+                                                case 'zip':
+                                                case 'rar': $icon = '📦'; $bgClass = 'bg-orange-500/20 border-orange-500/20'; break;
+                                            }
+                                        @endphp
                                         <div class="flex items-start gap-4 mb-4">
-                                            <div class="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-500/20 flex items-center justify-center text-2xl shrink-0">
-                                                📄
+                                            <div class="w-12 h-12 rounded-2xl {{ $bgClass }} border flex items-center justify-center text-2xl shrink-0">
+                                                {{ $icon }}
                                             </div>
                                             <div class="min-w-0">
                                                 <h4 class="font-black text-white uppercase text-sm truncate leading-snug">
@@ -599,6 +591,14 @@
                                                class="flex-1 bg-[#00E500] hover:bg-green-500 text-black py-2 rounded-xl font-black uppercase text-[10px] text-center transition">
                                                 Baixar
                                             </a>
+
+                                            <button
+                                                type="button"
+                                                onclick="toggleArquivoOculto({{ $arq->id }}, this)"
+                                                class="p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 transition flex items-center justify-center {{ $arq->oculto ? 'bg-amber-600 text-white hover:bg-amber-500' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10' }}"
+                                                title="{{ $arq->oculto ? 'Este arquivo está oculto do cliente. Clique para mostrar.' : 'Este arquivo está visível para o cliente. Clique para ocultar.' }}">
+                                                <span>{{ $arq->oculto ? '🙈' : '👁️' }}</span>
+                                            </button>
 
                                             <button
                                                 @click="openDeleteModal('{{ route('arquivos.destroy', $arq->id) }}', '{{ addslashes($arq->nome) }}')"
@@ -642,18 +642,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <button @click="openMemorial"
-                                class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 shadow-md">
-                                📄 Memorial Descritivo
-                            </button>
-                            <a href="{{ route('pasta.dxf', $pasta->id) }}"
-                               class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 shadow-md">
-                                📐 Baixar DXF (CAD)
-                            </a>
-                            <button onclick="window.print()"
-                                class="bg-[#004A7C] hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 border border-white/10 shadow-md">
-                                🖨️ Imprimir Planta
-                            </button>
+
                             <button id="btn-satelite" onclick="alternarCamada()"
                                 class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 border border-white/5 shadow-md">
                                 🛰️ Satélite
@@ -1035,6 +1024,61 @@
             </div>
         </div>
 
+        <!-- CPF MODAL -->
+        <div x-show="openCpfModal"
+             class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
+             x-cloak>
+
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-white">
+
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black uppercase italic text-[#00E500]">
+                            Vincular CPF do Proprietário
+                        </h2>
+                        <p class="text-white/60 mt-2">
+                            Insira o CPF do proprietário para que o imóvel seja vinculado a ele automaticamente quando se cadastrar.
+                        </p>
+                    </div>
+
+                    <button @click="openCpfModal = false"
+                            class="text-white/40 hover:text-white text-3xl leading-none">
+                        ×
+                    </button>
+                </div>
+
+                <form action="{{ route('admin.pastas.vincularCpf', $pasta->id) }}" method="POST">
+                    @csrf
+
+                    <div class="mb-6">
+                        <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                            CPF (Somente Números)
+                        </label>
+                        <input type="text"
+                               name="identificador_cliente"
+                               value="{{ $pasta->identificador_cliente }}"
+                               required
+                               maxlength="11"
+                               class="w-full bg-white text-[#003366] px-5 py-3 rounded-2xl outline-none font-bold">
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="submit"
+                                class="flex-1 bg-[#00E500] hover:bg-green-500 text-black py-3 rounded-2xl font-black uppercase transition">
+                            Vincular CPF
+                        </button>
+
+                        <button type="button"
+                                @click="openCpfModal = false"
+                                class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-black uppercase transition">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
         <!-- DELETE MODAL -->
         <div x-show="deleteModal"
              x-transition
@@ -1202,12 +1246,89 @@
                 pendenciaModal: false,
                 previewModal: false,
                 openSigefModal: false,
+                openCpfModal: false,
                 previewUrl: '',
                 previewType: '',
                 previewName: '',
                 memorialModal: false,
                 memorialTexto: '',
                 loadingMemorial: false,
+                syncLocalExecutando: false,
+                syncPercent: 0,
+                syncCurrent: 0,
+                syncTotal: 0,
+                syncLastFile: '',
+
+                async sincronizarPastaUnica(id) {
+                    this.syncLocalExecutando = true;
+                    this.syncPercent = 0;
+                    this.syncCurrent = 0;
+                    this.syncTotal = 0;
+                    this.syncLastFile = 'Iniciando sincronização...';
+
+                    let pollInterval;
+
+                    try {
+                        const response = await fetch('/pastas/' + id + '/sync', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        });
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.error || 'Erro ao iniciar sincronização');
+
+                        // Start polling to wait for completion
+                        pollInterval = setInterval(async () => {
+                            try {
+                                const progressResp = await fetch('/importacao/sync-progress?pasta_id=' + id);
+                                if (progressResp.ok) {
+                                    const progressData = await progressResp.json();
+                                    
+                                    this.syncPercent = progressData.percentage || 0;
+                                    this.syncCurrent = progressData.current || 0;
+                                    this.syncTotal = progressData.total || 0;
+                                    this.syncLastFile = progressData.last_file || '';
+
+                                    if (progressData.status === 'done') {
+                                        clearInterval(pollInterval);
+                                        this.syncLocalExecutando = false;
+                                        Swal.fire({
+                                            title: 'Sincronizado!',
+                                            text: 'Sincronização da pasta concluída com sucesso!',
+                                            icon: 'success',
+                                            confirmButtonColor: '#003366',
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    } else if (progressData.status === 'error') {
+                                        clearInterval(pollInterval);
+                                        this.syncLocalExecutando = false;
+                                        Swal.fire({
+                                            title: 'Erro!',
+                                            text: progressData.last_file || 'Ocorreu um erro na sincronização.',
+                                            icon: 'error',
+                                            confirmButtonColor: '#003366',
+                                        });
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Erro ao buscar progresso:', e);
+                            }
+                        }, 800);
+
+                    } catch (error) {
+                        if (pollInterval) clearInterval(pollInterval);
+                        this.syncLocalExecutando = false;
+                        Swal.fire({
+                            title: 'Erro!',
+                            text: error.message,
+                            icon: 'error',
+                            confirmButtonColor: '#003366',
+                        });
+                    }
+                },
 
                 async openMemorial() {
                     this.loadingMemorial = true;
@@ -1446,6 +1567,92 @@
         }
 
         document.addEventListener('DOMContentLoaded', carregarMapaSigef);
+
+        async function toggleArquivoOculto(id, btn) {
+            try {
+                const response = await fetch('/admin/arquivos/' + id + '/toggle-oculto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Erro ao alterar visibilidade');
+                
+                const isOculto = data.oculto;
+                const span = btn.querySelector('span');
+                if (isOculto) {
+                    btn.className = "p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 bg-amber-600 text-white hover:bg-amber-500 transition flex items-center justify-center";
+                    if (span) span.innerText = "🙈";
+                    btn.title = "Este arquivo está oculto do cliente. Clique para mostrar.";
+                } else {
+                    btn.className = "p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition flex items-center justify-center";
+                    if (span) span.innerText = "👁️";
+                    btn.title = "Este arquivo está visível para o cliente. Clique para ocultar.";
+                }
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            } catch (error) {
+                Swal.fire({
+                    title: 'Erro!',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#003366',
+                });
+            }
+        }
+
+        async function togglePastaOculto(id, btn) {
+            try {
+                const response = await fetch('/admin/pastas/' + id + '/toggle-oculto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Erro ao alterar visibilidade');
+                
+                const isOculto = data.oculto;
+                const span = btn.querySelector('span');
+                if (isOculto) {
+                    btn.className = "p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 bg-amber-600 text-white hover:bg-amber-500 transition flex items-center justify-center";
+                    if (span) span.innerText = "🙈 Oculta";
+                    btn.title = "Esta pasta está oculta do cliente. Clique para mostrar.";
+                } else {
+                    btn.className = "p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition flex items-center justify-center";
+                    if (span) span.innerText = "👁️ Visível";
+                    btn.title = "Esta pasta está visível para o cliente. Clique para ocultar.";
+                }
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            } catch (error) {
+                Swal.fire({
+                    title: 'Erro!',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#003366',
+                });
+            }
+        }
     </script>
 
 </body>

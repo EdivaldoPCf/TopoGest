@@ -13,7 +13,12 @@ class Pasta extends Model
         'cliente_id', 
         'identificador_cliente', 
         'categoria_servico',
-        'codigo_sigef'
+        'codigo_sigef',
+        'oculto'
+    ];
+
+    protected $casts = [
+        'oculto' => 'boolean',
     ];
 
     // Relacionamento para buscar as pastas que estão DENTRO desta
