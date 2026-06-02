@@ -169,6 +169,7 @@ class MarcoController extends Controller
             ->where(function ($q) {
                 $q->whereNotNull('latitude')->orWhereNotNull('easting');
             })
+            ->orderBy('id', 'asc')
             ->get();
 
         if ($marcos->isEmpty()) {

@@ -27,7 +27,9 @@
                     </a>
                 </div>
                 
-                <p class="text-gray-600 mt-2">Visualizando {{ count($marcos) }} marcos encontrados com coordenadas.</p>
+                <div id="marcos-info" class="flex flex-wrap items-center mt-2 gap-4">
+                    <p class="text-gray-600">Visualizando {{ count($marcos) }} marcos encontrados com coordenadas.</p>
+                </div>
 
                 <div id="map"></div>
             </div>
@@ -64,6 +66,27 @@
         var marcos = @json($marcos);
         var highlightId = {{ $highlightId ?? 'null' }};
         var highlightMarker = null;
+        var polygonCoords = [];
+
+        function calcularAreaHa(coords) {
+            if (coords.length < 3) return 0;
+            let area = 0;
+            const n = coords.length;
+            const R = 6371000;
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                area += (coords[j][1] - coords[i][1]) * Math.PI / 180
+                    * (2 + Math.sin(coords[i][0] * Math.PI / 180) + Math.sin(coords[j][0] * Math.PI / 180));
+            }
+            return (Math.abs(area * R * R / 2) / 10000);
+        }
+
+        function formatarAreaBr(area) {
+            if (!area) return '0,0000';
+            const num = typeof area === 'string' ? parseFloat(area.toString().replace(',', '.')) : area;
+            if (isNaN(num)) return area;
+            return num.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+        }
 
         marcos.forEach(function(marco) {
             var lat = null;
@@ -89,6 +112,7 @@
 
             if (lat !== null && lng !== null) {
                 var point = L.latLng(lat, lng);
+                polygonCoords.push([lat, lng]);
                 bounds.extend(point);
 
                 var isHighlighted = (marco.id == highlightId);
@@ -116,6 +140,23 @@
                 }
             }
         });
+
+        if (polygonCoords.length >= 3) {
+            L.polygon(polygonCoords, {
+                color: '#10b981',
+                weight: 2,
+                fillColor: '#10b981',
+                fillOpacity: 0.2
+            }).addTo(map);
+
+            var areaHa = calcularAreaHa(polygonCoords);
+            var areaText = formatarAreaBr(areaHa) + ' ha (calc.)';
+            
+            var areaSpan = document.createElement('span');
+            areaSpan.className = 'bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-lg border border-green-300';
+            areaSpan.innerHTML = '<i class="fas fa-draw-polygon mr-1"></i> Área: ' + areaText;
+            document.getElementById('marcos-info').appendChild(areaSpan);
+        }
 
         if (bounds.isValid()) {
             map.fitBounds(bounds, {padding: [50, 50]});
