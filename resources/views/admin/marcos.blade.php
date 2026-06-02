@@ -174,7 +174,7 @@
                             <div class="text-white/85 text-xs bg-[#003366]/40 border border-white/10 px-4 py-2 rounded-xl flex items-center gap-2">
                                 <span>Último cadastrado:</span>
                                 <span class="text-yellow-400 font-bold tracking-wide">
-                                    {{ $ultimo ? $credencial.'-'.$tipo.'-'.sprintf('%04d', $ultimo->numero) : 'Nenhum' }}
+                                    {{ $ultimo ? $credencial.'-'.$tipo.'-'.str_pad($ultimo->numero, 4, '0', STR_PAD_LEFT) : 'Nenhum' }}
                                 </span>
                             </div>
                         </div>
@@ -397,7 +397,7 @@
                                     <td class="py-6 px-8">
 
                                         <div class="font-black text-lg tracking-tight">
-                                            {{ $marco->credencial }}-{{ $marco->tipo }}-{{ sprintf('%04d', $marco->numero) }}
+                                            {{ $marco->credencial }}-{{ $marco->tipo }}-{{ str_pad($marco->numero, 4, '0', STR_PAD_LEFT) }}
                                         </div>
 
                                     </td>

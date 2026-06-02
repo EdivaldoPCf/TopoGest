@@ -86,7 +86,7 @@ class MarcoController extends Controller
             for ($num = $numeroInicio; $num <= $numeroFim; $num++) {
                 $resultado = $this->saveMarco($credencial, $tipo, $num, $request->imovel);
                 if ($resultado['status'] === 'duplicate') {
-                    $duplicates[] = "{$credencial}-{$tipo}-" . sprintf('%04d', $num);
+                    $duplicates[] = "{$credencial}-{$tipo}-" . str_pad($num, 4, '0', STR_PAD_LEFT);
                 } else {
                     $savedCount++;
                 }
@@ -142,7 +142,7 @@ class MarcoController extends Controller
     if ($existente) {
         return [
             'status' => 'duplicate',
-            'marco' => "{$cred}-{$tipo}-" . sprintf('%04d', $num),
+            'marco' => "{$cred}-{$tipo}-" . str_pad($num, 4, '0', STR_PAD_LEFT),
             'imovel' => $existente->imovel,
             'data' => $existente->created_at->format('d/m/Y')
         ];
