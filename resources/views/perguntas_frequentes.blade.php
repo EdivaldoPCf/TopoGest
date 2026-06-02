@@ -12,6 +12,7 @@
             display: none;
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="min-h-screen bg-gray-200 overflow-x-hidden">

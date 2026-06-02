@@ -71,7 +71,7 @@ class ImportMarcosOdsCommand extends Command
 
         // Pega todos os matches que pareçam marcos ou codigos (Global Fallback)
         $marcosEncontrados = [];
-        if (preg_match_all('/([A-Z0-9]+)\-([A-Z])\-([0-9]+)/i', $text, $matches)) {
+        if (preg_match_all('/([A-Z0-9]+)\-([A-Z])\-(\d{1,5})(?![0-9])/i', $text, $matches)) {
             foreach ($matches[0] as $m) {
                 $marcosEncontrados[] = $m;
             }
@@ -115,6 +115,10 @@ class ImportMarcosOdsCommand extends Command
                 $numero = str_pad($mParts[2], 4, '0', STR_PAD_LEFT);
             } else if (preg_match('/^[0-9]+$/', $marcoRaw)) {
                 $numero = str_pad($marcoRaw, 4, '0', STR_PAD_LEFT);
+            }
+
+            if ($credencial === 'ATN') {
+                continue;
             }
 
             $chave = "{$credencial}-{$tipo}-{$numero}";
@@ -176,9 +180,14 @@ class ImportMarcosOdsCommand extends Command
 
                         if ($started) {
                             $marcoRawTable = $rowText[0];
-                            if (preg_match('/^([A-Z0-9]+)-([A-Z])-([0-9]+)$/i', $marcoRawTable, $parts)) {
+                            if (preg_match('/^([A-Z0-9]+)-([A-Z])-(.+)$/i', $marcoRawTable, $parts)) {
                                 $c = strtoupper($parts[1]);
                                 $t = strtoupper($parts[2]);
+                                
+                                if ($c === 'ATN') {
+                                    continue;
+                                }
+
                                 $n = str_pad($parts[3], 4, '0', STR_PAD_LEFT);
                                 $chave = "{$c}-{$t}-{$n}";
 

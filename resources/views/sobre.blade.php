@@ -7,6 +7,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="min-h-screen bg-[#D9D9D9] overflow-x-hidden">

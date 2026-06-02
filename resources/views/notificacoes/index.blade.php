@@ -31,6 +31,7 @@
             overflow: hidden;
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="min-h-screen antialiased p-4 md:p-8 overflow-hidden bg-[#0b1724]">

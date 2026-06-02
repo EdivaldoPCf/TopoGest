@@ -90,6 +90,7 @@
             }
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="min-h-screen overflow-hidden bg-[#071018] text-white">

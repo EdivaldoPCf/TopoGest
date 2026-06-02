@@ -44,6 +44,7 @@
             );
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="font-sans antialiased text-white overflow-x-hidden">

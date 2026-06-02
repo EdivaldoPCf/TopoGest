@@ -24,5 +24,10 @@ class AppServiceProvider extends ServiceProvider
         } elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
+
+        \Illuminate\Notifications\DatabaseNotification::created(function ($notification) {
+            // Dispara evento sempre que uma nova notificação for gravada no DB
+            event(new \App\Events\NovaNotificacaoEvent($notification->notifiable_id, $notification->data));
+        });
     }
 }

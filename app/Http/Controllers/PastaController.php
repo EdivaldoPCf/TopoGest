@@ -189,18 +189,16 @@ class PastaController extends Controller
         $pasta2 = $pasta3->parent;
         $pasta1 = $pasta2->parent;
 
-        $novoNivel1 = Pasta::firstOrCreate([
-            'nome' => $pasta1->nome,
-            'parent_id' => null,
-            'tipo_servico' => 'pronto'
-        ]);
+        // Nível 1 e 2 não têm tipo_servico — busca apenas por nome+parent_id para evitar duplicatas
+        $novoNivel1 = Pasta::firstOrCreate(
+            ['nome' => $pasta1->nome, 'parent_id' => null]
+        );
 
-        $novoNivel2 = Pasta::firstOrCreate([
-            'nome' => $pasta2->nome,
-            'parent_id' => $novoNivel1->id,
-            'tipo_servico' => 'pronto'
-        ]);
+        $novoNivel2 = Pasta::firstOrCreate(
+            ['nome' => $pasta2->nome, 'parent_id' => $novoNivel1->id]
+        );
 
+        // Apenas o Nível 3 (Imóvel) recebe o tipo_servico
         $pasta3->update([
             'parent_id' => $novoNivel2->id,
             'tipo_servico' => 'pronto'
@@ -217,32 +215,28 @@ class PastaController extends Controller
 
     // Retorna o serviço para 'pendente', recria a estrutura e move a pasta Nível 3
     public function tornarPendente($id)
-{
-    $pasta3 = Pasta::findOrFail($id);
-    $pasta2 = $pasta3->parent;
-    $pasta1 = $pasta2->parent;
+    {
+        $pasta3 = Pasta::findOrFail($id);
+        $pasta2 = $pasta3->parent;
+        $pasta1 = $pasta2->parent;
 
-    // Garante a estrutura no status 'pendente'
-    $novoNivel1 = Pasta::firstOrCreate([
-        'nome' => $pasta1->nome,
-        'parent_id' => null,
-        'tipo_servico' => 'pendente'
-    ]);
+        // Nível 1 e 2 não têm tipo_servico — busca apenas por nome+parent_id para evitar duplicatas
+        $novoNivel1 = Pasta::firstOrCreate(
+            ['nome' => $pasta1->nome, 'parent_id' => null]
+        );
 
-    $novoNivel2 = Pasta::firstOrCreate([
-        'nome' => $pasta2->nome,
-        'parent_id' => $novoNivel1->id,
-        'tipo_servico' => 'pendente'
-    ]);
+        $novoNivel2 = Pasta::firstOrCreate(
+            ['nome' => $pasta2->nome, 'parent_id' => $novoNivel1->id]
+        );
 
-    // Move a pasta do serviço (Nível 3) de volta
-    $pasta3->update([
-        'parent_id' => $novoNivel2->id,
-        'tipo_servico' => 'pendente'
-    ]);
+        // Apenas o Nível 3 (Imóvel) recebe o tipo_servico
+        $pasta3->update([
+            'parent_id' => $novoNivel2->id,
+            'tipo_servico' => 'pendente'
+        ]);
 
-    return redirect()->route('admin.pastas.index', ['status' => 'pendente'])->with('success', 'Serviço retornado para pendente!');
-}
+        return redirect()->route('admin.pastas.index', ['status' => 'pendente'])->with('success', 'Serviço retornado para pendente!');
+    }
 
     public function updateSigef(Request $request, $id)
     {

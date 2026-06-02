@@ -29,6 +29,8 @@
             -webkit-backdrop-filter: blur(16px);
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    @vite(['resources/js/app.js'])
 </head>
 
 <body class="bg-slate-200 min-h-screen antialiased overflow-x-hidden">
@@ -338,16 +340,37 @@
                                            class="w-5 h-5 rounded border-slate-300 text-[#003366] focus:ring-blue-400/30 cursor-pointer">
                                 </th>
 
-                                <th class="text-left py-5 px-8 font-black">
-                                    Número do Marco
+                                <th class="text-left py-5 px-8 font-black group">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'numero', 'sort_dir' => ($sortBy == 'numero' && $sortDir == 'asc' ? 'desc' : 'asc')]) }}" class="flex items-center gap-2 hover:text-yellow-400 transition-colors">
+                                        Número do Marco
+                                        @if($sortBy == 'numero')
+                                            <span class="text-yellow-400">{!! $sortDir == 'asc' ? '&#9650;' : '&#9660;' !!}</span>
+                                        @else
+                                            <span class="opacity-0 group-hover:opacity-50 transition-opacity">&#9650;</span>
+                                        @endif
+                                    </a>
                                 </th>
 
-                                <th class="text-left py-5 px-8 font-black">
-                                    Imóvel
+                                <th class="text-left py-5 px-8 font-black group">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'imovel', 'sort_dir' => ($sortBy == 'imovel' && $sortDir == 'asc' ? 'desc' : 'asc')]) }}" class="flex items-center gap-2 hover:text-yellow-400 transition-colors">
+                                        Imóvel
+                                        @if($sortBy == 'imovel')
+                                            <span class="text-yellow-400">{!! $sortDir == 'asc' ? '&#9650;' : '&#9660;' !!}</span>
+                                        @else
+                                            <span class="opacity-0 group-hover:opacity-50 transition-opacity">&#9650;</span>
+                                        @endif
+                                    </a>
                                 </th>
 
-                                <th class="text-left py-5 px-8 font-black">
-                                    Cadastro
+                                <th class="text-left py-5 px-8 font-black group">
+                                    <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'created_at', 'sort_dir' => ($sortBy == 'created_at' && $sortDir == 'asc' ? 'desc' : 'asc')]) }}" class="flex items-center gap-2 hover:text-yellow-400 transition-colors">
+                                        Cadastro
+                                        @if($sortBy == 'created_at')
+                                            <span class="text-yellow-400">{!! $sortDir == 'asc' ? '&#9650;' : '&#9660;' !!}</span>
+                                        @else
+                                            <span class="opacity-0 group-hover:opacity-50 transition-opacity">&#9650;</span>
+                                        @endif
+                                    </a>
                                 </th>
 
                                 <th class="text-center py-5 px-8 font-black">
@@ -738,6 +761,26 @@
             });
 
         @endif
+
+        // WebSocket Integration
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Echo) {
+                window.Echo.private('marcos')
+                    .listen('MarcosAtualizadosEvent', (e) => {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: e.message || 'Marcos atualizados pelo robô. Recarregando...',
+                            showConfirmButton: false,
+                            timer: 2500,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    });
+            }
+        });
 
     </script>
 

@@ -20,7 +20,6 @@ class AdminImportacaoController extends Controller
     private $ignoredFolders = ['GNSS', 'RTK', 'BASE', 'ROVER', 'ARQUIVO METRICA', 'ARQUIVO MÉRICA'];
     private $ignoredExtensions = ['topo', 'tbkp', 'dwl', 'dwl2', 'bak'];
     private $ignoredFiles = [];
-    private $tecnicoCpf = '196.208.532-53';
 
     public function index()
     {
@@ -100,6 +99,53 @@ class AdminImportacaoController extends Controller
         }
     }
 
+    public function runPowerShell(Request $request)
+    {
+        $path = rtrim($request->input('path'), '\\/');
+        if (empty($path)) {
+            return response()->json(['error' => 'Por favor, informe o caminho.'], 400);
+        }
+
+        try {
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+            if ($isWindows) {
+                $php = PHP_BINARY;
+                if (preg_match('/php-fpm|php-cgi/i', $php)) {
+                    $possiblePaths = [
+                        str_replace(['php-fpm', 'php-cgi', 'sbin'], ['php', 'php', 'bin'], $php),
+                        str_replace(['php-fpm', 'php-cgi'], 'php', $php),
+                        '/usr/local/bin/php',
+                        '/usr/bin/php',
+                        'php'
+                    ];
+                    foreach ($possiblePaths as $phpPath) {
+                        if (file_exists($phpPath) && is_executable($phpPath)) {
+                            $php = $phpPath;
+                            break;
+                        }
+                    }
+                    if ($php === PHP_BINARY) {
+                        $php = 'php';
+                    }
+                }
+                $artisanPath = base_path('artisan');
+                // Open a new visible cmd window to run the command
+                $cmd = "start \"Importacao PowerShell\" cmd /c \"\"" . escapeshellarg($php) . "\" \"" . escapeshellarg($artisanPath) . "\" pastas:import \"" . escapeshellcmd($path) . "\" && echo. && echo Importacao concluida. Pode fechar esta janela. && pause\"";
+                pclose(popen($cmd, "r"));
+                
+                return response()->json([
+                    'status' => 'success', 
+                    'message' => 'Comando iniciado em uma nova janela do PowerShell/CMD!'
+                ]);
+            } else {
+                return response()->json(['error' => 'Este comando funciona apenas no servidor Windows local.'], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error("Erro ao iniciar PowerShell: " . $e->getMessage());
+            return response()->json(['error' => 'Erro ao iniciar PowerShell: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function processarPasta(Request $request)
     {
         $dados = $request->validate([
@@ -151,7 +197,7 @@ class AdminImportacaoController extends Controller
                 RecursiveIteratorIterator::SELF_FIRST
             );
 
-            $cpfEncontrado = null;
+            $cpfsEncontrados = [];
             $verticesEncontrados = [];
             
             // Map to cache folder instances: ['relative/path' => Pasta_ID]
@@ -163,19 +209,20 @@ class AdminImportacaoController extends Controller
                 $normalizedCaminhoCompleto = str_replace('\\', '/', $caminhoCompleto);
                 $relPath = trim(str_replace($normalizedCaminhoCompleto, '', $normalizedPath), '/');
 
-                // Ignorar se qualquer parte do caminho relativo for uma pasta a ser ignorada
+                $isIgnored = false;
+                $isPppBase = false;
+
+                // Check ignored folders or if it's a PPP base folder
                 if ($relPath !== '') {
                     $parts = explode('/', $relPath);
-                    $inIgnoredFolder = false;
                     foreach ($parts as $part) {
                         $upperPart = mb_strtoupper($part, 'UTF-8');
                         if (in_array($upperPart, ['GNSS', 'RTK', 'BASE', 'ROVER']) || stripos($upperPart, 'METRICA') !== false || stripos($upperPart, 'MÉTRICA') !== false) {
-                            $inIgnoredFolder = true;
-                            break;
+                            $isIgnored = true;
                         }
-                    }
-                    if ($inIgnoredFolder) {
-                        continue;
+                        if ($upperPart === 'PPP') {
+                            $isPppBase = true;
+                        }
                     }
                 }
 
@@ -195,7 +242,8 @@ class AdminImportacaoController extends Controller
                                     'nome' => $part,
                                     'parent_id' => $currentParentId
                                 ], [
-                                    'tipo_servico' => 'pronto'
+                                    'tipo_servico' => 'pronto',
+                                    'oculto' => $isIgnored ? 1 : 0
                                 ]);
                                 $pastasMap[$currentPath] = $novaPasta->id;
                             }
@@ -208,9 +256,21 @@ class AdminImportacaoController extends Controller
                     $ext = strtolower($file->getExtension());
                     $basename = strtolower($file->getBasename());
 
-                    // Ignorar arquivos indesejados, extensões configuradas e arquivos temporários do Office
-                    if (in_array($ext, $this->ignoredExtensions) || in_array($basename, $this->ignoredFiles) || str_starts_with($file->getFilename(), '~$') || $basename === 'thumbs.db' || str_contains($basename, 'topo.zip')) {
+                    // Skip only system temp files and thumbs.db completely
+                    if (str_starts_with($file->getFilename(), '~$') || $basename === 'thumbs.db') {
                         continue;
+                    }
+
+                    // Check ignored extensions and specific files like topo.zip
+                    if (in_array($ext, $this->ignoredExtensions) || in_array($basename, $this->ignoredFiles) || str_contains($basename, 'topo.zip') || str_contains($basename, 'topos.zip')) {
+                        $isIgnored = true;
+                    }
+
+                    // Handle PPP zip files if it contains @
+                    if ($isPppBase && $ext === 'zip' && str_contains($basename, '@')) {
+                        $baseProcessor = app(\App\Services\BaseProcessorService::class);
+                        $baseProcessor->processPppZip($file->getPathname());
+                        $isIgnored = true; // Mark the original zip as hidden or we could continue to skip it. We'll store it as hidden.
                     }
 
                     // Extração de dados (CPF e Vértices)
@@ -225,8 +285,8 @@ class AdminImportacaoController extends Controller
                     }
 
                     if ($parsedData) {
-                        if ($parsedData['cpf'] && !$cpfEncontrado) {
-                            $cpfEncontrado = $parsedData['cpf'];
+                        if (!empty($parsedData['cpf'])) {
+                            $cpfsEncontrados[] = $parsedData['cpf'];
                         }
                         if (!empty($parsedData['vertices'])) {
                             $verticesEncontrados = array_merge($verticesEncontrados, $parsedData['vertices']);
@@ -249,7 +309,8 @@ class AdminImportacaoController extends Controller
                                     'nome' => $part,
                                     'parent_id' => $currentParentId
                                 ], [
-                                    'tipo_servico' => 'pronto'
+                                    'tipo_servico' => 'pronto',
+                                    'oculto' => $isIgnored ? 1 : 0
                                 ]);
                                 $pastasMap[$currentPath] = $novaPasta->id;
                             }
@@ -271,24 +332,37 @@ class AdminImportacaoController extends Controller
                         'path' => $novoCaminho,
                         'tamanho' => round($file->getSize() / 1024 / 1024, 2),
                         'tipo' => strtoupper($ext),
+                        'oculto' => $isIgnored ? 1 : 0
                     ]);
                 }
             }
 
             // 3. Atrelar CPF e Usuário se aplicável
-            if ($cpfEncontrado) {
-                $cpfNumerico = preg_replace('/[^0-9]/', '', $cpfEncontrado);
-                $pastaImovel->identificador_cliente = $cpfNumerico;
+            if (!empty($cpfsEncontrados)) {
+                $cpfsEncontrados = array_unique($cpfsEncontrados);
+                foreach ($cpfsEncontrados as $cpfEncontrado) {
+                    $cpfNumerico = preg_replace('/[^0-9]/', '', $cpfEncontrado);
+                    
+                    $cliente = User::where('cpf', $cpfNumerico)
+                                   ->orWhere('cnpj', $cpfNumerico)
+                                   ->first();
 
-                // Tenta achar um cliente já existente
-                $cliente = User::where('cpf', $cpfNumerico)
-                               ->orWhere('cnpj', $cpfNumerico)
-                               ->first();
-
-                if ($cliente) {
-                    $pastaImovel->cliente_id = $cliente->id;
+                    if ($cliente) {
+                        if (empty($pastaImovel->cliente_id)) {
+                            $pastaImovel->identificador_cliente = $cpfNumerico;
+                            $pastaImovel->cliente_id = $cliente->id;
+                            $pastaImovel->save();
+                        } elseif ($pastaImovel->cliente_id !== $cliente->id) {
+                            $pastaImovel->clientesSecundarios()->syncWithoutDetaching([$cliente->id]);
+                        }
+                    } else {
+                        // Se não encontrou cliente mas tem o CPF, salva no identificador caso esteja vazio
+                        if (empty($pastaImovel->identificador_cliente)) {
+                            $pastaImovel->identificador_cliente = $cpfNumerico;
+                            $pastaImovel->save();
+                        }
+                    }
                 }
-                $pastaImovel->save();
             }
 
             // 4. Salvar vértices encontrados
@@ -323,6 +397,17 @@ class AdminImportacaoController extends Controller
         }
     }
 
+    private function isCpfAdmin($cpf) {
+        $cleanCpf = preg_replace('/[^0-9]/', '', $cpf);
+        static $adminCpfs = null;
+        if ($adminCpfs === null) {
+            $adminCpfs = \App\Models\User::where('role', 'admin')->pluck('cpf')->map(function($c) {
+                return preg_replace('/[^0-9]/', '', $c);
+            })->toArray();
+        }
+        return in_array($cleanCpf, $adminCpfs);
+    }
+
     private function parsePdfForData($pdfPath)
     {
         $result = ['cpf' => null, 'vertices' => []];
@@ -334,15 +419,15 @@ class AdminImportacaoController extends Controller
             // Buscar CPF (000.000.000-00)
             if (preg_match_all('/\d{3}\.\d{3}\.\d{3}\-\d{2}/', $text, $matches)) {
                 foreach ($matches[0] as $cpf) {
-                    if ($cpf !== $this->tecnicoCpf) {
+                    if (!$this->isCpfAdmin($cpf)) {
                         $result['cpf'] = $cpf;
-                        break; // Pega o primeiro que não seja o técnico
+                        break; // Pega o primeiro que não seja admin
                     }
                 }
             }
 
             // Buscar Vértices (BCA-M, BCA-P, BCA-V)
-            if (preg_match_all('/BCA-[MPV][\w\d\-]+/', $text, $matches)) {
+            if (preg_match_all('/BCA-[MPV]-\d{1,5}(?![0-9])/', $text, $matches)) {
                 $result['vertices'] = $matches[0];
             }
 
@@ -375,7 +460,7 @@ class AdminImportacaoController extends Controller
                     // Buscar CPF (000.000.000-00) ou sem formatação, vamos manter o regex atual para segurança:
                     if (preg_match_all('/\d{3}\.\d{3}\.\d{3}\-\d{2}/', $text, $matches)) {
                         foreach ($matches[0] as $cpf) {
-                            if ($cpf !== $this->tecnicoCpf) {
+                            if (!$this->isCpfAdmin($cpf)) {
                                 $result['cpf'] = $cpf;
                                 break;
                             }
@@ -383,7 +468,7 @@ class AdminImportacaoController extends Controller
                     }
 
                     // Buscar Vértices (BCA-M, BCA-P, BCA-V)
-                    if (preg_match_all('/BCA-[MPV][\w\d\-]+/', $text, $matches)) {
+                    if (preg_match_all('/BCA-[MPV]-\d{1,5}(?![0-9])/', $text, $matches)) {
                         $result['vertices'] = $matches[0];
                     }
                 }
@@ -406,6 +491,11 @@ class AdminImportacaoController extends Controller
                 if (preg_match('/^([A-Z0-9]+)\-([A-Z])\-(.+)$/i', $codigo, $mParts)) {
                     $cred = strtoupper($mParts[1]);
                     $tipo = strtoupper($mParts[2]);
+                    
+                    if (!in_array($cred, ['BCA', 'EMES'])) {
+                        continue;
+                    }
+
                     $num = str_pad($mParts[3], 4, '0', STR_PAD_LEFT);
 
                     $marcoExistente = \App\Models\Marco::where('credencial', $cred)
@@ -444,6 +534,8 @@ class AdminImportacaoController extends Controller
                     }
                 }
             }
+            
+            event(new \App\Events\MarcosAtualizadosEvent('Novos marcos importados via ODS'));
         } catch (\Exception $e) {
             Log::warning("Erro ao processar ODS para extrair coordenadas: " . $e->getMessage());
         }
@@ -451,10 +543,12 @@ class AdminImportacaoController extends Controller
 
     public function uploadWeb(Request $request)
     {
+        // Libera a sessão do PHP imediatamente para permitir requisições concorrentes da mesma sessão
+        session_write_close();
+
         $request->validate([
-            'ano' => 'required|string',
-            'categoria' => 'required|string',
-            'imovel' => 'required|string',
+            'tipo_upload' => 'required|in:ano,categoria,imovel',
+            'status_servico' => 'required|in:pronto,pendente',
             'caminho_relativo' => 'required|string',
             'arquivo' => 'required|file'
         ]);
@@ -462,64 +556,95 @@ class AdminImportacaoController extends Controller
         try {
             DB::beginTransaction();
 
-            $ano = trim($request->ano);
-            $categoria = trim($request->categoria);
-            $imovel = trim($request->imovel);
+            $tipo = $request->tipo_upload;
+            $statusServico = $request->status_servico;
             $relPath = trim($request->caminho_relativo);
             $file = $request->file('arquivo');
 
-            // 1. Criar a estrutura base
-            $pastaAno = Pasta::firstOrCreate([
-                'nome' => $ano,
-                'parent_id' => null
-            ], ['tipo_servico' => 'pronto']);
-
-            $pastaCat = Pasta::firstOrCreate([
-                'nome' => $categoria,
-                'parent_id' => $pastaAno->id
-            ], ['tipo_servico' => 'pronto']);
-
-            $pastaImovel = Pasta::firstOrCreate([
-                'nome' => $imovel,
-                'parent_id' => $pastaCat->id
-            ], ['tipo_servico' => 'pendente']); // Imóveis por padrão caem como pendentes
-
-            // 2. Extrair subpastas do caminho_relativo
-            // Ex: Lote 90/Documentos/doc.pdf
             $parts = explode('/', str_replace('\\', '/', $relPath));
-            
-            // Remove o nome do arquivo
             $fileName = array_pop($parts);
             $basename = strtolower($fileName);
             $ext = strtolower($file->getClientOriginalExtension());
 
-            // 2.1. Filtros de ignorar arquivos e pastas
-            if (in_array($ext, $this->ignoredExtensions) || in_array($basename, $this->ignoredFiles) || str_starts_with($fileName, '~$') || $basename === 'thumbs.db') {
+            $ano = '';
+            $categoria = '';
+            $imovel = '';
+
+            if ($tipo === 'ano') {
+                if (count($parts) < 3) return response()->json(['status' => 'ignored']);
+                $ano = array_shift($parts);
+                $categoria = array_shift($parts);
+                $imovel = array_shift($parts);
+            } elseif ($tipo === 'categoria') {
+                if (count($parts) < 2) return response()->json(['status' => 'ignored']);
+                $ano = trim($request->ano);
+                if (!$ano) return response()->json(['error' => 'Ano não informado'], 400);
+                $categoria = array_shift($parts);
+                $imovel = array_shift($parts);
+            } elseif ($tipo === 'imovel') {
+                if (count($parts) < 1) return response()->json(['status' => 'ignored']);
+                $ano = trim($request->ano);
+                $categoria = trim($request->categoria);
+                if (!$ano || !$categoria) return response()->json(['error' => 'Ano ou Categoria não informados'], 400);
+                $imovel = array_shift($parts);
+            }
+
+            // Filtros de ignorar arquivos e pastas
+            $isIgnored = false;
+            $isPppBase = false;
+
+            if (str_starts_with($fileName, '~$') || $basename === 'thumbs.db') {
+                DB::rollBack();
                 return response()->json(['status' => 'ignored']);
             }
 
-            foreach ($this->ignoredFolders as $igFolder) {
-                if (in_array(mb_strtolower($igFolder, 'UTF-8'), array_map(fn($p) => mb_strtolower($p, 'UTF-8'), $parts))) {
-                    return response()->json(['status' => 'ignored']);
-                }
-            }
-            
-            // Remove a raiz (o Lote 90), pois é o imóvel
-            if (count($parts) > 0 && $parts[0] === $imovel) {
-                array_shift($parts);
+            if (in_array($ext, $this->ignoredExtensions) || in_array($basename, $this->ignoredFiles) || str_contains($basename, 'topo.zip') || str_contains($basename, 'topos.zip')) {
+                $isIgnored = true;
             }
 
-            $currentParentId = $pastaImovel->id;
-            
-            // Criar a estrutura de subpastas (Documentos, etc)
             foreach ($parts as $part) {
-                if (trim($part) === '') continue;
-                $novaPasta = Pasta::firstOrCreate([
-                    'nome' => $part,
-                    'parent_id' => $currentParentId
-                ], ['tipo_servico' => 'pronto']);
-                $currentParentId = $novaPasta->id;
+                if (in_array(mb_strtolower($part, 'UTF-8'), array_map(fn($p) => mb_strtolower($p, 'UTF-8'), $this->ignoredFolders))) {
+                    $isIgnored = true;
+                }
+                if (mb_strtoupper($part, 'UTF-8') === 'PPP') {
+                    $isPppBase = true;
+                }
             }
+
+            // Handle PPP zip files se houver @
+            if ($isPppBase && $ext === 'zip' && str_contains($basename, '@')) {
+                $baseProcessor = app(\App\Services\BaseProcessorService::class);
+                $baseProcessor->processPppZip($file->getRealPath());
+                $isIgnored = true; 
+            }
+
+            // 1. Criar a estrutura base COM CACHE LOCK para evitar concorrência
+            $lockKey = 'cria_pastas_user_' . (auth()->id() ?: 'guest');
+            $lock = \Illuminate\Support\Facades\Cache::lock($lockKey, 15);
+            
+            $currentParentId = null;
+            $pastaImovel = null;
+
+            $lock->block(10, function () use (&$pastaImovel, &$currentParentId, $ano, $categoria, $imovel, $statusServico, $parts, $isIgnored) {
+                $pastaAno = Pasta::firstOrCreate(['nome' => $ano, 'parent_id' => null], ['tipo_servico' => 'pronto']);
+                $pastaCat = Pasta::firstOrCreate(['nome' => $categoria, 'parent_id' => $pastaAno->id], ['tipo_servico' => 'pronto']);
+                $pastaImovel = Pasta::firstOrCreate(['nome' => $imovel, 'parent_id' => $pastaCat->id], ['tipo_servico' => $statusServico]);
+
+                $currentParentId = $pastaImovel->id;
+                
+                // Criar a estrutura de subpastas (Documentos, etc)
+                foreach ($parts as $part) {
+                    if (trim($part) === '') continue;
+                    $novaPasta = Pasta::firstOrCreate([
+                        'nome' => $part,
+                        'parent_id' => $currentParentId
+                    ], [
+                        'tipo_servico' => 'pronto',
+                        'oculto' => $isIgnored ? 1 : 0
+                    ]);
+                    $currentParentId = $novaPasta->id;
+                }
+            });
 
             // 3. Processar o arquivo
             $tamanho = round($file->getSize() / 1024 / 1024, 2);
@@ -534,6 +659,7 @@ class AdminImportacaoController extends Controller
                 'path' => $novoCaminho,
                 'tamanho' => $tamanho,
                 'tipo' => strtoupper($ext),
+                'oculto' => $isIgnored ? 1 : 0
             ]);
 
             // Extração de dados (CPF e Vértices)
@@ -551,15 +677,23 @@ class AdminImportacaoController extends Controller
                 if (!empty($parsedData['cpf'])) {
                     $cpfNumerico = preg_replace('/[^0-9]/', '', $parsedData['cpf']);
                     
-                    if (!$pastaImovel->identificador_cliente) {
-                        $pastaImovel->identificador_cliente = $cpfNumerico;
-                        $cliente = User::where('cpf', $cpfNumerico)
-                                       ->orWhere('cnpj', $cpfNumerico)
-                                       ->first();
-                        if ($cliente) {
+                    $cliente = User::where('cpf', $cpfNumerico)
+                                   ->orWhere('cnpj', $cpfNumerico)
+                                   ->first();
+                                   
+                    if ($cliente) {
+                        if (empty($pastaImovel->cliente_id)) {
+                            $pastaImovel->identificador_cliente = $cpfNumerico;
                             $pastaImovel->cliente_id = $cliente->id;
+                            $pastaImovel->save();
+                        } elseif ($pastaImovel->cliente_id !== $cliente->id) {
+                            $pastaImovel->clientesSecundarios()->syncWithoutDetaching([$cliente->id]);
                         }
-                        $pastaImovel->save();
+                    } else {
+                        if (empty($pastaImovel->identificador_cliente)) {
+                            $pastaImovel->identificador_cliente = $cpfNumerico;
+                            $pastaImovel->save();
+                        }
                     }
                 }
 

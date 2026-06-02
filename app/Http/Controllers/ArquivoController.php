@@ -46,6 +46,8 @@ class ArquivoController extends Controller
 
         Arquivo::create($data);
 
+        event(new \App\Events\PastaAtualizadaEvent($pastaId, 'Novo arquivo recebido'));
+
         return redirect()->back()->with('success', 'Arquivo enviado!');
     }
 
@@ -53,9 +55,13 @@ class ArquivoController extends Controller
     {
         $arquivo = Arquivo::findOrFail($id);
 
+        $pastaId = $arquivo->pasta_id;
+        
         $filePath = $arquivo->path ?? $arquivo->caminho;
         Storage::disk('public')->delete($filePath);
         $arquivo->delete();
+
+        event(new \App\Events\PastaAtualizadaEvent($pastaId, 'Arquivo excluído'));
 
         return redirect()->back()->with('success', 'Arquivo excluído!');
     }

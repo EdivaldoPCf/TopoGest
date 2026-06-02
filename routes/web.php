@@ -11,6 +11,7 @@ use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\MarcoController;
 use App\Http\Controllers\SigefMapaController;
 use App\Http\Controllers\AdminGeradorController;
+use App\Http\Controllers\ContratoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +83,10 @@ Route::middleware('auth')->group(function () {
     // Rota para abrir uma pasta específica e ver seu conteúdo
     Route::get('/admin/pastas/{id}', [App\Http\Controllers\PastaController::class, 'show'])->name('admin.pastas.show');
     Route::get('/meus-servicos/{id}', [ServicoController::class, 'show'])->name('client.servico.show')->middleware('auth');
+    Route::get('/meus-contratos', [\App\Http\Controllers\ClientContratoController::class, 'index'])->name('client.contratos');
+    Route::get('/meus-contratos/{id}/download', [\App\Http\Controllers\ClientContratoController::class, 'download'])->name('client.contratos.download');
+    Route::post('/meus-contratos/{id}/assinar', [\App\Http\Controllers\ClientContratoController::class, 'assinar'])->name('client.contratos.assinar');
+    Route::get('/meus-contratos/recibo/{id}/visualizar', [\App\Http\Controllers\ClientContratoController::class, 'visualizarRecibo'])->name('client.contratos.recibo.visualizar');
 
     // Pastas e Uploads (Gestão de Documentos)
     Route::get('/pasta/{id}', [PastaController::class, 'show'])->name('pasta.show');
@@ -159,6 +164,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/importacao', [\App\Http\Controllers\AdminImportacaoController::class, 'index'])->name('admin.importacao.index');
     Route::post('/importacao/buscar', [\App\Http\Controllers\AdminImportacaoController::class, 'buscarPastas'])->name('admin.importacao.buscar');
     Route::post('/importacao/processar', [\App\Http\Controllers\AdminImportacaoController::class, 'processarPasta'])->name('admin.importacao.processar');
+    Route::post('/importacao/run-powershell', [\App\Http\Controllers\AdminImportacaoController::class, 'runPowerShell'])->name('admin.importacao.runPowerShell');
     Route::post('/importacao/upload-web', [\App\Http\Controllers\AdminImportacaoController::class, 'uploadWeb'])->name('admin.importacao.uploadWeb');
     Route::post('/importacao/sync-settings', [\App\Http\Controllers\AdminImportacaoController::class, 'salvarConfiguracaoSync'])->name('admin.importacao.syncSettings');
     Route::post('/importacao/sync-now', [\App\Http\Controllers\AdminImportacaoController::class, 'syncAgora'])->name('admin.importacao.syncNow');
@@ -229,7 +235,23 @@ Route::post('/admin/pastas/{id}/solicitar', [AdminController::class, 'solicitarE
     Route::get('/admin/gerador-express/{tempId}/dxf', [AdminGeradorController::class, 'dxf'])->name('admin.gerador.dxf');
     Route::get('/admin/gerador-express/{tempId}/txt', [AdminGeradorController::class, 'txt'])->name('admin.gerador.txt');
 
+    // ─── Acerto: Geração de Contratos ───────────────────────────────────────────
+    Route::get('/acerto', [ContratoController::class, 'index'])->name('admin.acerto.index');
+    Route::post('/acerto', [ContratoController::class, 'store'])->name('admin.acerto.store');
+    Route::get('/acerto/{id}/visualizar', [ContratoController::class, 'visualizar'])->name('admin.acerto.visualizar');
+    Route::get('/acerto/{id}/download', [ContratoController::class, 'download'])->name('admin.acerto.download');
+    Route::post('/acerto/{id}/assinar', [ContratoController::class, 'assinar'])->name('admin.acerto.assinar');
+    Route::delete('/acerto/{id}', [ContratoController::class, 'destroy'])->name('admin.acerto.destroy');
+    Route::post('/acerto/{id}/recibo', [ContratoController::class, 'gerarRecibo'])->name('admin.acerto.recibo');
+    Route::post('/acerto/{id}/recibo-entrada', [ContratoController::class, 'gerarReciboEntrada'])->name('admin.acerto.recibo.entrada');
+    Route::get('/acerto/recibo/{id}/visualizar', [ContratoController::class, 'visualizarRecibo'])->name('admin.acerto.recibo.visualizar');
+    Route::delete('/acerto/recibo/{id}', [ContratoController::class, 'excluirRecibo'])->name('admin.acerto.recibo.destroy');
+    Route::post('/acerto/busca-cpf', [ContratoController::class, 'buscaCpf'])->name('admin.acerto.buscaCpf');
+
 });
+
+// Verificação pública de assinatura (sem auth)
+Route::get('/acerto/verificar/{hash}', [ContratoController::class, 'verificar'])->name('admin.acerto.verificar');
 
 // Inclui as rotas de autenticação padrão do Laravel (Login, Register, etc.)
 require __DIR__.'/auth.php';

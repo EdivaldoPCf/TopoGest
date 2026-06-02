@@ -32,6 +32,7 @@
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="font-sans antialiased text-white overflow-x-hidden">

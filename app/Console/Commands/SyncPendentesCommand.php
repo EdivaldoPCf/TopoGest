@@ -33,7 +33,6 @@ class SyncPendentesCommand extends Command
     protected $ignoredExtensions = ['topo', 'tbkp', 'dwl', 'dwl2', 'bak'];
     protected $ignoredFiles = ['thumbs.db'];
     protected $ignoredFolders = ['GNSS', 'RTK', 'BASE', 'ROVER', 'ARQUIVO METRICA', 'ARQUIVO MÉRICA'];
-    protected $tecnicoCpf = '016.326.682-14';
 
     /**
      * Execute the console command.
@@ -61,6 +60,9 @@ class SyncPendentesCommand extends Command
                     'percentage' => 0,
                     'last_file' => "Caminho raiz inválido ou não configurado: {$rootDir}"
                 ], 300);
+                
+                event(new \App\Events\SyncProgressUpdated(0, 0, 0, "Caminho raiz inválido ou não configurado: {$rootDir}", 'error'));
+                
                 return;
             }
 
@@ -102,27 +104,9 @@ class SyncPendentesCommand extends Command
                             $ext = strtolower($file->getExtension());
                             $basename = strtolower($file->getBasename());
 
-                            if (in_array($ext, $this->ignoredExtensions) || in_array($basename, $this->ignoredFiles) || str_starts_with($file->getFilename(), '~$') || $basename === 'thumbs.db' || str_contains($basename, 'topo.zip')) {
+                            if (str_starts_with($file->getFilename(), '~$') || $basename === 'thumbs.db') {
                                 continue;
                             }
-
-                            // Normalize path separators to forward slash
-                            $normalizedPath = str_replace('\\', '/', $file->getPathname());
-                            $normalizedCaminhoFisico = str_replace('\\', '/', $caminhoFisico);
-                            $relPath = trim(str_replace($normalizedCaminhoFisico, '', $normalizedPath), '/');
-
-                            $inIgnoredFolder = false;
-                            if ($relPath !== '') {
-                                $parts = explode('/', $relPath);
-                                foreach ($parts as $part) {
-                                    $upperPart = mb_strtoupper($part, 'UTF-8');
-                                    if (in_array($upperPart, ['GNSS', 'RTK', 'BASE', 'ROVER']) || stripos($upperPart, 'METRICA') !== false || stripos($upperPart, 'MÉTRICA') !== false) {
-                                        $inIgnoredFolder = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if ($inIgnoredFolder) continue;
 
                             $totalFiles++;
                         }
@@ -137,6 +121,8 @@ class SyncPendentesCommand extends Command
                 'percentage' => 0,
                 'last_file' => ''
             ], 300);
+            
+            event(new \App\Events\SyncProgressUpdated(0, 0, $totalFiles, '', 'running'));
 
             $syncedFiles = 0;
             $currentProgress = 0;
@@ -156,6 +142,8 @@ class SyncPendentesCommand extends Command
                 'percentage' => 100,
                 'last_file' => 'Finalizado'
             ], 300);
+            
+            event(new \App\Events\SyncProgressUpdated(100, $totalFiles, $totalFiles, 'Finalizado', 'done'));
 
             $this->info("Sincronização concluída. Novos arquivos: {$syncedFiles}");
         } catch (\Throwable $e) {
@@ -167,6 +155,8 @@ class SyncPendentesCommand extends Command
                 'percentage' => 0,
                 'last_file' => 'Erro: ' . $e->getMessage()
             ], 300);
+            
+            event(new \App\Events\SyncProgressUpdated(0, 0, 0, 'Erro: ' . $e->getMessage(), 'error'));
         }
     }
 
@@ -188,19 +178,20 @@ class SyncPendentesCommand extends Command
             $normalizedCaminhoCompleto = str_replace('\\', '/', $caminhoCompleto);
             $relPath = trim(str_replace($normalizedCaminhoCompleto, '', $normalizedPath), '/');
 
-            // Ignorar se qualquer parte do caminho relativo for uma pasta a ser ignorada
+            $isIgnored = false;
+            $isPppBase = false;
+
+            // Check ignored folders or if it's a PPP base folder
             if ($relPath !== '') {
                 $parts = explode('/', $relPath);
-                $inIgnoredFolder = false;
                 foreach ($parts as $part) {
                     $upperPart = mb_strtoupper($part, 'UTF-8');
                     if (in_array($upperPart, ['GNSS', 'RTK', 'BASE', 'ROVER']) || stripos($upperPart, 'METRICA') !== false || stripos($upperPart, 'MÉTRICA') !== false) {
-                        $inIgnoredFolder = true;
-                        break;
+                        $isIgnored = true;
                     }
-                }
-                if ($inIgnoredFolder) {
-                    continue;
+                    if ($upperPart === 'PPP') {
+                        $isPppBase = true;
+                    }
                 }
             }
 
@@ -220,7 +211,8 @@ class SyncPendentesCommand extends Command
                                 'nome' => $part,
                                 'parent_id' => $currentParentId
                             ], [
-                                'tipo_servico' => 'pendente'
+                                'tipo_servico' => 'pendente',
+                                'oculto' => $isIgnored ? 1 : 0
                             ]);
                             $pastasMap[$currentPath] = $novaPasta->id;
                         }
@@ -233,9 +225,21 @@ class SyncPendentesCommand extends Command
                 $ext = strtolower($file->getExtension());
                 $basename = strtolower($file->getBasename());
 
-                // Ignorar arquivos indesejados, extensões configuradas e arquivos temporários do Office
-                if (in_array($ext, $this->ignoredExtensions) || in_array($basename, $this->ignoredFiles) || str_starts_with($file->getFilename(), '~$') || $basename === 'thumbs.db' || str_contains($basename, 'topo.zip')) {
+                // Skip system temp files and thumbs.db
+                if (str_starts_with($file->getFilename(), '~$') || $basename === 'thumbs.db') {
                     continue;
+                }
+
+                // Check ignored extensions
+                if (in_array($ext, $this->ignoredExtensions) || in_array($basename, $this->ignoredFiles) || str_contains($basename, 'topo.zip') || str_contains($basename, 'topos.zip')) {
+                    $isIgnored = true;
+                }
+
+                // Handle PPP zip files
+                if ($isPppBase && $ext === 'zip' && str_contains($basename, '@')) {
+                    $baseProcessor = app(\App\Services\BaseProcessorService::class);
+                    $baseProcessor->processPppZip($file->getPathname());
+                    $isIgnored = true;
                 }
 
                 // Atualiza o progresso no cache
@@ -249,6 +253,8 @@ class SyncPendentesCommand extends Command
                         'percentage' => $percentage,
                         'last_file' => $file->getBasename()
                     ], 300);
+                    
+                    event(new \App\Events\SyncProgressUpdated($percentage, $currentProgress, $totalFiles, $file->getBasename(), 'running'));
                 }
 
                 // Determinar a subpasta correta
@@ -267,7 +273,8 @@ class SyncPendentesCommand extends Command
                                 'nome' => $part,
                                 'parent_id' => $currentParentId
                             ], [
-                                'tipo_servico' => 'pendente'
+                                'tipo_servico' => 'pendente',
+                                'oculto' => $isIgnored ? 1 : 0
                             ]);
                             $pastasMap[$currentPath] = $novaPasta->id;
                         }
@@ -319,6 +326,7 @@ class SyncPendentesCommand extends Command
                     'path' => $novoCaminho,
                     'tamanho' => round($file->getSize() / 1024 / 1024, 2),
                     'tipo' => strtoupper($ext),
+                    'oculto' => $isIgnored ? 1 : 0
                 ]);
             }
         }
@@ -361,6 +369,17 @@ class SyncPendentesCommand extends Command
         return $countNovos;
     }
 
+    private function isCpfAdmin($cpf) {
+        $cleanCpf = preg_replace('/[^0-9]/', '', $cpf);
+        static $adminCpfs = null;
+        if ($adminCpfs === null) {
+            $adminCpfs = \App\Models\User::where('role', 'admin')->pluck('cpf')->map(function($c) {
+                return preg_replace('/[^0-9]/', '', $c);
+            })->toArray();
+        }
+        return in_array($cleanCpf, $adminCpfs);
+    }
+
     private function parsePdfForData($pdfPath)
     {
         $result = ['cpf' => null, 'vertices' => []];
@@ -371,7 +390,7 @@ class SyncPendentesCommand extends Command
 
             if (preg_match_all('/\d{3}\.\d{3}\.\d{3}\-\d{2}/', $text, $matches)) {
                 foreach ($matches[0] as $cpf) {
-                    if ($cpf !== $this->tecnicoCpf) {
+                    if (!$this->isCpfAdmin($cpf)) {
                         $result['cpf'] = $cpf;
                         break;
                     }
@@ -404,7 +423,7 @@ class SyncPendentesCommand extends Command
 
                     if (preg_match_all('/\d{3}\.\d{3}\.\d{3}\-\d{2}/', $text, $matches)) {
                         foreach ($matches[0] as $cpf) {
-                            if ($cpf !== $this->tecnicoCpf) {
+                            if (!$this->isCpfAdmin($cpf)) {
                                 $result['cpf'] = $cpf;
                                 break;
                             }
@@ -433,6 +452,10 @@ class SyncPendentesCommand extends Command
                 if (preg_match('/^([A-Z0-9]+)\-([A-Z])\-(.+)$/i', $codigo, $mParts)) {
                     $cred = strtoupper($mParts[1]);
                     $tipo = strtoupper($mParts[2]);
+                    if (!in_array($cred, ['BCA', 'EMES'])) {
+                        continue;
+                    }
+
                     $num = str_pad($mParts[3], 4, '0', STR_PAD_LEFT);
 
                     $marcoExistente = \App\Models\Marco::where('credencial', $cred)
@@ -470,6 +493,7 @@ class SyncPendentesCommand extends Command
                     }
                 }
             }
+            event(new \App\Events\MarcosAtualizadosEvent('Novos marcos importados pelo sincronizador via ODS'));
         } catch (\Exception $e) {
             Log::warning("Erro ao processar ODS para extrair coordenadas no Sync: " . $e->getMessage());
         }

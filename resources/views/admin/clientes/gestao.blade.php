@@ -94,6 +94,7 @@
             }
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="min-h-screen overflow-x-hidden bg-[#E5E7EB] text-white">

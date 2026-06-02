@@ -16,6 +16,9 @@
     <!-- proj4js — Conversão UTM → WGS84 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
 
+    <!-- Turf.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
     <style>
         .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
@@ -136,6 +139,8 @@
             display: none;
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    @vite(['resources/js/app.js'])
 </head>
 
 <body class="min-h-screen bg-gray-100 overflow-auto">
@@ -860,7 +865,7 @@
             } catch (e) {
                 content.innerText = "Erro ao carregar o memorial descritivo.";
             } finally {
-                loading.classList.add('hidden');
+                loading.classList.remove('hidden');
             }
         }
 
@@ -936,26 +941,84 @@
             }).filter(p => p !== null);
         }
 
-        // ---- Calcular área aproximada do polígono (ha) em WGS84 ----
-        function calcularAreaHa(coords) {
-            if (coords.length < 3) return 0;
+        // ---- Calcular área exata do polígono (ha) no Sistema Topográfico Local (SGL) ----
+        // Padrão do SIGEF: Projeta para o plano SGL usando a altitude média e coordenadas geodésicas.
+        function calcularAreaHa(dados) {
+            if (!dados.vertices || dados.vertices.length < 3 || !dados.coords || dados.coords.length < 3) return 0;
+            
+            const n = dados.coords.length;
+            const coords = dados.coords;
+            
+            // WGS84 parameters
+            const a = 6378137.0;
+            const e2 = 0.00669437999014;
+            const rad = d => d * Math.PI / 180.0;
+
+            let sumLat = 0, sumLon = 0, sumH = 0;
+            const altitudes = [];
+            for (let i = 0; i < n; i++) {
+                sumLat += coords[i][0];
+                sumLon += coords[i][1];
+                let h = 0;
+                if (dados.vertices[i] && dados.vertices[i].altitude) {
+                    h = parseFloat(dados.vertices[i].altitude.toString().replace(',', '.')) || 0;
+                }
+                altitudes.push(h);
+                sumH += h;
+            }
+            
+            const lat0 = rad(sumLat / n);
+            const lon0 = rad(sumLon / n);
+            const h0 = sumH / n;
+
+            function toECEF(lat, lon, h) {
+                const N_rad = a / Math.sqrt(1 - e2 * Math.sin(lat) * Math.sin(lat));
+                const X = (N_rad + h) * Math.cos(lat) * Math.cos(lon);
+                const Y = (N_rad + h) * Math.cos(lat) * Math.sin(lon);
+                const Z = (N_rad * (1 - e2) + h) * Math.sin(lat);
+                return { X, Y, Z };
+            }
+
+            const ecef0 = toECEF(lat0, lon0, h0);
+            const enuCoords = [];
+
+            for (let i = 0; i < n; i++) {
+                const lat = rad(coords[i][0]);
+                const lon = rad(coords[i][1]);
+                const h = altitudes[i];
+                
+                const ecef = toECEF(lat, lon, h);
+                
+                const dX = ecef.X - ecef0.X;
+                const dY = ecef.Y - ecef0.Y;
+                const dZ = ecef.Z - ecef0.Z;
+
+                const sinLat0 = Math.sin(lat0);
+                const cosLat0 = Math.cos(lat0);
+                const sinLon0 = Math.sin(lon0);
+                const cosLon0 = Math.cos(lon0);
+
+                const East  = -sinLon0 * dX + cosLon0 * dY;
+                const North = -sinLat0 * cosLon0 * dX - sinLat0 * sinLon0 * dY + cosLat0 * dZ;
+                
+                enuCoords.push({ E: East, N: North });
+            }
+
             let area = 0;
-            const n = coords.length;
-            const R = 6371000; // raio da Terra em metros
             for (let i = 0; i < n; i++) {
                 const j = (i + 1) % n;
-                const lat1 = coords[i][0] * Math.PI / 180;
-                const lat2 = coords[j][0] * Math.PI / 180;
-                const dLon = (coords[j][1] - coords[i][1]) * Math.PI / 180;
-                area += (coords[j][1] - coords[i][1]) * Math.PI / 180
-                    * (2 + Math.sin(lat1) + Math.sin(lat2));
+                area += (enuCoords[i].E * enuCoords[j].N) - (enuCoords[j].E * enuCoords[i].N);
             }
-            const areaMq = Math.abs(area * R * R / 2);
-            return (areaMq / 10000).toFixed(4); // m² → ha
+            area = Math.abs(area) / 2.0;
+
+            return (area / 10000).toFixed(4);
         }
 
-        // ---- Inicializa o mapa Leaflet ----
-        function inicializarMapa(coords, dados) {
+        let todosPoligonos = [];
+        let poligonosRenderizados = [];
+        let indexPoligonoAtual = 0;
+
+        function inicializarMapaMultiplos(poligonosData) {
             if (!leafletMap) {
                 leafletMap = L.map('leaflet-mapa', {
                     zoomControl: true,
@@ -978,53 +1041,101 @@
                 camadaStreets.addTo(leafletMap);
             }
 
-            // Limpar camadas anteriores de polígono
+            // Agrupar vizinhos
+            todosPoligonos = poligonosData.map(p => {
+                p.coords = converterVertices(p.vertices);
+                return p;
+            }).filter(p => p.coords.length >= 3);
+
+            if (todosPoligonos.length === 0) return;
+
+            renderizarLote(0);
+
+            // Adicionar botões de alternância se houver mais de 1 lote
+            if (todosPoligonos.length > 1) {
+                let htmlBotoes = '<div class="mt-4 flex flex-wrap gap-2">';
+                todosPoligonos.forEach((p, i) => {
+                    htmlBotoes += `<button type="button" onclick="renderizarLote(${i})" class="px-4 py-2 bg-[#003366]/10 hover:bg-[#003366]/20 border border-[#003366]/20 rounded-xl text-[#003366] text-sm font-bold transition">Lote ${i + 1}</button>`;
+                });
+                htmlBotoes += '</div>';
+                
+                const meta = document.getElementById('sigef-meta');
+                if (!document.getElementById('sigef-botoes-lotes')) {
+                    meta.insertAdjacentHTML('beforeend', `<div id="sigef-botoes-lotes" class="col-span-full border-t border-[#003366]/10 pt-3">${htmlBotoes}</div>`);
+                }
+            }
+        }
+
+        function renderizarLote(indexPrimario) {
             leafletMap.eachLayer(layer => {
-                if (layer !== camadaStreets && layer !== camadaSateli) {
-                    leafletMap.removeLayer(layer);
+                if (layer !== camadaStreets && layer !== camadaSateli) leafletMap.removeLayer(layer);
+            });
+            poligonosRenderizados = [];
+
+            const pPrimario = todosPoligonos[indexPrimario];
+            const vizinhos = [pPrimario];
+
+            // Acha vizinhos (distância < 10m entre vértices ou intersecção)
+            const turfPrimario = turf.polygon([[...pPrimario.coords.map(c => [c[1], c[0]]), [pPrimario.coords[0][1], pPrimario.coords[0][0]]]]);
+            
+            todosPoligonos.forEach((pOutro, i) => {
+                if (i !== indexPrimario) {
+                    try {
+                        const turfOutro = turf.polygon([[...pOutro.coords.map(c => [c[1], c[0]]), [pOutro.coords[0][1], pOutro.coords[0][0]]]]);
+                        const intersecta = turf.intersect(turf.featureCollection([turfPrimario, turfOutro]));
+                        let muitoProximo = false;
+                        
+                        // Checagem manual de distância mínima entre vértices
+                        for(let v1 of pPrimario.coords) {
+                            for(let v2 of pOutro.coords) {
+                                const pt1 = turf.point([v1[1], v1[0]]);
+                                const pt2 = turf.point([v2[1], v2[0]]);
+                                if (turf.distance(pt1, pt2, {units: 'meters'}) < 10) {
+                                    muitoProximo = true;
+                                    break;
+                                }
+                            }
+                            if (muitoProximo) break;
+                        }
+
+                        if (intersecta || muitoProximo) {
+                            vizinhos.push(pOutro);
+                        }
+                    } catch (e) {}
                 }
             });
 
-            if (coords.length < 3) return;
+            const boundsGlobal = L.latLngBounds();
 
-            // Polígono principal
-            const poligono = L.polygon(coords, {
-                color: '#003366',
-                weight: 2.5,
-                fillColor: '#3B82F6',
-                fillOpacity: 0.25,
-            }).addTo(leafletMap);
+            vizinhos.forEach((dados, idx) => {
+                const coords = dados.coords;
+                const isPrimario = (dados === pPrimario);
+                const corFill = isPrimario ? '#3B82F6' : '#00E500';
+                const corBorder = isPrimario ? '#003366' : '#00E500';
+                
+                const poligono = L.polygon(coords, {
+                    color: corBorder, weight: isPrimario ? 2.5 : 1.5, fillColor: corFill, fillOpacity: isPrimario ? 0.25 : 0.15,
+                }).addTo(leafletMap);
 
-            // Marcadores nos vértices
-            dados.vertices.forEach((v, i) => {
-                const coord = coords[i];
-                if (!coord) return;
+                boundsGlobal.extend(poligono.getBounds());
 
-                const icon = L.divIcon({
-                    className: '',
-                    html: `<div style="
-                        width: 10px; height: 10px;
-                        background: #003366;
-                        border: 2px solid white;
-                        border-radius: 50%;
-                        box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-                    "></div>`,
-                    iconSize: [10, 10],
-                    iconAnchor: [5, 5],
+                dados.vertices.forEach((v, i) => {
+                    const coord = coords[i];
+                    if (!coord) return;
+                    const icon = L.divIcon({
+                        className: '',
+                        html: `<div style="width:10px;height:10px;background:${corBorder};border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.5);"></div>`,
+                        iconSize: [10, 10], iconAnchor: [5, 5],
+                    });
+                    L.marker(coord, { icon })
+                        .bindTooltip(`<b>${v.codigo || ('M-' + (i + 1))}</b><br>Lat: ${coord[0].toFixed(6)}<br>Lon: ${coord[1].toFixed(6)}`, { permanent: false, direction: 'top' })
+                        .addTo(leafletMap);
                 });
-
-                L.marker(coord, { icon })
-                    .bindTooltip(`<b>${v.codigo || ('M-' + (i + 1))}</b><br>Lat: ${coord[0].toFixed(6)}<br>Lon: ${coord[1].toFixed(6)}`, {
-                        permanent: false,
-                        direction: 'top',
-                    })
-                    .addTo(leafletMap);
             });
 
-            // Ajustar zoom para o polígono
-            leafletMap.fitBounds(poligono.getBounds(), { padding: [30, 30] });
+            leafletMap.fitBounds(boundsGlobal, { padding: [30, 30] });
 
-            // Atualizar metadados
+            const dados = pPrimario;
             document.getElementById('sigef-titulo').innerText = dados.imovel || 'Imóvel Georreferenciado';
 
             const meta = document.getElementById('sigef-meta');
@@ -1032,11 +1143,7 @@
                 if (dados.imovel)    document.getElementById('meta-imovel').innerText = dados.imovel;
                 if (dados.detentor)  document.getElementById('meta-detentor').innerText = dados.detentor;
                 if (dados.municipio) document.getElementById('meta-municipio').innerText = dados.municipio;
-
-                const areaExibir = dados.area_ha
-                    ? dados.area_ha + ' ha'
-                    : calcularAreaHa(coords) + ' ha (calc.)';
-                document.getElementById('meta-area').innerText = areaExibir;
+                document.getElementById('meta-area').innerText = (dados.area_ha ? dados.area_ha + ' ha' : calcularAreaHa(dados) + ' ha (calc.)');
                 meta.classList.remove('hidden');
             }
 
@@ -1045,7 +1152,7 @@
             if (body && dados.vertices) {
                 body.innerHTML = '';
                 dados.vertices.forEach((v, i) => {
-                    const coord = coords[i] || [0, 0];
+                    const coord = dados.coords[i] || [0, 0];
                     body.innerHTML += `
                         <tr class="border-b border-gray-300">
                             <td class="py-1.5 font-bold">${v.codigo || ('M-' + (i + 1))}</td>
@@ -1097,34 +1204,46 @@
                 });
 
                 if (!resp.ok) {
-                    // 404 → sem ODS, não exibir mensagem negativa por padrão
-                    // (pasta pode ser nível 2 sem ODS ainda)
                     return;
                 }
 
-                const dados = await resp.json();
+                const data = await resp.json();
+                
+                const poligonos = data.poligonos ? data.poligonos : [data];
 
-                if (!dados.vertices || dados.vertices.length === 0) {
-                    return;
-                }
-
-                const coords = converterVertices(dados.vertices);
-
-                if (coords.length < 3) return;
+                if (poligonos.length === 0) return;
 
                 // Exibir seção do mapa
                 document.getElementById('sigef-mapa-section').classList.remove('hidden');
 
                 // Aguardar DOM estar visível antes de inicializar Leaflet
-                setTimeout(() => inicializarMapa(coords, dados), 100);
+                setTimeout(() => inicializarMapaMultiplos(poligonos), 100);
 
             } catch (err) {
                 console.error('Erro ao carregar mapa SIGEF:', err);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', carregarMapaSigef);
-    </script>
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarMapaSigef();
 
+            if (window.Echo) {
+                window.Echo.private('pasta.{{ $pasta->id }}')
+                    .listen('PastaAtualizadaEvent', (e) => {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: e.message || 'Pasta atualizada. Recarregando...',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    });
+            }
+        });
+    </script>
 </body>
 </html>

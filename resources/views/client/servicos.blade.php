@@ -25,6 +25,7 @@
             background: rgba(0, 51, 102, 1);
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="bg-gray-100 min-h-screen overflow-auto">

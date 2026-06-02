@@ -29,6 +29,7 @@
             box-shadow: 0 15px 40px rgba(0,0,0,.25);
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">

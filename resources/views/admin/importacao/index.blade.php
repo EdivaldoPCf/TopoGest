@@ -21,9 +21,7 @@
         <button @click="aba = 'nuvem'" :class="aba === 'nuvem' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] hover:bg-slate-50'" class="px-6 py-3 rounded-2xl font-black uppercase text-sm transition">
             ☁️ Via Navegador (Nuvem)
         </button>
-        <button @click="aba = 'local'" :class="aba === 'local' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] hover:bg-slate-50'" class="px-6 py-3 rounded-2xl font-black uppercase text-sm transition">
-            💻 Via Caminho Local (PowerShell)
-        </button>
+
         <button @click="aba = 'sync'" :class="aba === 'sync' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] hover:bg-slate-50'" class="px-6 py-3 rounded-2xl font-black uppercase text-sm transition">
             🔄 Sincronização Automática
         </button>
@@ -34,7 +32,20 @@
         
         <!-- ABA NUVEM -->
         <div x-show="aba === 'nuvem'" x-cloak>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Botões de Modo de Importação -->
+            <div class="flex flex-wrap gap-4 mb-6">
+                <button @click="tipoUpload = 'ano'" :class="tipoUpload === 'ano' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
+                    1. Importar Ano Inteiro
+                </button>
+                <button @click="tipoUpload = 'categoria'" :class="tipoUpload === 'categoria' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
+                    2. Importar Categoria Inteira
+                </button>
+                <button @click="tipoUpload = 'imovel'" :class="tipoUpload === 'imovel' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
+                    3. Importar Imóvel Específico
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" x-show="tipoUpload !== 'ano'">
                 <div>
                     <label class="block text-sm font-bold text-[#003366] mb-2 uppercase tracking-wide">
                         Ano
@@ -43,7 +54,7 @@
                            placeholder="Ex: 2026"
                            class="w-full rounded-2xl border-slate-200 focus:border-[#003366] px-5 py-4 text-[#003366] font-medium text-lg placeholder:text-slate-400">
                 </div>
-                <div>
+                <div x-show="tipoUpload === 'imovel'">
                     <label class="block text-sm font-bold text-[#003366] mb-2 uppercase tracking-wide">
                         Categoria
                     </label>
@@ -53,13 +64,29 @@
                 </div>
             </div>
 
+            <div class="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
+                <label class="block text-sm font-bold text-[#003366] mb-4 uppercase tracking-wide">
+                    Status do Serviço (Como os imóveis serão criados?)
+                </label>
+                <div class="flex flex-wrap gap-6">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="radio" x-model="statusServico" value="pronto" class="w-5 h-5 text-emerald-600 border-slate-300 focus:ring-emerald-600 cursor-pointer">
+                        <span class="text-base font-bold text-slate-700 group-hover:text-emerald-700 transition">Pronto (Verde)</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="radio" x-model="statusServico" value="pendente" class="w-5 h-5 text-red-600 border-slate-300 focus:ring-red-600 cursor-pointer">
+                        <span class="text-base font-bold text-slate-700 group-hover:text-red-700 transition">Pendente (Vermelho)</span>
+                    </label>
+                </div>
+            </div>
+
             <div class="mb-8 border-2 border-dashed border-slate-300 rounded-[32px] p-8 text-center" :class="importando ? 'opacity-50' : ''">
                 <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden" @change="prepararArquivos" :disabled="importando">
                 <label for="folderInput" class="cursor-pointer inline-flex flex-col items-center">
                     <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center text-4xl mb-4 text-[#003366]">
                         📁
                     </div>
-                    <span class="text-xl font-black text-[#003366] mb-2">Clique para selecionar uma pasta do Imóvel</span>
+                    <span class="text-xl font-black text-[#003366] mb-2" x-text="tipoUpload === 'ano' ? 'Selecione a pasta do Ano' : (tipoUpload === 'categoria' ? 'Selecione a pasta da Categoria' : 'Selecione a pasta do Imóvel')"></span>
                     <span class="text-slate-500 text-sm">O navegador lerá todas as subpastas automaticamente.</span>
                 </label>
                 
@@ -68,43 +95,13 @@
                 </div>
             </div>
 
-            <button @click="iniciarUploadWeb" :disabled="!ano || !categoria || arquivos.length === 0 || importando || importacaoConcluida"
+            <button @click="iniciarUploadWeb" :disabled="(tipoUpload !== 'ano' && !ano) || (tipoUpload === 'imovel' && !categoria) || arquivos.length === 0 || importando || importacaoConcluida"
                     class="w-full px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-wide transition shadow-lg shadow-emerald-600/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 🚀 Iniciar Sincronização em Nuvem
             </button>
         </div>
 
-        <!-- ABA LOCAL -->
-        <div x-show="aba === 'local'" x-cloak>
-            <div class="mb-8">
-                <label class="block text-sm font-bold text-[#003366] mb-2 uppercase tracking-wide">
-                    Caminho da Pasta do Ano (Servidor Local)
-                </label>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <input type="text" x-model="caminho" :disabled="buscando || importando"
-                           placeholder="Ex: \\Getec-pc\f\Trabalhos Getec V2\2026"
-                           class="flex-1 rounded-2xl border-slate-200 focus:border-[#003366] px-5 py-4 text-[#003366] font-medium text-lg placeholder:text-slate-400">
-                    
-                    <button @click="iniciarBusca" :disabled="!caminho || buscando || importando"
-                            class="px-8 py-4 bg-[#005B96] hover:bg-[#004A7C] text-white rounded-2xl font-black uppercase tracking-wide transition shadow-lg shadow-[#005B96]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        Buscar Pastas
-                    </button>
-                </div>
-                <p x-show="erro" x-cloak x-text="erro" class="mt-3 text-red-500 font-bold text-sm"></p>
-            </div>
 
-            <!-- Resultados da Busca Local -->
-            <div x-show="pastas.length > 0 && !importando && !importacaoConcluida" x-cloak x-transition class="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                <h3 class="text-xl font-black text-[#003366] mb-2">
-                    <span x-text="pastas.length"></span> Imóveis encontrados
-                </h3>
-                
-                <button @click="iniciarImportacaoLocal"
-                        class="mt-4 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase transition shadow-lg">
-                    Iniciar Sincronização Local
-                </button>
-            </div>
-        </div>
 
         <!-- ABA SYNC AUTOMATICO -->
         <div x-show="aba === 'sync'" x-cloak>
@@ -159,9 +156,11 @@
         </div>
 
         <!-- Progresso da Importação -->
-        <div x-show="importando || importacaoConcluida" x-cloak x-transition class="mt-8 bg-[#F5F7FA] rounded-2xl p-8 border border-[#003366]/10 relative overflow-hidden">
+        <div x-show="importando || importacaoConcluida || erroFatal" x-cloak x-transition class="mt-8 bg-[#F5F7FA] rounded-2xl p-8 border border-[#003366]/10 relative overflow-hidden">
             
-            <div class="flex items-center justify-between mb-4 relative z-10">
+            <div x-show="erroFatal" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 font-bold" x-text="erro"></div>
+
+            <div class="flex items-center justify-between mb-4 relative z-10" x-show="!erroFatal">
                 <h3 class="text-2xl font-black text-[#003366]" x-text="importacaoConcluida ? 'Importação Concluída!' : 'Sincronizando arquivos...'"></h3>
                 <span class="text-[#005B96] font-bold text-xl" x-text="Math.round(progresso) + '%'"></span>
             </div>
@@ -199,6 +198,8 @@
             aba: 'nuvem',
             
             // Nuvem state
+            tipoUpload: 'imovel',
+            statusServico: 'pronto',
             ano: '',
             categoria: '',
             arquivos: [],
@@ -212,6 +213,7 @@
             importando: false,
             importacaoConcluida: false,
             erro: '',
+            erroFatal: false,
             
             // Sync state
             syncAtivo: {{ $syncAtivo === '1' ? 'true' : 'false' }},
@@ -228,6 +230,28 @@
             processados: 0,
             totalParaProcessar: 0,
             pastaAtualText: '-',
+
+            init() {
+                // Initialize WebSocket listener
+                if (window.Echo) {
+                    window.Echo.channel('sync-progress')
+                        .listen('SyncProgressUpdated', (e) => {
+                            this.syncNowExecutando = e.status === 'running';
+                            this.syncPercent = e.percentage;
+                            this.syncCurrent = e.current;
+                            this.syncTotal = e.total;
+                            this.syncLastFile = e.last_file;
+                            
+                            if (e.status === 'done') {
+                                this.syncNowExecutando = false;
+                                this.syncMsg = 'Sincronização concluída com sucesso!';
+                            } else if (e.status === 'error') {
+                                this.syncNowExecutando = false;
+                                this.syncMsg = 'Erro na sincronização: ' + e.last_file;
+                            }
+                        });
+                }
+            },
 
             get progresso() {
                 if (this.totalParaProcessar === 0) return 0;
@@ -269,6 +293,32 @@
 
                 let pollInterval;
 
+                // Fallback polling caso o WebSocket não receba eventos
+                pollInterval = setInterval(async () => {
+                    if (!this.syncNowExecutando) {
+                        clearInterval(pollInterval);
+                        return;
+                    }
+                    try {
+                        const progRes = await fetch('{{ route('admin.importacao.syncProgress') }}');
+                        if (progRes.ok) {
+                            const progressData = await progRes.json();
+                            if (progressData.status === 'running') {
+                                this.syncPercent = progressData.percentage || 0;
+                                this.syncCurrent = progressData.current || 0;
+                                this.syncTotal = progressData.total || 0;
+                                this.syncLastFile = progressData.last_file || '';
+                            } else if (progressData.status === 'done') {
+                                this.syncNowExecutando = false;
+                                this.syncMsg = 'Sincronização concluída com sucesso!';
+                                clearInterval(pollInterval);
+                            }
+                        }
+                    } catch (e) {
+                        // Ignora erro de rede temporário no polling
+                    }
+                }, 5000);
+
                 try {
                     const response = await fetch('{{ route('admin.importacao.syncNow') }}', {
                         method: 'POST',
@@ -280,31 +330,7 @@
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.error || 'Erro ao iniciar sincronização');
 
-                    // Iniciar polling de progresso
-                    pollInterval = setInterval(async () => {
-                        try {
-                            const progressResp = await fetch('{{ route('admin.importacao.syncProgress') }}');
-                            if (progressResp.ok) {
-                                const progressData = await progressResp.json();
-                                this.syncPercent = progressData.percentage || 0;
-                                this.syncCurrent = progressData.current || 0;
-                                this.syncTotal = progressData.total || 0;
-                                this.syncLastFile = progressData.last_file || '';
-
-                                if (progressData.status === 'done') {
-                                    clearInterval(pollInterval);
-                                    this.syncNowExecutando = false;
-                                    this.syncMsg = 'Sincronização concluída com sucesso!';
-                                } else if (progressData.status === 'error') {
-                                    clearInterval(pollInterval);
-                                    this.syncNowExecutando = false;
-                                    this.syncMsg = 'Erro na sincronização: ' + (progressData.last_file || 'Ocorreu um erro.');
-                                }
-                            }
-                        } catch (e) {
-                            console.error('Erro ao buscar progresso:', e);
-                        }
-                    }, 800);
+                    this.syncMsg = 'Comando enviado! Acompanhe o progresso...';
 
                 } catch (error) {
                     if (pollInterval) clearInterval(pollInterval);
@@ -322,6 +348,7 @@
             async iniciarUploadWeb() {
                 this.importando = true;
                 this.importacaoConcluida = false;
+                this.erroFatal = false;
                 this.processados = 0;
                 this.totalParaProcessar = this.arquivos.length;
                 this.erro = '';
@@ -333,103 +360,79 @@
                     imovelNome = this.arquivos[0].webkitRelativePath.split('/')[0];
                 }
 
-                // Processar em lotes de 1 para evitar timeout e limite do PHP
-                for (let i = 0; i < this.arquivos.length; i++) {
-                    const file = this.arquivos[i];
-                    this.pastaAtualText = file.webkitRelativePath || file.name;
-                    
-                    const formData = new FormData();
-                    formData.append('ano', this.ano);
-                    formData.append('categoria', this.categoria);
-                    formData.append('imovel', imovelNome);
-                    formData.append('caminho_relativo', file.webkitRelativePath || file.name);
-                    formData.append('arquivo', file);
+                // Processar usando um pool de concorrência para evitar travamentos em arquivos muito grandes
+                const concurrencyLimit = 5;
+                let currentIndex = 0;
 
-                    try {
-                        const response = await fetch('{{ route('admin.importacao.uploadWeb') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: formData
-                        });
-
-                        const data = await response.json();
-                        if (!response.ok) {
-                            console.error(`Erro ao processar ${file.name}:`, data.error);
+                const worker = async () => {
+                    while (currentIndex < this.arquivos.length) {
+                        if (this.erroFatal) break;
+                        
+                        const i = currentIndex++;
+                        const file = this.arquivos[i];
+                        
+                        // Atualiza o texto apenas de vez em quando para não sobrecarregar a UI do Alpine com 13 mil re-renders por segundo
+                        if (i % 5 === 0 || file.size > 5000000) {
+                            this.pastaAtualText = file.webkitRelativePath || file.name;
                         }
-                    } catch (error) {
-                        console.error(`Erro de rede ao processar ${file.name}:`, error);
-                    }
 
-                    this.processados++;
+                        // Ignorar arquivos gigantes ou formatos brutos de topografia (nuvem de pontos, ortomosaicos) que travam o navegador
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        const ignoredExtensions = ['tif', 'tiff', 'las', 'laz', 'rcp', 'rcs', 'ecw'];
+                        
+                        if (ignoredExtensions.includes(ext) || file.size > 150 * 1024 * 1024) {
+                            console.log(`Pulando arquivo gigante/bruto: ${file.name}`);
+                            this.processados++;
+                            continue;
+                        }
+                        
+                        const formData = new FormData();
+                        formData.append('tipo_upload', this.tipoUpload);
+                        formData.append('status_servico', this.statusServico);
+                        if (this.tipoUpload !== 'ano') formData.append('ano', this.ano);
+                        if (this.tipoUpload === 'imovel') formData.append('categoria', this.categoria);
+                        formData.append('caminho_relativo', file.webkitRelativePath || file.name);
+                        formData.append('arquivo', file);
+
+                        try {
+                            const response = await fetch('{{ route('admin.importacao.uploadWeb') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: formData
+                            });
+
+                            if (!response.ok) {
+                                console.error(`Erro ao processar ${file.name}: Status ${response.status}`);
+                                if (response.status === 419 || response.status === 401) {
+                                    this.erroFatal = true;
+                                    this.erro = "Sua sessão de login expirou. Por favor, recarregue a página e faça login novamente para continuar.";
+                                    break;
+                                }
+                            }
+                        } catch (error) {
+                            console.error(`Erro de rede ao processar ${file.name}:`, error);
+                            // Pode ser perda de internet temporária, não vamos cancelar tudo por um erro de rede, apenas logging
+                        }
+
+                        this.processados++;
+                    }
+                };
+
+                const workers = [];
+                for (let w = 0; w < concurrencyLimit; w++) {
+                    workers.push(worker());
                 }
+
+                await Promise.all(workers);
 
                 this.importando = false;
                 this.importacaoConcluida = true;
                 this.pastaAtualText = 'Sincronização Finalizada';
             },
 
-            // --- FUNÇÕES LOCAL ---
-            async iniciarBusca() {
-                this.erro = '';
-                this.buscando = true;
-                this.pastas = [];
-                this.importacaoConcluida = false;
-                this.processados = 0;
 
-                try {
-                    const response = await fetch('{{ route('admin.importacao.buscar') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ path: this.caminho })
-                    });
-
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error);
-
-                    this.pastas = data.pastas;
-                    this.totalParaProcessar = this.pastas.length;
-                } catch (error) {
-                    this.erro = error.message;
-                } finally {
-                    this.buscando = false;
-                }
-            },
-
-            async iniciarImportacaoLocal() {
-                this.importando = true;
-                this.importacaoConcluida = false;
-                this.processados = 0;
-                this.totalParaProcessar = this.pastas.length;
-
-                for (let i = 0; i < this.pastas.length; i++) {
-                    const pasta = this.pastas[i];
-                    this.pastaAtualText = pasta.imovel;
-
-                    try {
-                        const response = await fetch('{{ route('admin.importacao.processar') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify(pasta)
-                        });
-                        const data = await response.json();
-                    } catch (error) {
-                        console.error(`Erro de rede ao processar ${pasta.imovel}:`, error);
-                    }
-                    this.processados++;
-                }
-
-                this.importando = false;
-                this.importacaoConcluida = true;
-                this.pastaAtualText = 'Finalizado';
-            }
         };
     }
 </script>

@@ -32,6 +32,11 @@ class User extends Authenticatable
                     // Vincula as pastas que têm o novo CPF ao cliente
                     \App\Models\Pasta::where('identificador_cliente', $cpfLimpo)
                         ->update(['cliente_id' => $user->id]);
+                    
+                    // Vincula os contratos em fila que pertencem a este CPF
+                    \App\Models\Contrato::where('cpf_proprietario', $cpfLimpo)
+                        ->where('status', 'fila')
+                        ->update(['cliente_id' => $user->id, 'status' => 'vinculado']);
                 }
             }
         });
@@ -102,5 +107,10 @@ class User extends Authenticatable
     public function pastas()
     {
         return $this->hasMany(Pasta::class, 'cliente_id');
+    }
+
+    public function contratos()
+    {
+        return $this->hasMany(Contrato::class, 'cliente_id');
     }
 }

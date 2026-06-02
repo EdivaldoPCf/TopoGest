@@ -50,4 +50,34 @@ class Pasta extends Model
     {
         return $this->belongsTo(User::class, 'cliente_id');
     }
+
+    // Relacionamento com contratos gerados para este imóvel
+    public function contratos()
+    {
+        return $this->hasMany(\App\Models\Contrato::class);
+    }
+
+    // Clientes adicionais (caso haja ODS de múltiplos proprietários)
+    public function clientesSecundarios()
+    {
+        return $this->belongsToMany(User::class, 'pasta_user', 'pasta_id', 'user_id');
+    }
+
+    public function scopeOwnedBy($query, $userId)
+    {
+        return $query->where(function($q) use ($userId) {
+            $q->where('cliente_id', $userId)
+              ->orWhereHas('clientesSecundarios', function($subQ) use ($userId) {
+                  $subQ->where('users.id', $userId);
+              });
+        });
+    }
+
+    public function isOwner($userId)
+    {
+        if ($this->cliente_id == $userId) {
+            return true;
+        }
+        return $this->clientesSecundarios()->where('users.id', $userId)->exists();
+    }
 }

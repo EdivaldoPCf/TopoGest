@@ -172,6 +172,7 @@
             }
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body x-data="{ currentTab: 'dashboard', plantaAssinada: false, showSignModal: false, signStep: 'choose' }" class="min-h-screen overflow-x-hidden bg-[#E5E7EB] text-white">
@@ -1512,14 +1513,7 @@
                         </div>
                     </button>
 
-                    <button @click="plantaAssinada = true; showSignModal = false; alert('Planta assinada via gov.br com sucesso!')" 
-                            class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00E500] p-4 rounded-2xl transition flex items-start gap-4">
-                        <div class="text-2xl mt-1">🇧🇷</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-sm text-white">Assinatura gov.br (Prata ou Ouro)</h4>
-                            <p class="text-xs text-white/50 mt-0.5 font-normal">Utilize sua conta oficial gov.br para assinar o documento de forma gratuita.</p>
-                        </div>
-                    </button>
+
                 </div>
 
                 <!-- Passo 2: Carregando/Buscando Token -->

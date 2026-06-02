@@ -22,6 +22,7 @@
             color: white;
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="min-h-screen bg-slate-200 overflow-x-hidden overflow-y-auto">

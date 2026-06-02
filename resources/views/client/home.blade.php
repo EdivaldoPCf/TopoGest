@@ -18,6 +18,8 @@
             border-radius: 999px;
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    @vite(['resources/js/app.js'])
 </head>
 
 <body class="bg-gray-100 min-h-screen overflow-auto">
@@ -56,28 +58,38 @@
             <div class="flex items-center gap-4 self-end lg:self-auto">
 
                 <!-- Notifications -->
-                <a href="{{ route('notificacoes.index') }}"
-                   class="relative bg-[#003366]/95 backdrop-blur-md p-4 rounded-2xl text-white shadow-2xl border border-white/20 hover:bg-[#002244] hover:scale-105 transition-all duration-300 flex items-center justify-center">
+                <div x-data="{ unreadCount: {{ auth()->user()->unreadNotifications->count() }} }"
+                     x-init="
+                        if (window.Echo) {
+                            window.Echo.private('App.Models.User.{{ auth()->id() }}')
+                                .listen('NovaNotificacaoEvent', (e) => {
+                                    unreadCount++;
+                                });
+                        }
+                     ">
+                    <a href="{{ route('notificacoes.index') }}"
+                       class="relative bg-[#003366]/95 backdrop-blur-md p-4 rounded-2xl text-white shadow-2xl border border-white/20 hover:bg-[#002244] hover:scale-105 transition-all duration-300 flex items-center justify-center">
 
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-7 w-7"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-7 w-7"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
 
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
+                            <path stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
 
-                    @if(auth()->user()->unreadNotifications->count() > 0)
-                        <span class="absolute -top-1 -right-1 flex h-5 w-5">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-5 w-5 bg-red-600 border-2 border-[#003366]"></span>
-                        </span>
-                    @endif
-                </a>
+                        <template x-if="unreadCount > 0">
+                            <span class="absolute -top-1 -right-1 flex h-5 w-5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-5 w-5 bg-red-600 border-2 border-[#003366]"></span>
+                            </span>
+                        </template>
+                    </a>
+                </div>
 
                 <!-- User Card -->
                 <a href="{{ route('profile.edit') }}"
@@ -128,6 +140,15 @@
                             <div>
                                 <p class="text-xs uppercase tracking-[0.35em] text-white/70">Serviços</p>
                                 <strong class="block text-lg font-black">Meus Imóveis</strong>
+                            </div>
+                        </a>
+
+                        <a href="{{ route('client.contratos') }}"
+                           class="flex items-center gap-4 rounded-3xl border border-white/10 bg-white/10 px-5 py-4 text-white shadow-inner transition hover:bg-white/15">
+                            <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004A7C] text-white text-lg">📄</span>
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.35em] text-white/70">Acerto</p>
+                                <strong class="block text-lg font-black">Meus Contratos</strong>
                             </div>
                         </a>
 
@@ -182,9 +203,18 @@
                             <p class="mt-4 max-w-2xl text-white/80 leading-relaxed">Acompanhe seus serviços, documentos e suporte com um acesso rápido e organizado.</p>
                         </div>
 
-                        <div class="rounded-3xl bg-[#003366]/85 px-6 py-4 text-white shadow-xl border border-white/10">
+                        <div x-data="{ unreadCount: {{ auth()->user()->unreadNotifications->count() }} }" 
+                             x-init="
+                                if (window.Echo) {
+                                    window.Echo.private('App.Models.User.{{ auth()->id() }}')
+                                        .listen('NovaNotificacaoEvent', (e) => {
+                                            unreadCount++;
+                                        });
+                                }
+                             "
+                             class="rounded-3xl bg-[#003366]/85 px-6 py-4 text-white shadow-xl border border-white/10">
                             <p class="text-xs uppercase tracking-[0.35em] text-white/60">Notificações não lidas</p>
-                            <p class="mt-3 text-3xl font-black">{{ auth()->user()->unreadNotifications->count() }}</p>
+                            <p class="mt-3 text-3xl font-black" x-text="unreadCount"></p>
                         </div>
                     </div>
 
@@ -216,7 +246,7 @@
 
                     <!-- CERTIFICAÇÃO SIGEF (INCRA) -->
                     @php
-                        $pastasSigef = \App\Models\Pasta::where('cliente_id', auth()->id())
+                        $pastasSigef = \App\Models\Pasta::ownedBy(auth()->id())
                             ->whereNotNull('codigo_sigef')
                             ->get();
                     @endphp

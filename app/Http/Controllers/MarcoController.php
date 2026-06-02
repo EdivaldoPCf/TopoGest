@@ -26,8 +26,21 @@ class MarcoController extends Controller
             });
         }
 
+        $sortBy = $request->get('sort_by', 'numero');
+        $sortDir = $request->get('sort_dir', 'asc');
+
+        if (!in_array($sortBy, ['numero', 'imovel', 'created_at'])) {
+            $sortBy = 'numero';
+        }
+        $sortDir = strtolower($sortDir) === 'desc' ? 'desc' : 'asc';
+
+        if ($sortBy === 'numero') {
+            $query->orderByRaw("CAST(numero AS UNSIGNED) {$sortDir}");
+        } else {
+            $query->orderBy($sortBy, $sortDir);
+        }
+
         $marcos = $query->with('user')
-            ->orderBy('numero', 'desc')
             ->paginate(20)
             ->withQueryString();
         $ultimo = Marco::where('credencial', $credencial)
@@ -38,7 +51,7 @@ class MarcoController extends Controller
         $totalBca = Marco::where('credencial', 'BCA')->count();
         $totalEmes = Marco::where('credencial', 'EMES')->count();
 
-        return view('admin.marcos', compact('marcos', 'ultimo', 'credencial', 'tipo', 'totalBca', 'totalEmes'));
+        return view('admin.marcos', compact('marcos', 'ultimo', 'credencial', 'tipo', 'totalBca', 'totalEmes', 'sortBy', 'sortDir'));
     }
 
     public function store(Request $request)

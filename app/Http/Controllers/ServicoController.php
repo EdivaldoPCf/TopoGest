@@ -11,38 +11,34 @@ class ServicoController extends Controller
     /**
      * Lista os serviços na Dashboard do Cliente
      */
-public function meusServicos()
-{
-    $servicos = \App\Models\Pasta::where('cliente_id', auth()->id())
-        ->whereHas('parent.parent', function($query) {
-            $query->whereNull('parent_id'); 
-        })->get();
+    public function meusServicos()
+    {
+        $servicos = \App\Models\Pasta::ownedBy(auth()->id())
+            ->whereHas('parent.parent', function($query) {
+                $query->whereNull('parent_id'); 
+            })->get();
 
-    // Mudamos de 'client.index' para 'client.servicos'
-    return view('client.servicos', compact('servicos'));
-}
+        return view('client.servicos', compact('servicos'));
+    }
 
     /**
      * Exibe os detalhes de um serviço/pasta específico para o cliente
      */
     public function show($id)
-{
-    // Carrega a pasta com subpastas, arquivos e pendências para o cliente
-    $pasta = Pasta::with(['subpastas', 'arquivos', 'pendencias'])->findOrFail($id);
-    
-    // Verificação de segurança (opcional): garante que o cliente só veja as próprias pastas
-    if (auth()->user()->role !== 'admin' && $pasta->cliente_id !== auth()->id()) {
-        // Se a pasta não for dele, tenta ver se a pasta pai é dele
-        if (!$pasta->parent || $pasta->parent->cliente_id !== auth()->id()) {
-            abort(403, 'Acesso negado.');
+    {
+        $pasta = Pasta::with(['subpastas', 'arquivos', 'pendencias'])->findOrFail($id);
+        
+        if (auth()->user()->role !== 'admin' && !$pasta->isOwner(auth()->id())) {
+            if (!$pasta->parent || !$pasta->parent->isOwner(auth()->id())) {
+                abort(403, 'Acesso negado.');
+            }
         }
-    }
 
-    return response()
-        ->view('client.show', compact('pasta'))
-        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-        ->header('Pragma', 'no-cache');
-}
+        return response()
+            ->view('client.show', compact('pasta'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
+    }
     /**
      * Finaliza o status de um serviço (Ação do Admin)
      */

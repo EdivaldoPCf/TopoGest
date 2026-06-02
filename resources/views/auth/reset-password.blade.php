@@ -22,6 +22,7 @@
             border-radius: 999px;
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="min-h-screen bg-slate-200 overflow-hidden">

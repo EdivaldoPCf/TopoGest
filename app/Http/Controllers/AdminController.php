@@ -30,7 +30,13 @@ class AdminController extends Controller
                             ->exists();
 
         $totalClientes = User::where('role', 'cliente')->count();
-        $totalServicosPendentes = Pasta::where('tipo_servico', 'pendente')->count();
+        $totalServicosPendentes = Pasta::where('tipo_servico', 'pendente')
+                                        ->whereHas('parent', function($q) {
+                                            $q->whereHas('parent', function($q2) {
+                                                $q2->whereNull('parent_id');
+                                            })->whereNotNull('parent_id');
+                                        })
+                                        ->count();
         $totalBases = Base::count();
         
         $totalBca = Marco::where('credencial', 'BCA')->count();
@@ -80,13 +86,13 @@ class AdminController extends Controller
     {
         $cliente = User::findOrFail($id);
 
-        $pendentes = Pasta::where('cliente_id', $id)
+        $pendentes = Pasta::ownedBy($id)
             ->where('tipo_servico', 'pendente')
             ->whereHas('parent.parent', function($query) {
                 $query->whereNull('parent_id');
             })->get();
 
-        $prontos = Pasta::where('cliente_id', $id)
+        $prontos = Pasta::ownedBy($id)
             ->where('tipo_servico', 'pronto')
             ->whereHas('parent.parent', function($query) {
                 $query->whereNull('parent_id');

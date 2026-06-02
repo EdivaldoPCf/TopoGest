@@ -52,6 +52,7 @@
             100% { transform: scale(1); opacity: 1; }
         }
     </style>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 </head>
 
 <body class="bg-gray-200 min-h-screen antialiased p-4 md:p-10">
