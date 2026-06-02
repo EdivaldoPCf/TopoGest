@@ -449,6 +449,23 @@
                                                     </div>
                                                 @endif
                                             </div>
+                                        @elseif($isLevel2)
+                                            <!-- Badge Cliente Pendente SEM CPF (Aguardando Cliente) -->
+                                            <div class="mt-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 space-y-2">
+                                                <div>
+                                                    <span class="text-[9px] uppercase tracking-widest text-yellow-400 block font-bold">Cliente (Não Cadastrado)</span>
+                                                    <span class="text-xs font-bold text-white uppercase truncate block leading-tight">
+                                                        CPF NÃO ENCONTRADO
+                                                    </span>
+                                                    <span class="text-[9px] text-yellow-300/80 block mt-1">Aguardando identificação do cliente...</span>
+                                                </div>
+                                                @if($sub->categoria_servico)
+                                                    <div>
+                                                        <span class="text-[9px] uppercase tracking-widest text-white/50 block font-bold">Categoria</span>
+                                                        <span class="text-xs font-bold text-[#00E500] uppercase truncate block leading-tight">{{ $sub->categoria_servico }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
                                         @endif
                                     </div>
 
@@ -622,7 +639,7 @@
                 <!-- ============================================================ -->
                 <!-- MAPA SIGEF (carregado automaticamente se houver arquivo ODS) -->
                 <!-- ============================================================ -->
-                @if($pasta->parent_id && $pasta->parent?->parent_id)
+                @if($pasta->parent_id && $pasta->parent?->parent_id && !$pasta->parent?->parent?->parent_id)
                 <div id="sigef-mapa-section" class="hidden glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl animate-fade">
 
                     <!-- Header -->

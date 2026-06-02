@@ -360,14 +360,9 @@ Artisan::command('pastas:import {directory}', function ($directory) {
             } elseif (preg_match('/^(.*?)\s*-\s*(.*?)$/', $folderName, $matches)) {
                 $part1 = trim($matches[1]);
                 $part2 = trim($matches[2]);
-                if (preg_match('/\b(orçando|orcando|divisa|ok|pendente)\b/i', $part2)) {
-                    if (preg_match('/^(Desmembramento|Lote|Gleba|Fazenda|Área|Area)\s+(.*?)$/i', $part1, $subMatches)) {
-                        $imovelNome = $part1;
-                        $clienteNome = trim($subMatches[2]);
-                    } else {
-                        $imovelNome = $part1;
-                        $clienteNome = $part1;
-                    }
+                if (preg_match('/(?:^|\s|_|-)(orçando|orcando|divisa|ok|pendente)(?:\s|_|-|$)/iu', $part2)) {
+                    $imovelNome = $part1;
+                    $clienteNome = 'Aguardando Cliente';
                 } else {
                     $imovelNome = $part1;
                     $clienteNome = $part2;
@@ -377,24 +372,30 @@ Artisan::command('pastas:import {directory}', function ($directory) {
             if (strpos($folderName, ' - ') !== false) {
                 $parts = array_map('trim', explode(' - ', $folderName));
                 $lastPart = end($parts);
-                if (!preg_match('/\b(orçando|orcando|divisa|ok|pendente)\b/i', $lastPart)) {
+                if (preg_match('/(?:^|\s|_|-)(orçando|orcando|divisa|ok|pendente)(?:\s|_|-|$)/iu', $lastPart)) {
+                    $clienteNome = 'Aguardando Cliente';
+                } else {
                     $clienteNome = $lastPart;
                 }
             }
 
-            if (empty($clienteNome)) {
+            if (empty($clienteNome) || $clienteNome === $folderName) {
                 if (strpos($folderName, '_') !== false) {
                     $parts = explode('_', $folderName);
                     $clienteNome = trim($parts[0]);
                     $imovelNome = str_replace('_', ' ', $folderName);
                 } else {
-                    $clienteNome = $folderName;
+                    if (preg_match('/(?:^|\s|_|-)(orçando|orcando|divisa|ok|pendente)(?:\s|_|-|$)/iu', $folderName)) {
+                        $clienteNome = 'Aguardando Cliente';
+                    } else {
+                        $clienteNome = $folderName;
+                    }
                 }
             }
 
             return [
                 'imovel' => $imovelNome ?: $folderName,
-                'cliente' => $clienteNome ?: 'Cliente Importado',
+                'cliente' => $clienteNome ?: 'Aguardando Cliente',
             ];
         }
     }
@@ -425,29 +426,57 @@ Artisan::command('pastas:import {directory}', function ($directory) {
     }
 
     if (!function_exists('extractCpfFromFiles')) {
-        function extractCpfFromFiles($files) {
+        function extractCpfFromFiles($files, $adminCpfs = []) {
+            $odsFiles = [];
+            
+            // 1. First check filenames
             foreach ($files as $file) {
                 $filename = basename($file);
+                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                if ($ext === 'ods') {
+                    $odsFiles[] = $file;
+                }
+                
+                $found = null;
                 if (preg_match('/\b\d{11}\b/', $filename, $m)) {
-                    return $m[0];
+                    $found = $m[0];
+                } elseif (preg_match('/\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/', $filename, $m)) {
+                    $found = preg_replace('/[^0-9]/', '', $m[0]);
+                } elseif (preg_match('/\b\d{14}\b/', $filename, $m)) {
+                    $found = $m[0];
+                } elseif (preg_match('/\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b/', $filename, $m)) {
+                    $found = preg_replace('/[^0-9]/', '', $m[0]);
                 }
-                if (preg_match('/\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/', $filename, $m)) {
-                    return preg_replace('/[^0-9]/', '', $m[0]);
-                }
-                if (preg_match('/\b\d{14}\b/', $filename, $m)) {
-                    return $m[0];
-                }
-                if (preg_match('/\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b/', $filename, $m)) {
-                    return preg_replace('/[^0-9]/', '', $m[0]);
+                if ($found && !in_array($found, $adminCpfs)) {
+                    return $found;
                 }
             }
+            
+            // 2. If not found in filenames, try parsing ODS files
+            if (!empty($odsFiles)) {
+                $parserService = app(\App\Services\SigefOdsParserService::class);
+                foreach ($odsFiles as $odsFile) {
+                    try {
+                        $dados = $parserService->parseOdsFile($odsFile);
+                        if (!empty($dados['identificacao']['cpf_cnpj'])) {
+                            $cpfRaw = preg_replace('/[^0-9]/', '', $dados['identificacao']['cpf_cnpj']);
+                            if ($cpfRaw && !in_array($cpfRaw, $adminCpfs)) {
+                                return $cpfRaw;
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        // skip
+                    }
+                }
+            }
+            
             return null;
         }
     }
 
     if (!function_exists('extractMarcosFromText')) {
         function extractMarcosFromText($text, $userId, $imovelNome, &$marcosCount) {
-            preg_match_all('/\b([A-Za-z]{3})[-_]?([MVPmvp])[-_]?(\d+)\b/', $text, $matches, PREG_SET_ORDER);
+            preg_match_all('/\b([A-Za-z]{3})[-_]?([MVPmvp])[-_]?(\d{1,5})(?![0-9])/i', $text, $matches, PREG_SET_ORDER);
             foreach ($matches as $m) {
                 $cred = strtoupper($m[1]);
                 $tipo = strtoupper($m[2]);
@@ -486,6 +515,7 @@ Artisan::command('pastas:import {directory}', function ($directory) {
             foreach ($iterator as $item) {
                 $name = $item->getFilename();
                 if ($item->isDir()) {
+                    $isOculto = preg_match('/gnss|metrica|métrica/i', $name) ? 1 : ($parentFolder->oculto ?? 0);
                     $subFolder = \App\Models\Pasta::firstOrCreate([
                         'nome' => $name,
                         'parent_id' => $parentFolder->id,
@@ -494,6 +524,10 @@ Artisan::command('pastas:import {directory}', function ($directory) {
                         'identificador_cliente' => $parentFolder->identificador_cliente,
                         'categoria_servico' => $parentFolder->categoria_servico
                     ]);
+                    if ($isOculto) {
+                        $subFolder->oculto = 1;
+                        $subFolder->save();
+                    }
                     $foldersCount++;
                     importSubfoldersAndFiles($item->getRealPath(), $subFolder, $cliente, $foldersCount, $filesCount, $marcosCount, $commandInstance);
                 } else {
@@ -506,12 +540,16 @@ Artisan::command('pastas:import {directory}', function ($directory) {
                         $newFileName = md5(uniqid() . $name) . (empty($ext) ? '' : '.' . $ext);
                         $targetPath = 'documentos/' . $newFileName;
                         copy($filePath, storage_path('app/public/' . $targetPath));
+                        
+                        $isOcultoFile = ($parentFolder->oculto ?? 0) || $ext === 'topo' || preg_match('/topos\.zip$/i', $name) ? 1 : 0;
+                        
                         \App\Models\Arquivo::create([
                             'nome' => $name,
                             'path' => $targetPath,
                             'tamanho' => round($item->getSize() / 1024 / 1024, 2),
                             'tipo' => strtoupper($ext),
-                            'pasta_id' => $parentFolder->id
+                            'pasta_id' => $parentFolder->id,
+                            'oculto' => $isOcultoFile
                         ]);
                         $filesCount++;
                     }
@@ -586,44 +624,61 @@ Artisan::command('pastas:import {directory}', function ($directory) {
                 }
             }
 
-            $cpf = extractCpfFromFiles($allFiles);
-            if (!$cpf) {
-                $cpf = generateDummyCpf($clienteNome);
-            }
+            $adminCpfs = \App\Models\User::where('role', 'admin')->pluck('cpf')->toArray();
+            $cpf_extraido = extractCpfFromFiles($allFiles, $adminCpfs);
 
-            $cliente = \App\Models\User::where('name', $clienteNome)
-                ->orWhere('cpf', $cpf)
-                ->first();
+            $cliente_id = null;
+            $identificador_cliente = null;
+            $pass_cliente = null;
 
-            if (!$cliente) {
-                $email = strtolower(preg_replace('/[^a-z0-9]/', '', $clienteNome)) . '@getectopografia.com.br';
-                if (\App\Models\User::where('email', $email)->exists()) {
-                    $email = strtolower(preg_replace('/[^a-z0-9]/', '', $clienteNome)) . rand(10, 99) . '@getectopografia.com.br';
+            if ($cpf_extraido) {
+                $cliente = \App\Models\User::where('cpf', $cpf_extraido)->first();
+                if ($cliente) {
+                    $cliente_id = $cliente->id;
+                    $identificador_cliente = $cliente->cpf;
+                    $pass_cliente = $cliente;
+                } else {
+                    $cliente_id = null;
+                    $identificador_cliente = $cpf_extraido;
                 }
-                $cliente = \App\Models\User::create([
-                    'name' => $clienteNome,
-                    'cpf' => $cpf,
-                    'tipo' => strlen($cpf) === 14 ? 'PJ' : 'PF',
-                    'email' => $email,
-                    'phone' => '11999999999',
-                    'password' => bcrypt('password'),
-                    'role' => 'client',
-                    'approved' => true
-                ]);
-                $totalClientsCreated++;
+            } else {
+                if ($clienteNome === 'Aguardando Cliente') {
+                    $cliente_id = null;
+                    $identificador_cliente = null;
+                } else {
+                    $cliente = \App\Models\User::where('name', $clienteNome)->first();
+                    if ($cliente) {
+                        $cliente_id = $cliente->id;
+                        $identificador_cliente = $cliente->cpf;
+                        $pass_cliente = $cliente;
+                    } else {
+                        // DO NOT store the parsed name. Only store CPF or keep null.
+                        $cliente_id = null;
+                        $identificador_cliente = null;
+                        $pass_cliente = null;
+                    }
+                }
             }
 
             $serviceFolder = \App\Models\Pasta::firstOrCreate([
                 'nome' => $imovelNome,
                 'parent_id' => $catFolder->id,
                 'tipo_servico' => 'pendente',
-                'cliente_id' => $cliente->id,
-                'identificador_cliente' => $cliente->cpf,
+                'cliente_id' => $cliente_id,
+                'identificador_cliente' => $identificador_cliente,
                 'categoria_servico' => $catName
             ]);
             $totalFoldersCreated++;
 
-            importSubfoldersAndFiles($servicePath, $serviceFolder, $cliente, $totalFoldersCreated, $totalFilesImported, $totalMarcosCreated, $this);
+            if ($pass_cliente) {
+                importSubfoldersAndFiles($servicePath, $serviceFolder, $pass_cliente, $totalFoldersCreated, $totalFilesImported, $totalMarcosCreated, $this);
+            } else {
+                // Criar um usuário temporário apenas para passar para as funções filhas que exigem objeto,
+                // já que não cadastramos o cliente ainda (mas os marcos precisam ser associados a alguém,
+                // ou salvos com user_id null).
+                $tempUser = new \App\Models\User(['id' => null]);
+                importSubfoldersAndFiles($servicePath, $serviceFolder, $tempUser, $totalFoldersCreated, $totalFilesImported, $totalMarcosCreated, $this);
+            }
         }
     }
 

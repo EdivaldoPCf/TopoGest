@@ -29,113 +29,129 @@ class SigefMapaController extends Controller
         $pasta = Pasta::with(['arquivos', 'subpastas.arquivos', 'subpastas.subpastas.arquivos'])
             ->findOrFail($pastaId);
 
-        $arquivoOds = $this->encontrarOds($pasta);
+        $arquivosOds = $this->encontrarTodosOds($pasta);
 
-        if (!$arquivoOds) {
+        if (empty($arquivosOds)) {
             return response()->json(['erro' => 'Nenhum arquivo ODS encontrado nesta pasta.'], 404);
         }
 
-        $caminho = Storage::disk('public')->path($arquivoOds->path);
+        $poligonos = [];
 
-        if (!file_exists($caminho)) {
-            return response()->json(['erro' => 'Arquivo ODS não encontrado no servidor.'], 404);
+        foreach ($arquivosOds as $arquivoOds) {
+            $caminho = Storage::disk('public')->path($arquivoOds->path);
+
+            if (!file_exists($caminho)) {
+                continue;
+            }
+
+            try {
+                $dadosOds = $this->parserService->parseOdsFile($caminho);
+                $identificacao = $dadosOds['identificacao'];
+                $vertices = $dadosOds['vertices'];
+
+                if (!empty($vertices)) {
+                    $poligonos[] = [
+                        'arquivo_id'   => $arquivoOds->id,
+                        'arquivo_nome' => $arquivoOds->nome ?? $arquivoOds->nome_original,
+                        'imovel'       => $identificacao['imovel']   ?? null,
+                        'detentor'     => $identificacao['detentor'] ?? null,
+                        'cpf_cnpj'     => $identificacao['cpf_cnpj'] ?? null,
+                        'municipio'    => $identificacao['municipio'] ?? null,
+                        'area_ha'      => $identificacao['area_ha']  ?? null,
+                        'sncr'         => $identificacao['sncr']     ?? null,
+                        'vertices'     => $vertices,
+                    ];
+                }
+            } catch (\Throwable $e) {
+                // Ignore errors for individual files so others can still load
+            }
         }
 
-        try {
-            $dadosOds = $this->parserService->parseOdsFile($caminho);
-            $identificacao = $dadosOds['identificacao'];
-            $vertices = $dadosOds['vertices'];
-        } catch (\Throwable $e) {
-            return response()->json(['erro' => 'Erro ao processar o ODS: ' . $e->getMessage()], 422);
-        }
-
-        if (empty($vertices)) {
-            return response()->json(['erro' => 'Nenhum vértice encontrado na planilha ODS.'], 422);
+        if (empty($poligonos)) {
+            return response()->json(['erro' => 'Nenhum vértice encontrado nas planilhas ODS ou erro de leitura.'], 422);
         }
 
         // =========================================================================
         // Auto-save/update de marcos na base global
         // =========================================================================
-        $imovelName = $identificacao['imovel'] ?? 'Imóvel Desconhecido';
-        foreach ($vertices as $v) {
-            $codigo = trim($v['codigo']);
-            if (preg_match('/^([A-Z0-9]+)\-([A-Z])\-(.+)$/i', $codigo, $mParts)) {
-                $cred = strtoupper($mParts[1]);
-                $tipo = strtoupper($mParts[2]);
-                $num = str_pad($mParts[3], 4, '0', STR_PAD_LEFT);
+        foreach ($poligonos as $p) {
+            $imovelName = $p['imovel'] ?? 'Imóvel Desconhecido';
+            foreach ($p['vertices'] as $v) {
+                $codigo = trim($v['codigo']);
+                if (preg_match('/^([A-Z0-9]+)\-([A-Z])\-(.+)$/i', $codigo, $mParts)) {
+                    $cred = strtoupper($mParts[1]);
+                    $tipo = strtoupper($mParts[2]);
+                    $num = str_pad($mParts[3], 4, '0', STR_PAD_LEFT);
 
-                $marcoExistente = \App\Models\Marco::where('credencial', $cred)
-                    ->where('tipo', $tipo)
-                    ->where('numero', $num)
-                    ->first();
+                    $marcoExistente = \App\Models\Marco::where('credencial', $cred)
+                        ->where('tipo', $tipo)
+                        ->where('numero', $num)
+                        ->first();
 
-                if ($marcoExistente) {
-                    // Já existe. Atualiza apenas se NÃO tiver coordenada.
-                    if (is_null($marcoExistente->latitude) && is_null($marcoExistente->easting)) {
-                        if ($v['tipo'] === 'geodesica') {
-                            $marcoExistente->latitude = $v['N'];
-                            $marcoExistente->longitude = $v['E'];
-                        } else {
-                            $marcoExistente->easting = $v['E'];
-                            $marcoExistente->northing = $v['N'];
+                    if ($marcoExistente) {
+                        if (is_null($marcoExistente->latitude) && is_null($marcoExistente->easting)) {
+                            if ($v['tipo'] === 'geodesica') {
+                                $marcoExistente->latitude = $v['N'];
+                                $marcoExistente->longitude = $v['E'];
+                            } else {
+                                $marcoExistente->easting = $v['E'];
+                                $marcoExistente->northing = $v['N'];
+                            }
+                            $marcoExistente->save();
                         }
-                        $marcoExistente->save();
-                    }
-                } else {
-                    // Não existe. Insere novo.
-                    $novoMarco = new \App\Models\Marco();
-                    $novoMarco->user_id = auth()->id() ?? 1;
-                    $novoMarco->credencial = $cred;
-                    $novoMarco->tipo = $tipo;
-                    $novoMarco->numero = $num;
-                    $novoMarco->imovel = substr($imovelName, 0, 100);
-
-                    if ($v['tipo'] === 'geodesica') {
-                        $novoMarco->latitude = $v['N'];
-                        $novoMarco->longitude = $v['E'];
                     } else {
-                        $novoMarco->easting = $v['E'];
-                        $novoMarco->northing = $v['N'];
+                        $novoMarco = new \App\Models\Marco();
+                        $novoMarco->user_id = auth()->id() ?? 1;
+                        $novoMarco->credencial = $cred;
+                        $novoMarco->tipo = $tipo;
+                        $novoMarco->numero = $num;
+                        $novoMarco->imovel = substr($imovelName, 0, 100);
+
+                        if ($v['tipo'] === 'geodesica') {
+                            $novoMarco->latitude = $v['N'];
+                            $novoMarco->longitude = $v['E'];
+                        } else {
+                            $novoMarco->easting = $v['E'];
+                            $novoMarco->northing = $v['N'];
+                        }
+                        $novoMarco->save();
                     }
-                    $novoMarco->save();
                 }
             }
         }
         // =========================================================================
 
         return response()->json([
-            'arquivo_id'   => $arquivoOds->id,
-            'arquivo_nome' => $arquivoOds->nome ?? $arquivoOds->nome_original,
-            'imovel'       => $identificacao['imovel']   ?? null,
-            'detentor'     => $identificacao['detentor'] ?? null,
-            'cpf_cnpj'     => $identificacao['cpf_cnpj'] ?? null,
-            'municipio'    => $identificacao['municipio'] ?? null,
-            'area_ha'      => $identificacao['area_ha']  ?? null,
-            'sncr'         => $identificacao['sncr']     ?? null,
-            'vertices'     => $vertices,
+            'poligonos' => $poligonos
         ]);
     }
 
     // -------------------------------------------------------------------------
-    // Busca recursiva do arquivo ODS
+    // Busca recursiva de todos os arquivos ODS
     // -------------------------------------------------------------------------
-    private function encontrarOds(Pasta $pasta): ?Arquivo
+    private function encontrarTodosOds(Pasta $pasta): array
     {
+        $arquivos = [];
         foreach ($pasta->arquivos as $arquivo) {
             $ext  = strtolower(pathinfo($arquivo->path ?? '', PATHINFO_EXTENSION));
             $tipo = strtolower($arquivo->tipo ?? '');
             if ($ext === 'ods' || $tipo === 'ods') {
-                return $arquivo;
+                $arquivos[] = $arquivo;
             }
         }
 
         foreach ($pasta->subpastas as $sub) {
             $sub->load(['arquivos', 'subpastas.arquivos']);
-            $found = $this->encontrarOds($sub);
-            if ($found) return $found;
+            $arquivos = array_merge($arquivos, $this->encontrarTodosOds($sub));
         }
 
-        return null;
+        return $arquivos;
+    }
+
+    private function encontrarOds(Pasta $pasta): ?Arquivo
+    {
+        $arquivos = $this->encontrarTodosOds($pasta);
+        return count($arquivos) > 0 ? $arquivos[0] : null;
     }
 
     /**
