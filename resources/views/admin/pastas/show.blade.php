@@ -1569,10 +1569,16 @@
             try {
                 const resp = await fetch(SIGEF_MAPA_URL, { headers: { 'Accept': 'application/json' } });
                 if (!resp.ok) return;
-                const dados = await resp.json();
+                const rawData = await resp.json();
+                const poligonos = rawData.poligonos ? rawData.poligonos : [rawData];
+                if (!poligonos || poligonos.length === 0) return;
+                
+                const dados = poligonos[0];
                 if (!dados.vertices || dados.vertices.length === 0) return;
+                
                 const coords = converterVertices(dados.vertices);
                 if (coords.length < 3) return;
+                
                 const mapSection = document.getElementById('sigef-mapa-section');
                 if (mapSection) {
                     mapSection.classList.remove('hidden');
