@@ -1467,7 +1467,14 @@
                 area += (coords[j][1] - coords[i][1]) * Math.PI / 180
                     * (2 + Math.sin(coords[i][0] * Math.PI / 180) + Math.sin(coords[j][0] * Math.PI / 180));
             }
-            return (Math.abs(area * R * R / 2) / 10000).toFixed(4);
+            return (Math.abs(area * R * R / 2) / 10000);
+        }
+
+        function formatarAreaBr(area) {
+            if (!area) return '0,0000';
+            const num = typeof area === 'string' ? parseFloat(area.toString().replace(',', '.')) : area;
+            if (isNaN(num)) return area;
+            return num.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
         }
 
         function inicializarMapa(coords, dados) {
@@ -1515,7 +1522,7 @@
                 if (dados.imovel)    document.getElementById('meta-imovel').innerText = dados.imovel;
                 if (dados.detentor)  document.getElementById('meta-detentor').innerText = dados.detentor;
                 if (dados.municipio) document.getElementById('meta-municipio').innerText = dados.municipio;
-                document.getElementById('meta-area').innerText = (dados.area_ha ? dados.area_ha + ' ha' : calcularAreaHa(coords) + ' ha (calc.)');
+                document.getElementById('meta-area').innerText = (dados.area_ha ? formatarAreaBr(dados.area_ha) + ' ha' : formatarAreaBr(calcularAreaHa(coords)) + ' ha (calc.)');
                 meta.classList.remove('hidden');
             }
 
