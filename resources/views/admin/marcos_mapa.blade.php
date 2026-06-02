@@ -2,6 +2,7 @@
 
 @section('content')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@3.1.4/Control.FullScreen.css" />
 <style>
     #map { height: 600px; width: 100%; border-radius: 10px; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
     .custom-popup .leaflet-popup-content-wrapper {
@@ -38,11 +39,12 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.fullscreen@3.1.4/Control.FullScreen.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var map = L.map('map').setView([-10.0, -67.0], 5); // Fallback center
+        var map = L.map('map', { fullscreenControl: true }).setView([-10.0, -67.0], 5); // Fallback center
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
