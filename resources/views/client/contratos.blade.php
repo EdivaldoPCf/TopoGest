@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meus Contratos - Getec Topografia</title>
+    <title>Meus Contratos - TopoGest</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         [x-cloak] { display: none !important; }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 <body class="bg-gray-100 min-h-screen overflow-auto" x-data="{ modalAssinar: false, contratoIdAssinar: null, modalRecibos: false, recibos: [], signStep: 'choose', documentoAssinado: false, assinanteNome: '{{ auth()->user()->name }}' }">
 
     <!-- Background -->
     <div class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed"
-         style="background-image: url('{{ asset('images/background-topo.jpg') }}');">
+         style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
         <div class="absolute inset-0 bg-black/20 backdrop-blur-[2px]"></div>
     </div>
 

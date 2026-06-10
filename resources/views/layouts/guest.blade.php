@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Getec Topografia') }}</title>
+    <title>{{ config('app.name', 'TopoGest') }}</title>
 
     <!-- Fonte -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -21,7 +21,7 @@
         [x-cloak] { display: none !important; }
 
         body {
-            background-image: url('{{ asset('images/background-topo.jpg') }}');
+            background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -44,7 +44,7 @@
             );
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="font-sans antialiased text-white overflow-x-hidden">
@@ -62,7 +62,7 @@
 
                 <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
                     <img 
-                        src="{{ asset('images/logo-icon.png') }}" 
+                        src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}" 
                         alt="Logo"
                         class="w-full h-full object-contain p-2"
                     >
@@ -70,8 +70,8 @@
 
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                     <img 
-                        src="{{ asset('images/logo-text.png') }}" 
-                        alt="Getec Topografia"
+                        src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}" 
+                        alt="TopoGest"
                         class="relative z-10 h-8 w-auto"
                     >
                 </div>
@@ -84,7 +84,7 @@
             <!-- Título opcional -->
             <div class="text-center mb-6">
                 <h1 class="text-3xl font-black uppercase italic tracking-tight text-white">
-                    Getec Topografia
+                    TopoGest
                 </h1>
 
                 <p class="text-white/70 text-sm mt-1">
@@ -98,7 +98,7 @@
 
         <!-- Rodapé -->
         <div class="mt-8 text-center text-white/60 text-xs tracking-wider uppercase">
-            © {{ date('Y') }} Getec Topografia • Todos os direitos reservados
+            © {{ date('Y') }} TopoGest • Todos os direitos reservados
         </div>
     </div>
 

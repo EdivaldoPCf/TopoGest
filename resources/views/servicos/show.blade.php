@@ -7,7 +7,7 @@
     <!-- Background -->
     <div class="fixed inset-0 -z-10">
         <img 
-            src="{{ asset('images/background-topo.jpg') }}"
+            src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
             alt="Background"
             class="w-full h-full object-cover"
         >

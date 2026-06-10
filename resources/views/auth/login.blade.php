@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrar - Getec Topografia</title>
+    <title>Entrar - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -22,7 +22,7 @@
             color: white;
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="bg-gray-100 min-h-screen overflow-x-hidden overflow-y-auto">
@@ -30,7 +30,7 @@
     <!-- Background -->
     <div class="fixed inset-0 z-0">
         <div class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
-             style="background-image: url('{{ asset('images/background-topo.jpg') }}');">
+             style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
         </div>
 
         <div class="absolute inset-0 bg-[#00111f]/55 backdrop-blur-[2px]"></div>
@@ -48,14 +48,14 @@
                    class="group flex items-center gap-4 transition-all duration-300 hover:scale-105">
 
                     <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                        <img src="{{ asset('images/logo-icon.png') }}"
-                             alt="Getec Topografia"
+                        <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
+                             alt="TopoGest"
                              class="w-full h-full object-contain p-2">
                     </div>
 
                     <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                        <img src="{{ asset('images/logo-text.png') }}"
-                             alt="Getec Topografia"
+                        <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
+                             alt="TopoGest"
                              class="relative z-10 h-8 object-contain">
                     </div>
                 </a>
@@ -95,7 +95,7 @@
 
                     <h1 class="text-6xl font-black leading-none mb-6">
                         Bem-vindo ao
-                        <span class="text-blue-300 italic">Getec Topografia</span>
+                        <span class="text-blue-300 italic">TopoGest</span>
                     </h1>
 
                     <p class="text-xl leading-relaxed text-white/80 max-w-xl">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acerto — Getec Topografia</title>
+    <title>Acerto — TopoGest</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -38,13 +38,13 @@
         label.field-label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,.5); font-weight: 700; margin-bottom: 6px; }
         .swal2-container { z-index: 10000 !important; }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 <body class="min-h-screen overflow-x-hidden bg-[#E5E7EB] text-white">
 
 <!-- BACKGROUND -->
 <div class="fixed inset-0 -z-10">
-    <img src="{{ asset('images/background-topo.jpg') }}" class="w-full h-full object-cover" alt="Background">
+    <img src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}" class="w-full h-full object-cover" alt="Background">
     <div class="absolute inset-0 bg-[#00111f]/55"></div>
     <div class="absolute inset-0" style="background: radial-gradient(circle at top left, rgba(0,74,124,.35), transparent 35%), radial-gradient(circle at bottom right, rgba(0,51,102,.4), transparent 35%);"></div>
 </div>
@@ -103,7 +103,7 @@
                 .catch(() => { this.buscandoCpf = false; });
             }
         },
-        nomeContratado: '{{ old('nome_contratado', 'Getec Topografia & Georreferenciamento') }}',
+        nomeContratado: '{{ old('nome_contratado', 'TopoGest & Georreferenciamento') }}',
         cpfContratado: '{{ old('cpf_cnpj_contratado') }}',
         buscandoCpfContratado: false,
         buscarCpfContratado() {
@@ -135,10 +135,10 @@
     <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-12">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-4 group w-fit">
             <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                <img src="{{ asset('images/logo-icon.png') }}" alt="Getec" class="w-full h-full object-contain p-2">
+                <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}" alt="Getec" class="w-full h-full object-contain p-2">
             </div>
             <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <img src="{{ asset('images/logo-text.png') }}" alt="Getec Topografia" class="relative z-10 h-8 w-auto">
+                <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}" alt="TopoGest" class="relative z-10 h-8 w-auto">
             </div>
         </a>
         <div class="flex flex-wrap items-center gap-4">
@@ -347,7 +347,7 @@
                                 <span>Nome do Responsável Técnico *</span>
                                 <span x-show="buscandoCpfContratado" class="text-yellow-400 normal-case tracking-normal">Buscando...</span>
                             </label>
-                            <input type="text" name="nome_contratado" required placeholder="Ex: João da Silva (Getec Topografia)" class="input-style" x-model="nomeContratado">
+                            <input type="text" name="nome_contratado" required placeholder="Ex: João da Silva (TopoGest)" class="input-style" x-model="nomeContratado">
                         </div>
                         <div>
                             <label class="field-label">CPF do Responsável *</label>

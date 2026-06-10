@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quem Somos - Getec Topografia</title>
+    <title>Quem Somos - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen bg-[#D9D9D9] overflow-x-hidden">
@@ -15,7 +15,7 @@
     <!-- Background -->
     <div class="fixed inset-0 -z-10">
         <div class="absolute inset-0 bg-cover bg-center bg-fixed"
-             style="background-image: url('{{ asset('images/background-topo.jpg') }}');">
+             style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
         </div>
 
         <!-- Overlay -->
@@ -39,7 +39,7 @@
 
                 <div class="relative z-10 max-w-3xl">
                     <span class="inline-flex items-center px-5 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-bold uppercase tracking-[0.2em] mb-6">
-                        Getec Topografia
+                        TopoGest
                     </span>
 
                     <h1 class="text-4xl md:text-5xl font-black leading-tight mb-6">
@@ -101,7 +101,7 @@
                             {!! nl2br(e($conteudo['quem_somos'])) !!}
                         @else
                             <p>
-                                A <span class="font-black">Getec Topografia</span> nasceu com o propósito
+                                A <span class="font-black">TopoGest</span> nasceu com o propósito
                                 de entregar a mais alta precisão em medições cartográficas. Nosso foco principal é garantir que as propriedades 
                                 dos nossos clientes estejam devidamente regularizadas e seguras contra litígios.
                             </p>

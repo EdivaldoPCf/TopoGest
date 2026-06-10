@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="min-h-screen bg-cover bg-center bg-fixed px-6 py-8"
-     style="background-image: url('{{ asset('images/background-topo.jpg') }}');">
+     style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
 
     <div class="max-w-7xl mx-auto">
 

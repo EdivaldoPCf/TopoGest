@@ -90,14 +90,14 @@
             }
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen overflow-hidden bg-[#071018] text-white">
 
     <!-- BACKGROUND -->
     <div class="fixed inset-0 z-0">
-        <img src="{{ asset('images/background-topo.jpg') }}"
+        <img src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
              class="w-full h-full object-cover">
 
         <div class="absolute inset-0 bg-black/55"></div>
@@ -318,7 +318,7 @@
                 return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
             }
 
-            console.group('Getec Topografia Map Debug');
+            console.group('TopoGest Map Debug');
             console.log('map script loaded');
             console.log('map element', document.getElementById('map'));
             console.log('Leaflet loaded', typeof L !== 'undefined', typeof L);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Getec Topografia</title>
+    <title>Cadastro - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -22,7 +22,7 @@
             color: white;
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen bg-slate-200 overflow-x-hidden overflow-y-auto">
@@ -30,7 +30,7 @@
     <!-- Background -->
     <div class="fixed inset-0 z-0">
         <div class="absolute inset-0 bg-cover bg-center bg-fixed"
-             style="background-image: url('{{ asset('images/background-topo.jpg') }}');">
+             style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
         </div>
 
         <div class="absolute inset-0 bg-[#001B2E]/45 backdrop-blur-[2px]"></div>
@@ -50,14 +50,14 @@
                class="group flex items-center gap-4 transition-all duration-300 hover:scale-[1.02]">
 
                 <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
+                         alt="TopoGest"
                          class="w-full h-full object-contain p-2">
                 </div>
 
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
+                         alt="TopoGest"
                          class="relative z-10 h-8 w-auto">
                 </div>
             </a>
@@ -114,7 +114,7 @@
                             </div>
 
                             <p class="text-slate-600 mt-5 text-sm md:text-base">
-                                Crie sua conta na plataforma Getec Topografia
+                                Crie sua conta na plataforma TopoGest
                             </p>
                         </div>
 
@@ -406,7 +406,7 @@
 
                 <!-- Rodapé -->
                 <div class="text-center mt-8 text-white/80 text-sm font-medium">
-                    © {{ date('Y') }} Getec Topografia — Todos os direitos reservados
+                    © {{ date('Y') }} TopoGest — Todos os direitos reservados
                 </div>
             </div>
         </main>

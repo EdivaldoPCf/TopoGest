@@ -337,8 +337,11 @@ class AdminImportacaoController extends Controller
                 }
             }
 
+            // Verifica se é projeto de órgão governamental
+            $isGovernmentProject = preg_match('/\b(INCRA|INTERACRE|FAPEC|TERRA LEGAL|GOVERNO|PREFEITURA)\b/i', $dados['categoria'] . ' ' . $dados['imovel']);
+
             // 3. Atrelar CPF e Usuário se aplicável
-            if (!empty($cpfsEncontrados)) {
+            if (!$isGovernmentProject && !empty($cpfsEncontrados)) {
                 $cpfsEncontrados = array_unique($cpfsEncontrados);
                 foreach ($cpfsEncontrados as $cpfEncontrado) {
                     $cpfNumerico = preg_replace('/[^0-9]/', '', $cpfEncontrado);

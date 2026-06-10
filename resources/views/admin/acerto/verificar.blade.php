@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificar Assinatura — Getec Topografia</title>
+    <title>Verificar Assinatura — TopoGest</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 <body class="min-h-screen bg-[#001a33] text-white flex items-center justify-center p-6">
     <div class="w-full max-w-xl text-center">
-        <img src="{{ asset('images/logo-completa.png') }}" alt="Getec" class="h-16 mx-auto mb-8" onerror="this.style.display='none'">
+        <img src="{{ asset('images/logo-completa.png') . '?v=' . @filemtime(public_path('images/logo-completa.png')) }}" alt="Getec" class="h-16 mx-auto mb-8" onerror="this.style.display='none'">
 
         @if($contrato)
             <div class="bg-emerald-500/15 border border-emerald-500/30 rounded-[30px] p-10">
@@ -34,7 +34,7 @@
             </div>
         @endif
 
-        <p class="text-white/20 text-xs mt-8">Getec Topografia &amp; Georreferenciamento — Sistema TopoGest</p>
+        <p class="text-white/20 text-xs mt-8">TopoGest &amp; Georreferenciamento — Sistema TopoGest</p>
     </div>
 </body>
 </html>

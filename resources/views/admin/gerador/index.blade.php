@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador Express de Planta e Memorial - Getec Topografia</title>
+    <title>Gerador Express de Planta e Memorial - TopoGest</title>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -172,7 +172,7 @@
             }
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body x-data="{ currentTab: 'dashboard', plantaAssinada: false, showSignModal: false, signStep: 'choose' }" class="min-h-screen overflow-x-hidden bg-[#E5E7EB] text-white">
@@ -180,7 +180,7 @@
     <!-- BACKGROUND -->
     <div class="fixed inset-0 -z-10">
         <img
-            src="{{ asset('images/background-topo.jpg') }}"
+            src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
             class="w-full h-full object-cover"
             alt="Background">
 
@@ -203,14 +203,14 @@
                class="flex items-center gap-4 group w-fit">
 
                 <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') }}"
-                          alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
+                          alt="TopoGest"
                           class="w-full h-full object-contain p-2">
                 </div>
 
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') }}"
-                          alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
+                          alt="TopoGest"
                           class="relative z-10 h-8 w-auto">
                 </div>
             </a>
@@ -498,9 +498,9 @@
 
                                     <!-- Cabeçalho Institucional -->
                                     <div class="border-b border-black flex items-center justify-between p-1.5 h-[15mm] flex-shrink-0">
-                                        <img src="{{ asset('images/logo-icon.png') }}" class="h-10 w-10 object-contain">
+                                        <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}" class="h-10 w-10 object-contain">
                                         <div class="text-center flex-grow">
-                                            <h1 class="text-[12px] font-bold uppercase tracking-wide">GETEC TOPOGRAFIA LTDA</h1>
+                                            <h1 class="text-[12px] font-bold uppercase tracking-wide">TopoGest LTDA</h1>
                                             <h2 class="text-[9px] font-bold uppercase mt-0.5">SERVIÇOS TÉCNICOS E CARTOGRAFIA</h2>
                                         </div>
                                     </div>
@@ -619,7 +619,7 @@
                                 
                                 <!-- Rodapé Mínimo fora da borda dupla interna -->
                                 <div class="text-[4px] mt-0.5 text-justify leading-tight">
-                                    Esta planta foi gerada automaticamente pelo Getec Topografia com base nas informações transmitidas. A autenticidade deste documento pode ser verificada pelo Responsável Técnico.
+                                    Esta planta foi gerada automaticamente pelo TopoGest com base nas informações transmitidas. A autenticidade deste documento pode ser verificada pelo Responsável Técnico.
                                 </div>
                             </div>
 
@@ -636,10 +636,10 @@
                                 <!-- Cabeçalho com Logo -->
                                 <div class="flex items-center justify-between pb-3" style="border-bottom: 1.5px solid black; margin-bottom: 20px;">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ asset('images/logo-icon.png') }}" alt="Brasão" style="height: 48px; object-fit: contain;">
+                                        <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}" alt="Brasão" style="height: 48px; object-fit: contain;">
                                     </div>
                                     <div class="text-right text-[7px] text-gray-500 font-semibold leading-tight">
-                                        <p>GETEC TOPOGRAFIA LTDA</p>
+                                        <p>TopoGest LTDA</p>
                                         <p>Serviços Técnicos e Cartografia</p>
                                     </div>
                                 </div>

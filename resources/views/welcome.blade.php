@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Getec Topografia - Início</title>
+    <title>TopoGest - Início</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen overflow-hidden text-white">
@@ -15,7 +15,7 @@
     <!-- Background -->
     <div class="fixed inset-0 z-0">
         <img 
-            src="{{ asset('images/background-topo.jpg') }}"
+            src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
             alt="Background"
             class="w-full h-full object-cover"
         >
@@ -87,8 +87,8 @@
 
                     <!-- Logo -->
                     <img 
-                        src="{{ asset('images/logo-completa.png') }}?v={{ file_exists(public_path('images/logo-completa.png')) ? filemtime(public_path('images/logo-completa.png')) : time() }}"
-                        alt="Getec Topografia"
+                        src="{{ asset('images/logo-completa.png') . '?v=' . @filemtime(public_path('images/logo-completa.png')) }}"
+                        alt="TopoGest"
                         class="relative z-10 w-[420px] md:w-[520px] h-auto object-contain drop-shadow-2xl"
                     >
 

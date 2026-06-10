@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Getec Topografia - Admin</title>
+    <title>TopoGest - Admin</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -36,7 +36,7 @@
             background: linear-gradient(135deg, #004A7C 0%, #005d9c 100%);
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
     @vite(['resources/js/app.js'])
 </head>
 
@@ -45,7 +45,7 @@
     <!-- BACKGROUND -->
     <div class="fixed inset-0 -z-10">
         <img
-            src="{{ asset('images/background-topo.jpg') }}"
+            src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
             class="w-full h-full object-cover"
             alt="Background">
 
@@ -68,14 +68,14 @@
                class="flex items-center gap-4 group w-fit">
 
                 <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
+                         alt="TopoGest"
                          class="w-full h-full object-contain p-2">
                 </div>
 
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
+                         alt="TopoGest"
                          class="relative z-10 h-8 w-auto">
                 </div>
             </a>
@@ -157,7 +157,7 @@
                     </p>
 
                     <h1 class="text-3xl md:text-4xl font-black italic uppercase tracking-tight">
-                        Getec Topografia Admin
+                        TopoGest Admin
                     </h1>
                 </div>
             </div>

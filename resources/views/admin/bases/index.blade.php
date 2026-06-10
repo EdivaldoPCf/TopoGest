@@ -3,11 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Localizador de Base - Getec Topografia</title>
+    <title>Localizador de Base - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Leaflet & Proj4 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+    
+    <!-- Leaflet Plugins (Fullscreen & Geocoder) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@latest/Control.FullScreen.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@latest/Control.FullScreen.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
     <style>
         ::-webkit-scrollbar {
@@ -50,20 +61,20 @@
             }
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen bg-gray-100 overflow-x-hidden">
 
     <!-- Background -->
     <div class="fixed inset-0 z-0">
-        <img src="{{ asset('images/background-topo.jpg') }}"
+        <img src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
              class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-black/40"></div>
     </div>
 
     <div class="relative z-10 max-w-7xl mx-auto p-4 md:p-10"
-         x-data="{ modal:false }">
+         x-data="{ modal:false, modalMapaBusca: false }">
 
         <!-- HEADER -->
         <div class="flex flex-col xl:flex-row justify-between gap-8 mb-10">
@@ -73,14 +84,14 @@
                class="flex items-center gap-4 group w-fit">
 
                 <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
+                         alt="TopoGest"
                          class="w-full h-full object-contain p-2">
                 </div>
 
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
+                         alt="TopoGest"
                          class="relative z-10 h-8 w-auto">
                 </div>
             </a>
@@ -91,6 +102,7 @@
                 <!-- Coordenadas -->
                 <form action="{{ route('admin.bases.buscar') }}"
                       method="GET"
+                      id="searchFormCoords"
                       class="glass rounded-3xl p-4 shadow-2xl border border-white/20">
 
                     <div class="flex flex-col md:flex-row gap-3 items-center">
@@ -98,19 +110,29 @@
                         <input type="number"
                                step="any"
                                name="norte"
+                               id="inputNorte"
                                placeholder="Coordenada Norte"
                                class="w-full md:w-52 bg-[#003366]/90 text-white px-5 py-3 rounded-2xl outline-none placeholder:text-white/60 font-semibold">
 
                         <input type="number"
                                step="any"
                                name="este"
+                               id="inputEste"
                                placeholder="Coordenada Este"
                                class="w-full md:w-52 bg-[#003366]/90 text-white px-5 py-3 rounded-2xl outline-none placeholder:text-white/60 font-semibold">
 
-                        <button type="submit"
-                                class="bg-orange-500 hover:bg-orange-600 text-white font-black uppercase px-8 py-3 rounded-2xl transition shadow-lg whitespace-nowrap">
-                            Buscar Próxima
-                        </button>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <button type="submit"
+                                    class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black uppercase px-6 py-3 rounded-2xl transition shadow-lg whitespace-nowrap">
+                                Buscar Próxima
+                            </button>
+
+                            <button type="button"
+                                    onclick="abrirModalMapa()"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase px-5 py-3 rounded-2xl transition shadow-lg whitespace-nowrap flex items-center justify-center gap-2">
+                                <span>📍</span> Mapa
+                            </button>
+                        </div>
 
                     </div>
                 </form>
@@ -455,7 +477,177 @@
         </div>
     </div>
 
+        <!-- MODAL DE BUSCA POR MAPA -->
+        <div id="modalMapaBusca"
+             style="display: none;"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+
+            <div id="modalMapaBuscaContent" 
+                 class="glass-dark rounded-[35px] w-full max-w-5xl p-6 md:p-8 border border-white/10 shadow-2xl flex flex-col h-[85vh] scale-95 transition-all duration-300">
+
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-3xl text-white font-black uppercase italic">
+                            Selecionar Ponto no Mapa
+                        </h2>
+                        <p class="text-white/70 mt-1">Clique em qualquer local no mapa para inserir o alfinete e localizar as bases mais próximas.</p>
+                    </div>
+
+                    <button type="button" onclick="fecharModalMapa()"
+                            class="text-white/60 hover:text-white text-4xl leading-none transition">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="flex-1 w-full rounded-2xl overflow-hidden border-2 border-white/20 shadow-inner relative bg-gray-900">
+                    <div id="mapBusca" class="absolute inset-0 w-full h-full z-10">
+                        <button type="button" 
+                                id="btnFloatingSearch" 
+                                onclick="event.preventDefault(); document.getElementById('btnBuscarPorPino').click();" 
+                                class="absolute bottom-8 right-8 z-[9999] bg-green-500 hover:bg-green-600 text-white font-black uppercase px-6 py-4 rounded-xl border-[3px] border-white shadow-2xl transition-transform hover:scale-105 hidden"
+                                style="pointer-events: auto;">
+                            🔍 PESQUISAR ESTE LOCAL
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-end items-center gap-4 mt-6">
+                    
+                    <div class="flex-1 w-full sm:w-auto text-white/80 font-mono text-sm bg-black/30 px-4 py-3 rounded-xl border border-white/10 text-center sm:text-left">
+                        <span id="coordsDisplay">Aguardando seleção no mapa...</span>
+                    </div>
+
+                    <div class="flex w-full sm:w-auto gap-3">
+                        <button type="button"
+                                onclick="fecharModalMapa()"
+                                class="flex-1 sm:flex-none bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-2xl font-black uppercase transition shadow-lg">
+                            Cancelar
+                        </button>
+
+                        <button type="button"
+                                id="btnBuscarPorPino"
+                                disabled
+                                class="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3 rounded-2xl font-black uppercase transition shadow-lg">
+                            Pesquisar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
     <script>
+        let mapBusca = null;
+        let pinoBusca = null;
+        let selectedLat = null;
+        let selectedLng = null;
+
+        function abrirModalMapa() {
+            let modal = document.getElementById('modalMapaBusca');
+            let content = document.getElementById('modalMapaBuscaContent');
+            
+            modal.style.display = 'flex';
+            
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+                
+                setTimeout(() => initMapBusca(), 300);
+            }, 10);
+        }
+
+        function fecharModalMapa() {
+            let modal = document.getElementById('modalMapaBusca');
+            let content = document.getElementById('modalMapaBuscaContent');
+            
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        function initMapBusca() {
+            if (!mapBusca) {
+                mapBusca = L.map('mapBusca', {
+                    fullscreenControl: true,
+                    fullscreenControlOptions: {
+                        position: 'topleft'
+                    }
+                }).setView([-9.974, -67.807], 8); // Padrão: Acre
+                
+                // Camada Híbrida do Google (Satélite + Ruas)
+                L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains:['mt0','mt1','mt2','mt3'],
+                    attribution: '© Google Maps'
+                }).addTo(mapBusca);
+                
+                // Barra de Pesquisa (Geocoder)
+                L.Control.geocoder({
+                    defaultMarkGeocode: false,
+                    placeholder: "Buscar cidade (ex: Rio Branco)..."
+                })
+                .on('markgeocode', function(e) {
+                    // Centraliza o mapa no local pesquisado
+                    mapBusca.fitBounds(e.geocode.bbox);
+                })
+                .addTo(mapBusca);
+                
+                mapBusca.on('click', function(e) {
+                    selectedLat = e.latlng.lat;
+                    selectedLng = e.latlng.lng;
+                    
+                    if(pinoBusca) {
+                        pinoBusca.setLatLng(e.latlng);
+                    } else {
+                        pinoBusca = L.marker(e.latlng).addTo(mapBusca);
+                    }
+                    
+                    document.getElementById('coordsDisplay').innerText = `Lat: ${selectedLat.toFixed(6)} | Lng: ${selectedLng.toFixed(6)}`;
+                    document.getElementById('btnBuscarPorPino').disabled = false;
+                    
+                    // Mostra o botão flutuante DOM nativo
+                    let btnFloat = document.getElementById('btnFloatingSearch');
+                    if(btnFloat) btnFloat.classList.remove('hidden');
+                });
+                
+            } else {
+                mapBusca.invalidateSize();
+            }
+        }
+
+        document.getElementById('btnBuscarPorPino').addEventListener('click', function() {
+            if(selectedLat === null || selectedLng === null) return;
+            
+            // Determinar a Zona UTM baseada na longitude
+            let zone = Math.floor((selectedLng + 180) / 6) + 1;
+            let isSouth = selectedLat < 0;
+            
+            // Definição Proj4 para UTM (WGS84)
+            let projString = `+proj=utm +zone=${zone} ${isSouth ? '+south' : ''} +datum=WGS84 +units=m +no_defs`;
+            
+            try {
+                let utm = proj4('EPSG:4326', projString, [selectedLng, selectedLat]);
+                let este = utm[0];
+                let norte = utm[1];
+                
+                // Preencher o formulário
+                document.getElementById('inputNorte').value = norte.toFixed(3);
+                document.getElementById('inputEste').value = este.toFixed(3);
+                
+                // Submeter form
+                document.getElementById('searchFormCoords').submit();
+                
+            } catch (err) {
+                console.error("Erro na conversão Proj4js", err);
+                Swal.fire('Erro', 'Não foi possível converter a coordenada. Tente novamente.', 'error');
+            }
+        });
+
         function shareBaseLocation(nome, url) {
             if (navigator.share) {
                 navigator.share({

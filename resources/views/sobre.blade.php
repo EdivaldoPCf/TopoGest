@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sobre - Getec Topografia</title>
+    <title>Sobre - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen bg-[#D9D9D9] overflow-x-hidden">
@@ -15,7 +15,7 @@
     <!-- Background -->
     <div class="fixed inset-0 -z-10">
         <div class="absolute inset-0 bg-cover bg-center bg-fixed"
-             style="background-image: url('{{ asset('images/background-topo.jpg') }}');">
+             style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
         </div>
 
         <!-- Overlay -->
@@ -47,7 +47,7 @@
                     </h1>
 
                     <p class="text-lg md:text-xl leading-relaxed text-white/90 font-medium">
-                        A Getec Topografia oferece soluções completas em Georreferenciamento, Levantamentos Planialtimétricos, Loteamentos e Regularização Fundiária.
+                        A TopoGest oferece soluções completas em Georreferenciamento, Levantamentos Planialtimétricos, Loteamentos e Regularização Fundiária.
                     </p>
 
                     @if(!empty($conteudo['whatsapp']))
@@ -93,7 +93,7 @@
                         </div>
 
                         <div>
-                            <h2 class="text-3xl font-black">Sobre o Getec Topografia</h2>
+                            <h2 class="text-3xl font-black">Sobre o TopoGest</h2>
                             <p class="text-sm uppercase tracking-[0.2em] text-[#004A7C]/70 font-bold mt-1">
                                 Gestão moderna para topografia
                             </p>
@@ -105,7 +105,7 @@
                             {!! nl2br(e($conteudo['sobre'])) !!}
                         @else
                             <p>
-                                A <span class="font-black">Getec Topografia</span> é uma empresa de engenharia e serviços cartográficos
+                                A <span class="font-black">TopoGest</span> é uma empresa de engenharia e serviços cartográficos
                                 dedicada a garantir a segurança jurídica da sua propriedade através de medições precisas e tecnologia de ponta.
                             </p>
 
@@ -225,7 +225,7 @@
 
                         <div>
                             <h2 class="text-3xl font-black">
-                                Por que escolher o Getec Topografia?
+                                Por que escolher o TopoGest?
                             </h2>
 
                             <p class="text-sm uppercase tracking-[0.2em] text-[#004A7C]/70 font-bold mt-1">

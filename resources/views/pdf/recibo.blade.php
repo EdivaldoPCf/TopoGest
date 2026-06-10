@@ -240,7 +240,7 @@
             color: #aaa;
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 <body>
 
@@ -249,7 +249,7 @@
         <div class="header-logo">
             @php $logoPath = public_path('images/logo-completa.png'); @endphp
             @if(file_exists($logoPath))
-                <img src="{{ $logoPath }}" alt="Getec Topografia">
+                <img src="{{ $logoPath }}" alt="TopoGest">
             @else
                 <div style="width:70px;height:70px;background:#003366;border-radius:6px;display:flex;align-items:center;justify-content:center;">
                     <span style="color:#fff;font-weight:bold;font-size:9pt;text-align:center;display:block;padding:4px;">GETEC</span>
@@ -257,7 +257,7 @@
             @endif
         </div>
         <div class="header-info">
-            <h1>GETEC TOPOGRAFIA LTDA</h1>
+            <h1>TopoGest LTDA</h1>
             <p>CNPJ: 03.715.655/0001-34</p>
         </div>
         <div class="header-number">
@@ -320,7 +320,7 @@
         </div>
         <div class="assinatura-linha"></div>
         <div class="assinatura-nome">{{ strtoupper($contrato->nome_contratado) }}</div>
-        <div class="assinatura-cargo">Responsável Técnico<br>Getec Topografia LTDA</div>
+        <div class="assinatura-cargo">Responsável Técnico<br>TopoGest LTDA</div>
     </div>
 
     <div class="page-footer">

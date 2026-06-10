@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $pasta->nome }} - Getec Topografia</title>
+    <title>{{ $pasta->nome }} - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -139,7 +139,7 @@
             display: none;
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
     @vite(['resources/js/app.js'])
 </head>
 
@@ -148,7 +148,7 @@
     <!-- Background -->
     <div class="fixed inset-0 z-0">
         <img
-            src="{{ asset('images/background-topo.jpg') }}"
+            src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
             alt="Background"
             class="w-full h-full object-cover"
         >
@@ -172,7 +172,7 @@
 
                             <div class="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
                                 <img
-                                    src="{{ asset('images/logo-icon.png') }}"
+                                    src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
                                     alt="Logo"
                                     class="w-full h-full object-contain p-2"
                                 >
@@ -180,8 +180,8 @@
 
                             <div class="hidden sm:flex relative items-center h-12 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                                 <img
-                                    src="{{ asset('images/logo-text.png') }}"
-                                    alt="Getec Topografia"
+                                    src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
+                                    alt="TopoGest"
                                     class="relative z-10 h-7 w-auto"
                                 >
                             </div>

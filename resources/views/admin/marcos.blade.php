@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Marcos - Getec Topografia</title>
+    <title>Gerenciador de Marcos - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -29,7 +29,7 @@
             -webkit-backdrop-filter: blur(16px);
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
     @vite(['resources/js/app.js'])
 </head>
 
@@ -37,7 +37,7 @@
 
     <!-- Background -->
     <div class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-         style="background-image: url('{{ asset('images/background-topo.jpg') }}');">
+         style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
     </div>
 
     <!-- Overlay -->
@@ -53,13 +53,13 @@
                class="flex items-center gap-4 bg-white/90 rounded-3xl px-5 py-4 shadow-2xl hover:scale-[1.02] transition-all w-fit">
 
                 <div class="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-2xl">
-                    <img src="{{ asset('images/logo-icon.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
+                         alt="TopoGest"
                          class="w-full h-full object-contain p-2">
                 </div>
 
                 <div>
-                    <img src="{{ asset('images/logo-text.png') }}"
+                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
                          class="h-8">
                     <p class="text-[#003366] text-xs font-black tracking-[0.3em] uppercase mt-1">
                         Gerenciador ADM
@@ -276,7 +276,7 @@
                             </h2>
 
                             <p class="text-white/70 text-sm uppercase tracking-[0.2em] mt-1">
-                                Banco de registros Getec Topografia
+                                Banco de registros TopoGest
                             </p>
                         </div>
 

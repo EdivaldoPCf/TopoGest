@@ -532,6 +532,9 @@ Artisan::command('pastas:import {directory}', function ($directory) {
                     importSubfoldersAndFiles($item->getRealPath(), $subFolder, $cliente, $foldersCount, $filesCount, $marcosCount, $commandInstance);
                 } else {
                     $filePath = $item->getRealPath();
+                    if (!$filePath) {
+                        continue;
+                    }
                     $ext = strtolower($item->getExtension());
                     $existingFile = \App\Models\Arquivo::where('nome', $name)
                         ->where('pasta_id', $parentFolder->id)
@@ -587,11 +590,10 @@ Artisan::command('pastas:import {directory}', function ($directory) {
     }
 
     $anoNome = basename($realDirectory);
-    $anoFolder = \App\Models\Pasta::firstOrCreate([
-        'nome' => $anoNome,
-        'parent_id' => null,
-        'tipo_servico' => 'pendente'
-    ]);
+    $anoFolder = \App\Models\Pasta::firstOrCreate(
+        ['nome' => $anoNome, 'parent_id' => null],
+        ['tipo_servico' => 'pendente']
+    );
     $this->info("Pasta de Ano criada/recuperada: {$anoNome} (ID: {$anoFolder->id})");
 
     $categories = array_filter(glob($realDirectory . '/*'), 'is_dir');
@@ -602,11 +604,10 @@ Artisan::command('pastas:import {directory}', function ($directory) {
 
     foreach ($categories as $catPath) {
         $catName = basename($catPath);
-        $catFolder = \App\Models\Pasta::firstOrCreate([
-            'nome' => $catName,
-            'parent_id' => $anoFolder->id,
-            'tipo_servico' => 'pendente'
-        ]);
+        $catFolder = \App\Models\Pasta::firstOrCreate(
+            ['nome' => $catName, 'parent_id' => $anoFolder->id],
+            ['tipo_servico' => 'pendente']
+        );
         $this->info("  Categoria criada/recuperada: {$catName} (ID: {$catFolder->id})");
 
         $services = array_filter(glob($catPath . '/*'), 'is_dir');
@@ -631,52 +632,56 @@ Artisan::command('pastas:import {directory}', function ($directory) {
             $identificador_cliente = null;
             $pass_cliente = null;
 
-            if ($cpf_extraido) {
-                $cliente = \App\Models\User::where('cpf', $cpf_extraido)->first();
-                if ($cliente) {
-                    $cliente_id = $cliente->id;
-                    $identificador_cliente = $cliente->cpf;
-                    $pass_cliente = $cliente;
-                } else {
-                    $cliente_id = null;
-                    $identificador_cliente = $cpf_extraido;
-                }
-            } else {
-                if ($clienteNome === 'Aguardando Cliente') {
-                    $cliente_id = null;
-                    $identificador_cliente = null;
-                } else {
-                    $cliente = \App\Models\User::where('name', $clienteNome)->first();
+            $isGovernmentProject = preg_match('/\b(INCRA|INTERACRE|FAPEC|TERRA LEGAL|GOVERNO|PREFEITURA)\b/i', $catName . ' ' . $serviceFolderName);
+
+            if (!$isGovernmentProject) {
+                if ($cpf_extraido) {
+                    $cliente = \App\Models\User::where('cpf', $cpf_extraido)->first();
                     if ($cliente) {
                         $cliente_id = $cliente->id;
                         $identificador_cliente = $cliente->cpf;
                         $pass_cliente = $cliente;
                     } else {
-                        // DO NOT store the parsed name. Only store CPF or keep null.
+                        $cliente_id = null;
+                        $identificador_cliente = $cpf_extraido;
+                    }
+                } else {
+                    if ($clienteNome === 'Aguardando Cliente') {
                         $cliente_id = null;
                         $identificador_cliente = null;
-                        $pass_cliente = null;
+                    } else {
+                        $cliente = \App\Models\User::where('name', $clienteNome)->first();
+                        if ($cliente) {
+                            $cliente_id = $cliente->id;
+                            $identificador_cliente = $cliente->cpf;
+                            $pass_cliente = $cliente;
+                        } else {
+                            $cliente_id = null;
+                            $identificador_cliente = null;
+                            $pass_cliente = null;
+                        }
                     }
                 }
             }
 
-            $serviceFolder = \App\Models\Pasta::firstOrCreate([
-                'nome' => $imovelNome,
-                'parent_id' => $catFolder->id,
-                'tipo_servico' => 'pendente',
-                'cliente_id' => $cliente_id,
-                'identificador_cliente' => $identificador_cliente,
-                'categoria_servico' => $catName
-            ]);
+            $serviceFolder = \App\Models\Pasta::firstOrCreate(
+                ['nome' => $imovelNome, 'parent_id' => $catFolder->id],
+                [
+                    'tipo_servico' => 'pendente',
+                    'cliente_id' => $cliente_id,
+                    'identificador_cliente' => $identificador_cliente,
+                    'categoria_servico' => $catName
+                ]
+            );
             $totalFoldersCreated++;
 
             if ($pass_cliente) {
                 importSubfoldersAndFiles($servicePath, $serviceFolder, $pass_cliente, $totalFoldersCreated, $totalFilesImported, $totalMarcosCreated, $this);
             } else {
                 // Criar um usuário temporário apenas para passar para as funções filhas que exigem objeto,
-                // já que não cadastramos o cliente ainda (mas os marcos precisam ser associados a alguém,
-                // ou salvos com user_id null).
-                $tempUser = new \App\Models\User(['id' => null]);
+                // usando id 1 para evitar erro de violação de restrição não-nulo na tabela marcos.
+                $tempUser = new \App\Models\User();
+                $tempUser->id = 1;
                 importSubfoldersAndFiles($servicePath, $serviceFolder, $tempUser, $totalFoldersCreated, $totalFilesImported, $totalMarcosCreated, $this);
             }
         }

@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alterar Perfil • Getec Topografia</title>
+    <title>Alterar Perfil • TopoGest</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen bg-[#0B1727] antialiased relative overflow-x-hidden">
@@ -17,7 +18,7 @@
     <!-- Background -->
     <div class="fixed inset-0 z-0">
         <img 
-            src="{{ asset('images/background-topo.jpg') }}" 
+            src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}" 
             alt="Background"
             class="w-full h-full object-cover"
         >
@@ -66,7 +67,7 @@
                                     id="current-photo"
                                     src="{{ auth()->user()->photo 
                                         ? asset('storage/' . auth()->user()->photo) 
-                                        : asset('images/default-avatar.png') }}"
+                                        : asset('images/default-avatar.png') . '?v=' . @filemtime(public_path('images/default-avatar.png')) }}"
                                     alt="Foto de perfil"
                                     class="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                                 >
@@ -337,4 +338,4 @@
     </script>
 
 </body>
-</html>
+</html> 

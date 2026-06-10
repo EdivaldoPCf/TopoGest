@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clientes - Getec Topografia</title>
+    <title>Clientes - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -32,7 +32,7 @@
             scrollbar-width: none;
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen bg-[#eef3f8] overflow-x-hidden">
@@ -40,7 +40,7 @@
     <!-- Background -->
     <div class="fixed inset-0 z-0">
         <div class="absolute inset-0 bg-cover bg-center"
-             style="background-image:url('{{ asset('images/background-topo.jpg') }}')"></div>
+             style="background-image:url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}')"></div>
 
         <div class="absolute inset-0 bg-white/80 backdrop-blur-[3px]"></div>
     </div>
@@ -64,7 +64,7 @@
                         <div class="relative">
 
                             <div class="w-16 h-16 rounded-2xl bg-white shadow-2xl flex items-center justify-center group-hover:scale-105 transition">
-                                <img src="{{ asset('images/logo-icon.png') }}"
+                                <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
                                      class="w-full h-full object-contain p-2">
                             </div>
 
@@ -73,7 +73,7 @@
 
                         <div>
                             <h1 class="text-3xl font-black text-[#003366] tracking-tight">
-                                Getec Topografia
+                                TopoGest
                             </h1>
 
                             <p class="text-sm text-[#003366]/70 font-semibold">
@@ -244,7 +244,7 @@
                                                     >
 
                                                     <div class="text-xs text-slate-500 mt-1">
-                                                        Cliente Getec Topografia
+                                                        Cliente TopoGest
                                                     </div>
 
                                                 </div>

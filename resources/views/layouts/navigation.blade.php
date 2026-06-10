@@ -9,14 +9,14 @@
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-4 hover:opacity-90 transition">
 
                     <div class="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                        <img src="{{ asset('images/logo-icon.png') }}" 
+                        <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}" 
                              alt="Logo" 
                              class="w-full h-full object-contain p-2">
                     </div>
 
                     <div class="relative flex items-center h-12 px-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                        <img src="{{ asset('images/logo-text.png') }}" 
-                             alt="Getec Topografia" 
+                        <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}" 
+                             alt="TopoGest" 
                              class="relative z-10 h-6 w-auto">
                     </div>
 

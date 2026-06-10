@@ -5,7 +5,7 @@
 
     <!-- Background -->
     <div class="absolute inset-0">
-        <img src="{{ asset('images/background-topo.jpg') }}"
+        <img src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
              class="w-full h-full object-cover"
              alt="Background">
         <div class="absolute inset-0 bg-black/35 backdrop-blur-[1px]"></div>

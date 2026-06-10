@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recuperar Senha - Getec Topografia</title>
+    <title>Recuperar Senha - TopoGest</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -29,14 +29,14 @@
             box-shadow: 0 15px 40px rgba(0,0,0,.25);
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
 </head>
 
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
     <!-- BACKGROUND -->
     <div class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-         style="background-image: url('{{ asset('images/background-topo.jpg') }}');">
+         style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
     </div>
 
     <!-- OVERLAY -->
@@ -52,14 +52,14 @@
                class="group flex items-center gap-3 transition-all duration-300 hover:scale-105">
 
                 <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
+                         alt="TopoGest"
                          class="w-full h-full object-contain p-2">
                 </div>
 
                 <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') }}"
-                         alt="Getec Topografia"
+                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
+                         alt="TopoGest"
                          class="relative z-10 h-8">
                 </div>
 
@@ -201,7 +201,7 @@
 
         <!-- FOOTER -->
         <div class="mt-6 text-center text-white/60 text-xs uppercase tracking-[0.25em]">
-            Getec Topografia • Recuperação Segura
+            TopoGest • Recuperação Segura
         </div>
 
     </div>
