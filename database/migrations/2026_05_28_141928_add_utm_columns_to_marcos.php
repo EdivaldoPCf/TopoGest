@@ -12,9 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('marcos', function (Blueprint $table) {
-            $table->decimal('easting', 12, 4)->nullable();
-            $table->decimal('northing', 12, 4)->nullable();
-            $table->integer('meridiano_central')->nullable();
+            if (! Schema::hasColumn('marcos', 'easting')) {
+                $table->decimal('easting', 12, 4)->nullable();
+            }
+
+            if (! Schema::hasColumn('marcos', 'northing')) {
+                $table->decimal('northing', 12, 4)->nullable();
+            }
+
+            if (! Schema::hasColumn('marcos', 'meridiano_central')) {
+                $table->integer('meridiano_central')->nullable();
+            }
         });
     }
 
