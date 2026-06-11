@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Services\WhatsappService;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AdminController extends Controller
 {
@@ -43,6 +45,34 @@ class AdminController extends Controller
         $totalEmes = Marco::where('credencial', 'EMES')->count();
 
         return view('admin.dashboard', compact('temPendentes', 'totalClientes', 'totalServicosPendentes', 'totalBases', 'totalBca', 'totalEmes'));
+    }
+
+    public function indexV2(): Response
+    {
+        $temPendentes = User::where('role', 'admin')
+            ->where('approved', false)
+            ->exists();
+
+        $totalClientes = User::where('role', 'cliente')->count();
+        $totalServicosPendentes = Pasta::where('tipo_servico', 'pendente')
+            ->whereHas('parent', function ($q) {
+                $q->whereHas('parent', function ($q2) {
+                    $q2->whereNull('parent_id');
+                })->whereNotNull('parent_id');
+            })
+            ->count();
+        $totalBases = Base::count();
+        $totalBca = Marco::where('credencial', 'BCA')->count();
+        $totalEmes = Marco::where('credencial', 'EMES')->count();
+
+        return Inertia::render('Admin/DashboardV2', [
+            'temPendentes' => $temPendentes,
+            'totalClientes' => $totalClientes,
+            'totalServicosPendentes' => $totalServicosPendentes,
+            'totalBases' => $totalBases,
+            'totalBca' => $totalBca,
+            'totalEmes' => $totalEmes,
+        ]);
     }
 
     /**

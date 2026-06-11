@@ -157,6 +157,7 @@ Route::middleware('auth')->group(function () {
     
     // Painel Principal
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/v2', [AdminController::class, 'indexV2'])->name('admin.dashboard.v2');
     
     Route::post('/gerador-mapa/pdf', [AdminController::class, 'generateMapPdf'])->name('admin.gerador.pdf');
 
