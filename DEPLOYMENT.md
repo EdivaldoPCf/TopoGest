@@ -4,7 +4,7 @@ Este repositório possui dois ambientes independentes no mesmo servidor:
 
 | Branch | Ambiente | Banco | Endereço |
 | --- | --- | --- | --- |
-| `main` | produção | MariaDB | `http://192.168.1.100/topogest/` |
+| `main` | produção | PostgreSQL | `http://192.168.1.100/topogest/` |
 | `development` | homologação | PostgreSQL | `http://catlog.tail738f14.ts.net/topogest/` |
 
 Produção escuta somente no endereço da LAN. Homologação escuta somente no
