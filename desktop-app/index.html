@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TopoGest Sincronizador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .drag-region { -webkit-app-region: drag; }
+        .no-drag { -webkit-app-region: no-drag; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col overflow-hidden font-sans text-gray-800">
+
+    <!-- Header Draggeável -->
+    <div class="h-12 bg-white flex items-center justify-between px-4 drag-region shadow-sm z-50">
+        <div class="flex items-center gap-2">
+            <div class="w-6 h-6 bg-blue-600 rounded flex items-center justify-center font-bold text-white text-xs">T</div>
+            <span class="font-semibold text-gray-700 tracking-wide text-sm">TopoGest Drive</span>
+        </div>
+        <div class="flex gap-2 no-drag">
+            <button id="btnMinimize" class="p-2 hover:bg-gray-100 rounded text-gray-500 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
+            </button>
+            <button id="btnClose" class="p-2 hover:bg-red-500 hover:text-white rounded text-gray-500 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- VIEW DE LOGIN -->
+    <div id="loginView" class="flex-1 flex items-center justify-center bg-gray-50 absolute inset-0 top-12 z-40">
+        <div class="bg-white p-10 rounded-2xl shadow-xl w-[450px] border border-gray-100">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-3xl mb-4 shadow-lg">T</div>
+                <h1 class="text-2xl font-bold text-gray-800">Bem-vindo ao TopoGest</h1>
+                <p class="text-gray-500 mt-2 text-sm">Faça login com sua conta corporativa para sincronizar arquivos com a nuvem.</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                    <input type="email" id="email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                    <input type="password" id="password" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="••••••••">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2">
+                        <span>Entrar</span>
+                        <svg id="loginSpinner" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                </div>
+                <p id="loginError" class="text-red-500 text-sm text-center font-medium hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- VIEW DO DASHBOARD (Estilo Google Drive) -->
+    <div id="dashboardView" class="flex-1 flex bg-white hidden absolute inset-0 top-12 z-30">
+        
+        <!-- Sidebar Esquerda -->
+        <div class="w-64 bg-[#F8FAFD] border-r border-gray-200 flex flex-col py-4 px-3">
+            <button id="btnAddFolder" class="bg-white border border-gray-200 shadow-sm hover:shadow-md hover:bg-gray-50 text-gray-800 font-medium py-3 px-4 rounded-2xl flex items-center gap-3 transition-all mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Adicionar Pasta
+            </button>
+
+            <nav class="space-y-1 flex-1">
+                <button class="w-full flex items-center gap-3 px-4 py-3 bg-[#C2E7FF] text-[#001D35] rounded-full font-medium transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                    Início
+                </button>
+                <button class="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-full font-medium transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Atividade Recente
+                </button>
+                <button class="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-full font-medium transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Configurações
+                </button>
+            </nav>
+
+            <div class="mt-auto pt-6 border-t border-gray-200">
+                <button id="btnLogout" class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-full font-medium transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    Sair da Conta
+                </button>
+            </div>
+        </div>
+
+        <!-- Área Principal -->
+        <div class="flex-1 p-8 overflow-y-auto bg-white">
+            <h2 class="text-2xl font-normal text-gray-800 mb-8" id="welcomeText">Início</h2>
+
+            <!-- Cards Superiores -->
+            <div class="grid grid-cols-2 gap-6 mb-8">
+                <div class="bg-[#F8FAFD] p-6 rounded-3xl border border-gray-100 hover:shadow-md transition">
+                    <div class="flex items-center gap-3 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        <h3 class="text-lg font-medium text-gray-800">Tudo Atualizado</h3>
+                    </div>
+                    <p class="text-sm text-gray-500">Procurando atualizações mais recentes...</p>
+                </div>
+
+                <div class="bg-[#F8FAFD] p-6 rounded-3xl border border-gray-100 hover:shadow-md transition flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-800 mb-1">Pastas em Sincronia</h3>
+                        <p class="text-sm text-gray-500" id="folderCountText">0 pastas conectadas</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-sm font-medium text-gray-500 mb-4 uppercase tracking-wider">Suas Pastas Locais</h3>
+            
+            <!-- Lista de Pastas -->
+            <div id="foldersList" class="grid grid-cols-3 gap-4 mb-10">
+                <!-- As pastas injetadas virão aqui -->
+            </div>
+
+            <h3 class="text-sm font-medium text-gray-500 mb-4 uppercase tracking-wider">Atividade Recente</h3>
+            
+            <!-- Lista de Arquivos -->
+            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                <div id="syncList" class="divide-y divide-gray-100">
+                    <div class="p-8 text-center text-gray-400 text-sm">
+                        Nenhuma atividade recente.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Adicionar Pasta Estrutural -->
+    <div id="modalAddFolder" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-[500px]">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Estruturar Pasta</h2>
+            <p class="text-sm text-gray-500 mb-6">Você está adicionando uma pasta local ao TopoGest. Por favor, defina o Ano e a Categoria para que o sistema organize os arquivos corretamente no servidor.</p>
+            
+            <div class="space-y-4 mb-8">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pasta Local Selecionada</label>
+                    <input type="text" id="modalFolderPath" disabled class="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+                        <select id="modalAno" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026" selected>2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                        <select id="modalCategoria" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="CAR">CAR</option>
+                            <option value="GEORREFERENCIAMENTO">GEORREFERENCIAMENTO</option>
+                            <option value="LOTEAMENTO">LOTEAMENTO</option>
+                            <option value="USUCAPIAO">USUCAPIÃO</option>
+                            <option value="OUTROS">OUTROS</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button id="btnCancelAdd" class="px-5 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition">Cancelar</button>
+                <button id="btnConfirmAdd" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-md transition">Adicionar e Sincronizar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Controles da Janela
+        document.getElementById('btnMinimize').addEventListener('click', () => ipcRenderer.send('window-minimize'));
+        document.getElementById('btnClose').addEventListener('click', () => ipcRenderer.send('window-close'));
+
+        // Telas
+        const loginView = document.getElementById('loginView');
+        const dashboardView = document.getElementById('dashboardView');
+
+        // Ouve se tem token salvo para pular o login
+        ipcRenderer.on('auth-status', (event, { isAuth, user }) => {
+            if (isAuth) {
+                loginView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                document.getElementById('welcomeText').innerText = `Bem-vindo, ${user.name.split(' ')[0]}`;
+                // Solicita as pastas configuradas
+                ipcRenderer.send('request-folders');
+            } else {
+                loginView.classList.remove('hidden');
+                dashboardView.classList.add('hidden');
+            }
+        });
+
+        // Evento de Login
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            document.getElementById('btnLogin').disabled = true;
+            document.getElementById('loginSpinner').classList.remove('hidden');
+            document.getElementById('loginError').classList.add('hidden');
+
+            ipcRenderer.send('login-request', { email, password });
+        });
+
+        // Resposta de Login
+        ipcRenderer.on('login-response', (event, response) => {
+            document.getElementById('btnLogin').disabled = false;
+            document.getElementById('loginSpinner').classList.add('hidden');
+
+            if (response.success) {
+                // Vai pra tela inicial (o main.js manda o auth-status logo depois)
+            } else {
+                const errEl = document.getElementById('loginError');
+                errEl.innerText = response.error;
+                errEl.classList.remove('hidden');
+            }
+        });
+
+        // Logout
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            ipcRenderer.send('logout-request');
+        });
+
+        // ==== DASHBOARD & PASTAS ====
+        document.getElementById('btnAddFolder').addEventListener('click', () => {
+            ipcRenderer.send('dialog-add-folder');
+        });
+
+        // O main.js retorna o caminho se for selecionado
+        ipcRenderer.on('folder-selected', (event, path) => {
+            document.getElementById('modalFolderPath').value = path;
+            document.getElementById('modalAddFolder').classList.remove('hidden');
+        });
+
+        document.getElementById('btnCancelAdd').addEventListener('click', () => {
+            document.getElementById('modalAddFolder').classList.add('hidden');
+        });
+
+        document.getElementById('btnConfirmAdd').addEventListener('click', () => {
+            const path = document.getElementById('modalFolderPath').value;
+            const ano = document.getElementById('modalAno').value;
+            const categoria = document.getElementById('modalCategoria').value;
+
+            ipcRenderer.send('confirm-add-folder', { path, ano, categoria });
+            document.getElementById('modalAddFolder').classList.add('hidden');
+        });
+
+        // Recebe e renderiza as pastas
+        ipcRenderer.on('update-folders-list', (event, folders) => {
+            const list = document.getElementById('foldersList');
+            document.getElementById('folderCountText').innerText = `${folders.length} pastas conectadas`;
+            
+            list.innerHTML = '';
+            folders.forEach(f => {
+                list.innerHTML += `
+                    <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:shadow-md transition cursor-pointer group">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" /></svg>
+                            <div class="truncate">
+                                <p class="text-sm font-semibold text-gray-800 truncate" title="${f.path}">${f.path.split('\\').pop()}</p>
+                                <p class="text-xs text-gray-500">${f.ano} / ${f.categoria}</p>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition" onclick="removeFolder('${f.path.replace(/\\/g, '\\\\')}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                `;
+            });
+        });
+
+        window.removeFolder = function(path) {
+            ipcRenderer.send('remove-folder', path);
+        }
+
+        // Atualização de Arquivos (Sync Activity)
+        ipcRenderer.on('sync-progress', (event, data) => {
+            const list = document.getElementById('syncList');
+            if (list.innerHTML.includes('Nenhuma atividade recente')) {
+                list.innerHTML = '';
+            }
+
+            const itemId = 'file-' + btoa(data.file).replace(/[^a-zA-Z0-9]/g, '');
+            let item = document.getElementById(itemId);
+
+            if (!item) {
+                item = document.createElement('div');
+                item.id = itemId;
+                item.className = 'flex items-center justify-between p-4 hover:bg-gray-50 transition';
+                list.prepend(item);
+            }
+
+            item.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">${data.file}</p>
+                        <p class="text-xs text-gray-500">Sincronizando para ${data.folder}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-semibold ${data.progress === 100 ? 'text-green-600' : 'text-blue-600'}">${data.status}</p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
