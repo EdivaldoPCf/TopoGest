@@ -131,7 +131,7 @@ services:
       reverb:
         condition: service_started
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/topogest/up"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/topogest/"]
       interval: 15s
       timeout: 5s
       retries: 5
