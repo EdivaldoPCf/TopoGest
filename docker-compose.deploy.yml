@@ -63,6 +63,8 @@ services:
       APP_KEY: ${APP_KEY:?APP_KEY is required}
       APP_ENV: testing
       APP_DEBUG: "false"
+      APP_URL: http://localhost
+      ASSET_URL: http://localhost
       DB_CONNECTION: sqlite
       DB_DATABASE: /tmp/topogest-tests.sqlite
       CACHE_STORE: array
