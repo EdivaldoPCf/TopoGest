@@ -8,8 +8,8 @@ Este repositório possui dois ambientes independentes no mesmo servidor:
 | `development` | homologação | PostgreSQL | `http://catlog.tail738f14.ts.net/topogest/` |
 
 Produção escuta somente no endereço da LAN. Homologação escuta somente no
-endereço Tailscale. Banco de dados, PHP-FPM e Reverb ficam apenas nas redes
-internas do Docker e não publicam portas no host.
+endereço Tailscale. Cada ambiente usa um contêiner de aplicação e um contêiner
+PostgreSQL. Os bancos não publicam portas no host.
 
 ## Configuração
 
@@ -26,7 +26,7 @@ correspondente e reinicie seus serviços pelo Portainer. Não envie um arquivo
 
 O serviço `topogest-pipeline` consulta as duas branches. Quando encontra um novo
 commit, ele clona uma cópia limpa, constrói imagens versionadas pelo SHA, executa
-os testes, aplica as migrations e verifica `/topogest/up`. Uma falha antes da
+os testes, aplica as migrations e verifica `/topogest/`. Uma falha antes da
 publicação preserva a versão em execução; uma falha no health check restaura as
 imagens anteriores.
 
@@ -36,12 +36,14 @@ não recria os ambientes.
 
 ## Serviços de cada ambiente
 
-- `web`: Nginx e a única porta publicada.
-- `app`: Laravel/PHP-FPM.
-- `db`: banco persistente, sem porta publicada.
-- `queue`: processamento assíncrono.
-- `scheduler`: tarefas agendadas do Laravel.
-- `reverb`: WebSocket interno, encaminhado pelo Nginx em `/topogest/app`.
+- `topogest-producao` ou `topogest-dev`: Nginx, Laravel/PHP-FPM, fila,
+  agendador e Reverb, coordenados pelo Supervisor. É a única porta publicada.
+- `topogest-producao-db` ou `topogest-dev-db`: PostgreSQL persistente, sem porta
+  publicada.
+
+O Reverb escuta apenas dentro do contêiner na porta 8080. O Nginx encaminha as
+conexões WebSocket recebidas em `/topogest/app`, portanto não é necessário abrir
+outra porta no servidor.
 
 Os volumes de produção e homologação têm nomes separados. Remover um contêiner
 não remove seus dados, mas remover explicitamente os volumes apaga o banco e os

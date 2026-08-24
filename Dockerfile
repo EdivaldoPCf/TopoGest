@@ -30,6 +30,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libsqlite3-dev \
         libxml2-dev \
         libzip-dev \
+        nginx \
+        supervisor \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
@@ -43,7 +45,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pdo_sqlite \
         xml \
         zip \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -f /etc/nginx/sites-enabled/default
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
@@ -77,9 +80,13 @@ RUN composer dump-autoload --no-dev --classmap-authoritative --no-interaction \
     && chmod -R 775 storage bootstrap/cache
 
 COPY docker/php/production.ini /usr/local/etc/php/conf.d/99-topogest.ini
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY docker/supervisor/topogest.conf /etc/supervisor/conf.d/topogest.conf
 
-EXPOSE 9000
-CMD ["php-fpm"]
+RUN nginx -t
+
+EXPOSE 80
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
 FROM app AS test
 
@@ -91,10 +98,3 @@ RUN composer install \
     && touch .env
 
 CMD ["php", "artisan", "test"]
-
-FROM nginx:1.28-alpine AS web
-
-COPY --from=app /var/www/html/public /var/www/html/public
-COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80

@@ -1,5 +1,5 @@
 x-app: &app
-  image: topogest-app:${IMAGE_TAG:?IMAGE_TAG is required}
+  image: topogest:${IMAGE_TAG:?IMAGE_TAG is required}
   build:
     context: .
     dockerfile: Dockerfile
@@ -80,63 +80,15 @@ services:
 
   app:
     <<: *app
-    container_name: ${CONTAINER_PREFIX:?CONTAINER_PREFIX is required}-app
-    command: php-fpm
-    healthcheck:
-      test: ["CMD", "php-fpm", "-t"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-
-  queue:
-    <<: *app
-    container_name: ${CONTAINER_PREFIX:?CONTAINER_PREFIX is required}-queue
-    command: php artisan queue:work --sleep=3 --tries=3 --timeout=120 --no-interaction
-    stop_grace_period: 30s
-
-  scheduler:
-    <<: *app
-    container_name: ${CONTAINER_PREFIX:?CONTAINER_PREFIX is required}-scheduler
-    command: php artisan schedule:work --no-interaction
-    stop_grace_period: 30s
-
-  reverb:
-    <<: *app
-    container_name: ${CONTAINER_PREFIX:?CONTAINER_PREFIX is required}-reverb
-    command: php artisan reverb:start --host=0.0.0.0 --port=8080
-    expose:
-      - "8080"
-    stop_grace_period: 30s
-
-  web:
-    container_name: ${CONTAINER_PREFIX:?CONTAINER_PREFIX is required}-web
-    image: topogest-web:${IMAGE_TAG:?IMAGE_TAG is required}
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: web
-      args:
-        VITE_APP_NAME: ${APP_NAME:-TopoGest}
-        VITE_REVERB_APP_KEY: ${REVERB_APP_KEY:?REVERB_APP_KEY is required}
-    restart: unless-stopped
+    container_name: ${CONTAINER_PREFIX:?CONTAINER_PREFIX is required}
     ports:
       - "${PUBLISH_IP:?PUBLISH_IP is required}:80:80"
-    volumes:
-      - storage_data:/var/www/html/storage:ro
-    networks:
-      - backend
-    depends_on:
-      app:
-        condition: service_healthy
-      reverb:
-        condition: service_started
+    stop_grace_period: 30s
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/topogest/"]
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://127.0.0.1/topogest/"]
       interval: 15s
       timeout: 5s
       retries: 5
-    security_opt:
-      - no-new-privileges:true
 
 volumes:
   db_data:
