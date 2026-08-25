@@ -10,7 +10,10 @@ class MarcoController extends Controller
 {
     public function index(Request $request)
     {
-        $credencial = $request->get('credencial', 'BCA');
+        $credenciaisList = \App\Models\Credencial::orderBy('codigo')->get();
+        $credencialDefault = $credenciaisList->first() ? $credenciaisList->first()->codigo : 'BCA';
+        
+        $credencial = $request->get('credencial', $credencialDefault);
         $tipo = $request->get('tipo', 'M');
         $search = $request->get('search');
 
@@ -51,7 +54,7 @@ class MarcoController extends Controller
         $totalBca = Marco::where('credencial', 'BCA')->count();
         $totalEmes = Marco::where('credencial', 'EMES')->count();
 
-        return view('admin.marcos', compact('marcos', 'ultimo', 'credencial', 'tipo', 'totalBca', 'totalEmes', 'sortBy', 'sortDir'));
+        return view('admin.marcos', compact('marcos', 'credenciaisList', 'credencial', 'tipo', 'ultimo', 'sortBy', 'sortDir'));
     }
 
     public function store(Request $request)

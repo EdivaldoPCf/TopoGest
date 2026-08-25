@@ -1,29 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $pasta->nome }} - TopoGest</title>
-
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Alpine -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Leaflet.js -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- proj4js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
-
-    <style>
-        [x-cloak] {
+@push('styles')
+<style>
+[x-cloak] {
             display: none !important;
         }
 
@@ -178,159 +157,37 @@
         #print-table-section {
             display: none;
         }
-    </style>
-</head>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</style>
+@endpush
 
-<body class="min-h-screen overflow-x-hidden bg-[#E5E7EB] text-white">
+@section('content')
+<div class="w-full animate-fade" x-data="app()">
 
-    <!-- BACKGROUND -->
-    <div class="fixed inset-0 -z-10">
-        <img
-            src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
-            class="w-full h-full object-cover"
-            alt="Background">
 
-        <div class="absolute inset-0 bg-[#00111f]/50"></div>
-
-        <div class="absolute inset-0"
-             style="background:
-             radial-gradient(circle at top left, rgba(0,74,124,.35), transparent 35%),
-             radial-gradient(circle at bottom right, rgba(0,51,102,.40), transparent 35%);">
-        </div>
+    <!-- HEADER -->
+    <div class="mb-8 bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-white shadow-sm inline-block w-max pr-12">
+        <h2 class="text-3xl font-black text-slate-800 tracking-tight">{{ $pasta->nome }}</h2>
+        <p class="text-slate-600 mt-1 font-medium">Pasta Atual</p>
     </div>
 
-    <div id="main-wrapper"
-         x-data="app()" 
-         @keydown.escape.window="closeModal('createFolderModal'); closeModal('uploadModal'); closeModal('pendenciaModal'); deleteModal = false; previewModal = false; openSigefModal = false; finalizeModal = false; revertModal = false; openCpfModal = false" 
-         class="relative w-full max-w-7xl mx-auto px-4 md:px-8 py-8 animate-fade">
 
-        <!-- HEADER -->
-        <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-12">
-
-            <!-- LOGO -->
-            <a href="{{ route('dashboard') }}"
-               class="flex items-center gap-4 group w-fit">
-
-                <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
-                         alt="TopoGest"
-                         class="w-full h-full object-contain p-2">
-                </div>
-
-                <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
-                         alt="TopoGest"
-                         class="relative z-10 h-8 w-auto">
-                </div>
-            </a>
-
-            <!-- RIGHT -->
-            <div class="flex flex-wrap items-center gap-4">
-
-                <!-- NOTIFICAÇÕES -->
-                <a href="{{ route('notificacoes.index') }}"
-                   class="glass glow w-14 h-14 rounded-2xl flex items-center justify-center border border-white/10 hover:bg-[#003366] transition-all duration-300 card-hover">
-
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-6 w-6"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor">
-
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                    </svg>
-                </a>
-
-                <!-- PERFIL -->
-                <div class="glass glow rounded-3xl px-4 py-3 flex items-center gap-4 border border-white/10 flex items-center justify-center font-black uppercase text-sm">
-                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-[#003366] border-2 border-white/20 flex items-center justify-center text-lg font-black">
-                        @if(Auth::user()->photo)
-                            <img src="{{ asset('storage/' . Auth::user()->photo) }}"
-                                 class="w-full h-full object-cover">
-                        @else
-                            {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                        @endif
-                    </div>
-
-                    <div class="leading-tight">
-                        <p class="text-[11px] uppercase tracking-[3px] text-white/60">
-                            Bem-vindo
-                        </p>
-
-                        <h2 class="text-xl font-black uppercase italic">
-                            {{ explode(' ', Auth::user()->name)[0] }}
-                        </h2>
-                    </div>
-                </div>
-
-            </div>
-        </header>
-
-        <!-- TOP TITLE -->
-        <div class="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div class="inline-flex items-center gap-3 glass glow rounded-3xl px-8 py-5 border border-white/10">
-                <div class="w-3 h-12 rounded-full bg-[#00E500]"></div>
-                <div>
-                    <p class="uppercase tracking-[4px] text-xs text-white/60">
-                        Pasta Atual
-                    </p>
-                    <h1 class="text-3xl md:text-4xl font-black italic uppercase tracking-tight">
-                        {{ $pasta->nome }}
-                    </h1>
-                </div>
-            </div>
-
-            <!-- BACK BUTTON -->
-            @if($pasta->parent)
-                <a href="{{ route('admin.pastas.show', $pasta->parent->id) }}"
-                   class="bg-white/10 hover:bg-white/20 text-white px-6 py-4 rounded-2xl font-black uppercase text-sm transition border border-white/10 flex items-center gap-2 shadow-lg w-fit">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Voltar
-                </a>
-            @else
-                <a href="{{ route('admin.pastas.index') }}"
-                   class="bg-white/10 hover:bg-white/20 text-white px-6 py-4 rounded-2xl font-black uppercase text-sm transition border border-white/10 flex items-center gap-2 shadow-lg w-fit">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Voltar
-                </a>
-            @endif
-        </div>
-
-        @if(session('success'))
-            <div class="mb-6 rounded-[20px] bg-emerald-500/15 border border-emerald-500/30 p-4 text-emerald-100 animate-fade">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mb-6 rounded-[20px] bg-rose-500/15 border border-rose-500/30 p-4 text-rose-100 animate-fade">
-                {{ session('error') }}
-            </div>
-        @endif
-
-            <!-- MAIN CONTENT AREA -->
-            <main class="w-full space-y-8">
+<main class="w-full space-y-8">
 
                 <!-- BREADCRUMBS -->
-                <div class="flex items-center flex-wrap gap-2 text-sm text-white/60 mb-6 bg-white/5 border border-white/10 rounded-2xl px-5 py-3 w-fit">
-                    <a href="{{ route('admin.pastas.index') }}" class="hover:text-[#00E500] transition">Início</a>
+                <div class="flex items-center flex-wrap gap-2 text-sm text-slate-500 mb-6 bg-white/5 border border-white/10 rounded-2xl px-5 py-3 w-fit">
+                    <a href="{{ route('admin.pastas.index') }}" class="hover:text-slate-800 transition">Início</a>
                     @if($pasta->parent)
                         @if($pasta->parent->parent)
                             <span>/</span>
-                            <a href="{{ route('admin.pastas.show', $pasta->parent->parent->id) }}" class="hover:text-[#00E500] transition">{{ $pasta->parent->parent->nome }}</a>
+                            <a href="{{ route('admin.pastas.show', $pasta->parent->parent->id) }}" class="hover:text-slate-800 transition">{{ $pasta->parent->parent->nome }}</a>
                         @endif
                         <span>/</span>
-                        <a href="{{ route('admin.pastas.show', $pasta->parent->id) }}" class="hover:text-[#00E500] transition">{{ $pasta->parent->nome }}</a>
+                        <a href="{{ route('admin.pastas.show', $pasta->parent->id) }}" class="hover:text-slate-800 transition">{{ $pasta->parent->nome }}</a>
                     @endif
                     <span>/</span>
-                    <span class="text-white font-bold">{{ $pasta->nome }}</span>
+                    <span class="text-slate-800 font-bold">{{ $pasta->nome }}</span>
                 </div>
 
                 @php
@@ -341,20 +198,20 @@
 
 
                 <!-- SUBPASTAS -->
-                <div class="glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl">
+                <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
 
                     <div class="px-8 py-6 border-b border-white/10 flex justify-between items-center">
                         <div>
                             <h2 class="text-2xl font-black uppercase italic">
                                 Subpastas
                             </h2>
-                            <p class="text-sm text-white/40">
+                            <p class="text-sm text-slate-500">
                                 Organização do serviço
                             </p>
                         </div>
                         <div class="flex items-center gap-3 flex-wrap">
                             @if($isLevel3)
-                                <button @click="sincronizarPastaUnica({{ $pasta->id }})" :disabled="syncLocalExecutando" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2.5 rounded-xl text-xs transition border border-white/10 uppercase flex items-center gap-2 disabled:opacity-50">
+                                <button @click="sincronizarPastaUnica({{ $pasta->id }})" :disabled="syncLocalExecutando" class="bg-emerald-600 hover:bg-emerald-500 text-slate-800 font-black px-4 py-2.5 rounded-xl text-xs transition border border-white/10 uppercase flex items-center gap-2 disabled:opacity-50">
                                     <span x-show="!syncLocalExecutando">🔄 Sincronizar</span>
                                     <span x-show="syncLocalExecutando">Sincronizando...</span>
                                 </button>
@@ -365,14 +222,14 @@
                                     ⚙️
                                 </button>
                                 
-                                <button @click="openCpfModal = true"
+                                <button type="button" @click="openCpfModal = true"
                                         title="Cliente / Proprietário"
                                         class="w-10 h-10 bg-white/5 hover:bg-white/10 flex items-center justify-center rounded-xl text-lg shadow-sm transition relative">
                                     👥
                                     <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-[#00111f] {{ $pasta->cliente_id ? 'bg-emerald-500' : ($pasta->identificador_cliente ? 'bg-yellow-400' : 'bg-rose-500') }}"></div>
                                 </button>
                                 
-                                <button @click="openSigefModal = true"
+                                <button type="button" @click="openSigefModal = true"
                                         title="Integração SIGEF"
                                         class="w-10 h-10 bg-white/5 hover:bg-white/10 flex items-center justify-center rounded-xl text-lg shadow-sm transition relative">
                                     🌐
@@ -380,8 +237,8 @@
                                 </button>
                             @endif
 
-                            <button @click="openCreateModal"
-                                    class="bg-[#00E500] hover:bg-green-600 text-black font-black uppercase px-5 py-2.5 rounded-xl text-xs shadow-lg transition flex items-center gap-1.5 ml-2">
+                            <button type="button" @click="openCreateModal"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 font-black uppercase px-5 py-2.5 rounded-xl text-xs shadow-lg transition flex items-center gap-1.5 ml-2">
                                 <span>+ {{ $isLevel2 ? 'Novo Imóvel' : 'Nova Pasta' }}</span>
                             </button>
                         </div>
@@ -390,29 +247,29 @@
                     <!-- Barra de Progresso da Sincronização Local -->
                     <div x-show="syncLocalExecutando" x-cloak class="mx-8 mt-6 bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2 animate-fade">
                         <div class="flex items-center justify-between text-xs font-bold">
-                            <span class="text-white/60 uppercase tracking-wider">Progresso da Sincronização</span>
-                            <span class="text-[#00E500]" x-text="syncPercent + '% (' + syncCurrent + '/' + syncTotal + ')'">0%</span>
+                            <span class="text-slate-500 uppercase tracking-wider">Progresso da Sincronização</span>
+                            <span class="text-slate-800" x-text="syncPercent + '% (' + syncCurrent + '/' + syncTotal + ')'">0%</span>
                         </div>
                         <div class="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
                             <div class="bg-[#00E500] h-2.5 rounded-full transition-all duration-300 shadow-[0_0_10px_#00E500]" :style="'width: ' + syncPercent + '%'"></div>
                         </div>
-                        <div class="text-[10px] text-white/40 truncate" x-text="syncLastFile ? 'Processando: ' + syncLastFile : 'Calculando arquivos na pasta física...'"></div>
+                        <div class="text-[10px] text-slate-500 truncate" x-text="syncLastFile ? 'Processando: ' + syncLastFile : 'Calculando arquivos na pasta física...'"></div>
                     </div>
 
                     <div class="p-8">
                         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             @forelse($pasta->subpastas as $sub)
-                                <div class="glass glow rounded-3xl border border-white/5 p-6 flex flex-col justify-between hover:scale-[1.02] transition duration-300 card-hover">
+                                <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
                                     <div>
                                         <div class="flex items-start gap-4 mb-4">
                                             <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 border border-yellow-500/20 flex items-center justify-center text-3xl shrink-0">
                                                 📁
                                             </div>
                                             <div class="min-w-0">
-                                                <h3 class="font-black uppercase text-white text-base tracking-wide truncate">
+                                                <h3 class="font-black uppercase text-slate-800 text-base tracking-wide truncate">
                                                     {{ $sub->nome }}
                                                 </h3>
-                                                <p class="text-xs text-white/40 mt-0.5">
+                                                <p class="text-xs text-slate-500 mt-0.5">
                                                     Criada em {{ $sub->created_at->format('d/m/Y') }}
                                                 </p>
                                             </div>
@@ -422,13 +279,13 @@
                                             <!-- Badge Cliente -->
                                             <div class="mt-4 bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2">
                                                 <div>
-                                                    <span class="text-[9px] uppercase tracking-widest text-white/50 block font-bold">Cliente</span>
-                                                    <span class="text-sm font-black text-white uppercase truncate block leading-tight">{{ $sub->cliente?->name ?? 'Não Cadastrado' }}</span>
+                                                    <span class="text-[9px] uppercase tracking-widest text-slate-500 block font-bold">Cliente</span>
+                                                    <span class="text-sm font-black text-slate-800 uppercase truncate block leading-tight">{{ $sub->cliente?->name ?? 'Não Cadastrado' }}</span>
                                                 </div>
                                                 @if($sub->categoria_servico)
                                                     <div>
-                                                        <span class="text-[9px] uppercase tracking-widest text-white/50 block font-bold">Categoria</span>
-                                                        <span class="text-xs font-bold text-[#00E500] uppercase truncate block leading-tight">{{ $sub->categoria_servico }}</span>
+                                                        <span class="text-[9px] uppercase tracking-widest text-slate-500 block font-bold">Categoria</span>
+                                                        <span class="text-xs font-bold text-slate-800 uppercase truncate block leading-tight">{{ $sub->categoria_servico }}</span>
                                                     </div>
                                                 @endif
                                             </div>
@@ -437,15 +294,15 @@
                                             <div class="mt-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 space-y-2">
                                                 <div>
                                                     <span class="text-[9px] uppercase tracking-widest text-yellow-400 block font-bold">Cliente (Não Cadastrado)</span>
-                                                    <span class="text-xs font-bold text-white uppercase truncate block leading-tight">
+                                                    <span class="text-xs font-bold text-slate-800 uppercase truncate block leading-tight">
                                                         CPF: {{ strlen($sub->identificador_cliente) === 11 ? preg_replace("/(\d{3})(\d{3})(\d{3})(\d{2})/", "$1.$2.$3-$4", $sub->identificador_cliente) : $sub->identificador_cliente }}
                                                     </span>
                                                     <span class="text-[9px] text-yellow-300/80 block mt-1">Aguardando cadastro do cliente...</span>
                                                 </div>
                                                 @if($sub->categoria_servico)
                                                     <div>
-                                                        <span class="text-[9px] uppercase tracking-widest text-white/50 block font-bold">Categoria</span>
-                                                        <span class="text-xs font-bold text-[#00E500] uppercase truncate block leading-tight">{{ $sub->categoria_servico }}</span>
+                                                        <span class="text-[9px] uppercase tracking-widest text-slate-500 block font-bold">Categoria</span>
+                                                        <span class="text-xs font-bold text-slate-800 uppercase truncate block leading-tight">{{ $sub->categoria_servico }}</span>
                                                     </div>
                                                 @endif
                                             </div>
@@ -454,15 +311,15 @@
                                             <div class="mt-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 space-y-2">
                                                 <div>
                                                     <span class="text-[9px] uppercase tracking-widest text-yellow-400 block font-bold">Cliente (Não Cadastrado)</span>
-                                                    <span class="text-xs font-bold text-white uppercase truncate block leading-tight">
+                                                    <span class="text-xs font-bold text-slate-800 uppercase truncate block leading-tight">
                                                         CPF NÃO ENCONTRADO
                                                     </span>
                                                     <span class="text-[9px] text-yellow-300/80 block mt-1">Aguardando identificação do cliente...</span>
                                                 </div>
                                                 @if($sub->categoria_servico)
                                                     <div>
-                                                        <span class="text-[9px] uppercase tracking-widest text-white/50 block font-bold">Categoria</span>
-                                                        <span class="text-xs font-bold text-[#00E500] uppercase truncate block leading-tight">{{ $sub->categoria_servico }}</span>
+                                                        <span class="text-[9px] uppercase tracking-widest text-slate-500 block font-bold">Categoria</span>
+                                                        <span class="text-xs font-bold text-slate-800 uppercase truncate block leading-tight">{{ $sub->categoria_servico }}</span>
                                                     </div>
                                                 @endif
                                             </div>
@@ -478,7 +335,7 @@
                                         <button
                                             type="button"
                                             onclick="togglePastaOculto({{ $sub->id }}, this)"
-                                            class="p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 transition flex items-center justify-center {{ $sub->oculto ? 'bg-amber-600 text-white hover:bg-amber-500' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10' }}"
+                                            class="p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 transition flex items-center justify-center {{ $sub->oculto ? 'bg-amber-600 text-slate-800 hover:bg-amber-500' : 'bg-white/5 text-slate-500 hover:text-slate-800 hover:bg-white/10' }}"
                                             title="{{ $sub->oculto ? 'Esta pasta está oculta do cliente. Clique para mostrar.' : 'Esta pasta está visível para o cliente. Clique para ocultar.' }}">
                                             <span>{{ $sub->oculto ? '🙈 Oculta' : '👁️ Visível' }}</span>
                                         </button>
@@ -491,7 +348,7 @@
                                     </div>
                                 </div>
                             @empty
-                                <div class="col-span-full py-16 text-center text-white/30 font-bold uppercase text-sm">
+                                <div class="col-span-full py-16 text-center text-slate-800/30 font-bold uppercase text-sm">
                                     Nenhuma subpasta encontrada.
                                 </div>
                             @endforelse
@@ -502,22 +359,22 @@
 
                 <!-- DOCUMENTOS E PENDÊNCIAS -->
                 @if($pasta->parent_id && $pasta->parent?->parent_id)
-                <div class="glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl">
+                <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
 
                     <div class="px-8 py-6 border-b border-white/10 flex justify-between items-center">
                         <div>
                             <h2 class="text-2xl font-black uppercase italic">
                                 Arquivos e Pendências
                             </h2>
-                            <p class="text-sm text-white/40">
+                            <p class="text-sm text-slate-500">
                                 Documentos e pendências vinculadas a este serviço
                             </p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button @click="openUploadModal" class="bg-[#004A7C] hover:bg-blue-700 text-white font-black px-4 py-2.5 rounded-xl text-xs transition border border-white/10 uppercase">
+                            <button type="button" @click="openUploadModal" class="bg-[#004A7C] hover:bg-blue-700 text-slate-800 font-black px-4 py-2.5 rounded-xl text-xs transition border border-white/10 uppercase">
                                 Upload Arquivo
                             </button>
-                            <button @click="openPendenciaModal" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black px-4 py-2.5 rounded-xl text-xs transition uppercase">
+                            <button type="button" @click="openPendenciaModal" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black px-4 py-2.5 rounded-xl text-xs transition uppercase">
                                 Nova Pendência
                             </button>
                         </div>
@@ -538,7 +395,7 @@
                                                         {{ $pendencia->titulo }}
                                                     </h4>
                                                 </div>
-                                                <p class="text-xs text-white/70 leading-relaxed">
+                                                <p class="text-xs text-slate-800/70 leading-relaxed">
                                                     {{ $pendencia->descricao }}
                                                 </p>
                                             </div>
@@ -548,7 +405,7 @@
                                                 </span>
                                                 <button
                                                     @click="openDeleteModal('{{ route('pendencias.destroy', $pendencia->id) }}', '{{ addslashes($pendencia->titulo) }}')"
-                                                    class="bg-red-600/80 hover:bg-red-700 text-white px-4 py-1.5 rounded-xl font-black uppercase text-[10px] transition">
+                                                    class="bg-red-600/80 hover:bg-red-700 text-slate-800 px-4 py-1.5 rounded-xl font-black uppercase text-[10px] transition">
                                                     Excluir
                                                 </button>
                                             </div>
@@ -560,7 +417,7 @@
 
                         <!-- ARQUIVOS -->
                         <div>
-                            <h3 class="text-xs uppercase tracking-[3px] text-[#00E500] font-bold mb-4">Documentos da Pasta</h3>
+                            <h3 class="text-xs uppercase tracking-[3px] text-slate-800 font-bold mb-4">Documentos da Pasta</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                                 @forelse($pasta->arquivos as $arq)
                                     <div class="glass border border-white/5 rounded-3xl p-6 flex flex-col justify-between hover:scale-[1.01] transition animate-fade">
@@ -588,10 +445,10 @@
                                                 {{ $icon }}
                                             </div>
                                             <div class="min-w-0">
-                                                <h4 class="font-black text-white uppercase text-sm truncate leading-snug">
+                                                <h4 class="font-black text-slate-800 uppercase text-sm truncate leading-snug">
                                                     {{ $arq->nome }}
                                                 </h4>
-                                                <p class="text-[10px] text-white/40 mt-1 uppercase font-bold">
+                                                <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold">
                                                     {{ $arq->tipo }} • {{ $arq->tamanho }} MB
                                                 </p>
                                             </div>
@@ -600,7 +457,7 @@
                                         <div class="flex items-center gap-2 mt-6 pt-4 border-t border-white/5">
                                             <button
                                                 @click="openPreviewModal('{{ asset('storage/'.$arq->path) }}', '{{ $arq->tipo }}', '{{ addslashes($arq->nome) }}')"
-                                                class="flex-1 bg-[#003366] hover:bg-[#004A7C] text-white py-2 rounded-xl font-black uppercase text-[10px] text-center transition">
+                                                class="flex-1 bg-[#003366] hover:bg-[#004A7C] text-slate-800 py-2 rounded-xl font-black uppercase text-[10px] text-center transition">
                                                 Visualizar
                                             </button>
 
@@ -612,20 +469,20 @@
                                             <button
                                                 type="button"
                                                 onclick="toggleArquivoOculto({{ $arq->id }}, this)"
-                                                class="p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 transition flex items-center justify-center {{ $arq->oculto ? 'bg-amber-600 text-white hover:bg-amber-500' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10' }}"
+                                                class="p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 transition flex items-center justify-center {{ $arq->oculto ? 'bg-amber-600 text-slate-800 hover:bg-amber-500' : 'bg-white/5 text-slate-500 hover:text-slate-800 hover:bg-white/10' }}"
                                                 title="{{ $arq->oculto ? 'Este arquivo está oculto do cliente. Clique para mostrar.' : 'Este arquivo está visível para o cliente. Clique para ocultar.' }}">
                                                 <span>{{ $arq->oculto ? '🙈' : '👁️' }}</span>
                                             </button>
 
                                             <button
                                                 @click="openDeleteModal('{{ route('arquivos.destroy', $arq->id) }}', '{{ addslashes($arq->nome) }}')"
-                                                class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl font-black uppercase text-[10px] transition shrink-0">
+                                                class="bg-red-600 hover:bg-red-700 text-slate-800 p-2 rounded-xl font-black uppercase text-[10px] transition shrink-0">
                                                 Excluir
                                             </button>
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="col-span-full py-12 text-center text-white/30 font-bold uppercase text-sm">
+                                    <div class="col-span-full py-12 text-center text-slate-800/30 font-bold uppercase text-sm">
                                         Nenhum arquivo enviado.
                                     </div>
                                 @endforelse
@@ -640,7 +497,7 @@
                 <!-- MAPA SIGEF (carregado automaticamente se houver arquivo ODS) -->
                 <!-- ============================================================ -->
                 @if($pasta->parent_id && $pasta->parent?->parent_id && !$pasta->parent?->parent?->parent_id)
-                <div id="sigef-mapa-section" class="hidden glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl animate-fade">
+                <div id="sigef-mapa-section" class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
 
                     <!-- Header -->
                     <div class="px-8 py-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -650,8 +507,8 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-3 flex-wrap">
-                                    <span class="uppercase tracking-[3px] text-xs text-[#00E500] font-black">Planta de Situação</span>
-                                    <span class="bg-emerald-500/25 text-[#00E500] text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">SIGEF / INCRA</span>
+                                    <span class="uppercase tracking-[3px] text-xs text-slate-800 font-black">Planta de Situação</span>
+                                    <span class="bg-emerald-500/25 text-slate-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">SIGEF / INCRA</span>
                                 </div>
                                 <h2 id="sigef-titulo" class="text-2xl font-black italic uppercase mt-1">
                                     Carregando dados...
@@ -661,7 +518,7 @@
                         <div class="flex flex-wrap gap-2">
 
                             <button id="btn-satelite" onclick="alternarCamada()"
-                                class="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 border border-white/5 shadow-md">
+                                class="bg-white/10 hover:bg-white/20 text-slate-800 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2 border border-white/5 shadow-md">
                                 🛰️ Satélite
                             </button>
                         </div>
@@ -670,20 +527,20 @@
                     <!-- Metadados -->
                     <div id="sigef-meta" class="hidden px-8 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-white/10 bg-white/5">
                         <div>
-                            <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Denominação</p>
-                            <p id="meta-imovel" class="text-sm font-black text-white mt-0.5 truncate">—</p>
+                            <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Denominação</p>
+                            <p id="meta-imovel" class="text-sm font-black text-slate-800 mt-0.5 truncate">—</p>
                         </div>
                         <div>
-                            <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Detentor</p>
-                            <p id="meta-detentor" class="text-sm font-black text-white mt-0.5 truncate">—</p>
+                            <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Detentor</p>
+                            <p id="meta-detentor" class="text-sm font-black text-slate-800 mt-0.5 truncate">—</p>
                         </div>
                         <div>
-                            <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Município</p>
-                            <p id="meta-municipio" class="text-sm font-black text-white mt-0.5 truncate">—</p>
+                            <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Município</p>
+                            <p id="meta-municipio" class="text-sm font-black text-slate-800 mt-0.5 truncate">—</p>
                         </div>
                         <div>
-                            <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Área</p>
-                            <p id="meta-area" class="text-sm font-black text-[#00E500] mt-0.5">—</p>
+                            <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Área</p>
+                            <p id="meta-area" class="text-sm font-black text-slate-800 mt-0.5">—</p>
                         </div>
                     </div>
 
@@ -715,11 +572,11 @@
                         <div class="flex items-center gap-6">
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded-full bg-[#00E500] border-2 border-white/20 shadow"></div>
-                                <span id="footer-vertices" class="text-xs font-bold text-white/80">0 vértices</span>
+                                <span id="footer-vertices" class="text-xs font-bold text-slate-800/80">0 vértices</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-3 rounded bg-blue-500/40 border-2 border-blue-400"></div>
-                                <span class="text-xs font-bold text-white/80">Perímetro do Imóvel</span>
+                                <span class="text-xs font-bold text-slate-800/80">Perímetro do Imóvel</span>
                             </div>
                         </div>
                         <a id="footer-link-sigef" href="#" target="_blank"
@@ -739,20 +596,20 @@
              class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
              x-cloak>
 
-            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-white">
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-slate-800">
 
                 <div class="flex justify-between items-center mb-8">
                     <div>
-                        <h2 class="text-3xl font-black uppercase italic text-[#00E500]">
+                        <h2 class="text-3xl font-black uppercase italic text-slate-800">
                             {{ $isLevel2 ? 'Novo Imóvel' : 'Nova Subpasta' }}
                         </h2>
-                        <p class="text-white/60 mt-2">
+                        <p class="text-slate-500 mt-2">
                             {{ $isLevel2 ? 'Associe o imóvel a um cliente usando CPF.' : 'Crie uma nova subpasta vinculada a esta pasta.' }}
                         </p>
                     </div>
 
                     <button @click="closeModal('createFolderModal')"
-                            class="text-white/40 hover:text-white text-3xl leading-none">
+                            class="text-slate-500 hover:text-slate-800 text-3xl leading-none">
                         ×
                     </button>
                 </div>
@@ -762,7 +619,7 @@
                     <input type="hidden" name="parent_id" value="{{ $pasta->id }}">
 
                     <div class="mb-6">
-                        <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                        <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                             Nome do Imóvel / Subpasta
                         </label>
                         <input type="text"
@@ -773,7 +630,7 @@
 
                     @if($isLevel2)
                         <div class="mb-6">
-                            <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                            <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                                 CPF do Cliente
                             </label>
                             <input type="text"
@@ -784,7 +641,7 @@
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                            <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                                 Categoria do Serviço
                             </label>
                             <input type="text"
@@ -802,7 +659,7 @@
 
                         <button type="button"
                                 @click="closeModal('createFolderModal')"
-                                class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-black uppercase transition">
+                                class="flex-1 bg-red-600 hover:bg-red-700 text-slate-800 py-3 rounded-2xl font-black uppercase transition">
                             Cancelar
                         </button>
                     </div>
@@ -816,20 +673,20 @@
              class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
              x-cloak>
 
-            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-white">
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-slate-800">
 
                 <div class="flex justify-between items-center mb-8">
                     <div>
-                        <h2 class="text-3xl font-black uppercase italic text-[#00E500]">
+                        <h2 class="text-3xl font-black uppercase italic text-slate-800">
                             Upload de Arquivo
                         </h2>
-                        <p class="text-white/60 mt-2">
+                        <p class="text-slate-500 mt-2">
                             Anexe um documento para esta pasta.
                         </p>
                     </div>
 
                     <button @click="closeModal('uploadModal')"
-                            class="text-white/40 hover:text-white text-3xl leading-none">
+                            class="text-slate-500 hover:text-slate-800 text-3xl leading-none">
                         ×
                     </button>
                 </div>
@@ -840,7 +697,7 @@
                     @csrf
 
                     <div class="mb-6">
-                        <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                        <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                             Nome do Documento
                         </label>
                         <input type="text"
@@ -850,13 +707,13 @@
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                        <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                             Selecionar Arquivo
                         </label>
 
                         <div class="relative">
                             <label class="relative w-full h-full flex items-center justify-center cursor-pointer bg-white/10 border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition border-dashed">
-                                <div class="pointer-events-none text-white/80 font-bold uppercase text-xs">Clique para selecionar o arquivo</div>
+                                <div class="pointer-events-none text-slate-800/80 font-bold uppercase text-xs">Clique para selecionar o arquivo</div>
                                 <input type="file"
                                        name="arquivo"
                                        required
@@ -873,7 +730,7 @@
 
                         <button type="button"
                                 @click="closeModal('uploadModal')"
-                                class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-black uppercase transition">
+                                class="flex-1 bg-red-600 hover:bg-red-700 text-slate-800 py-3 rounded-2xl font-black uppercase transition">
                             Cancelar
                         </button>
                     </div>
@@ -887,20 +744,20 @@
              class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
              x-cloak>
 
-            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-white">
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-slate-800">
 
                 <div class="flex justify-between items-center mb-8">
                     <div>
-                        <h2 class="text-3xl font-black uppercase italic text-[#00E500]">
+                        <h2 class="text-3xl font-black uppercase italic text-slate-800">
                             Nova Pendência
                         </h2>
-                        <p class="text-white/60 mt-2">
+                        <p class="text-slate-500 mt-2">
                             Registre um item pendente para o cliente.
                         </p>
                     </div>
 
                     <button @click="closeModal('pendenciaModal')"
-                            class="text-white/40 hover:text-white text-3xl leading-none">
+                            class="text-slate-500 hover:text-slate-800 text-3xl leading-none">
                         ×
                     </button>
                 </div>
@@ -909,7 +766,7 @@
                     @csrf
 
                     <div class="mb-6">
-                        <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                        <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                             Título da Pendência
                         </label>
                         <input type="text"
@@ -919,7 +776,7 @@
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                        <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                             Descrição
                         </label>
                         <textarea name="descricao"
@@ -936,7 +793,7 @@
 
                         <button type="button"
                                 @click="closeModal('pendenciaModal')"
-                                class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-black uppercase transition">
+                                class="flex-1 bg-red-600 hover:bg-red-700 text-slate-800 py-3 rounded-2xl font-black uppercase transition">
                             Cancelar
                         </button>
                     </div>
@@ -950,14 +807,14 @@
              class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
              x-cloak>
 
-            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl max-w-4xl flex flex-col animate-fade text-white">
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl max-w-4xl flex flex-col animate-fade text-slate-800">
 
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-black uppercase italic text-[#00E500]" x-text="previewName">
+                    <h2 class="text-3xl font-black uppercase italic text-slate-800" x-text="previewName">
                         Visualizar Arquivo
                     </h2>
                     <button @click="previewModal = false"
-                            class="text-white/40 hover:text-white text-3xl leading-none">
+                            class="text-slate-500 hover:text-slate-800 text-3xl leading-none">
                         ×
                     </button>
                 </div>
@@ -972,8 +829,8 @@
                     <template x-if="!['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf'].includes(previewType)">
                         <div class="text-center py-10">
                             <span class="text-5xl mb-4 block">📁</span>
-                            <p class="text-white font-bold mb-2">Visualização não disponível</p>
-                            <p class="text-white/40 text-sm mb-6">Arquivos do tipo .<span x-text="previewType.toUpperCase()"></span> não podem ser visualizados diretamente no navegador.</p>
+                            <p class="text-slate-800 font-bold mb-2">Visualização não disponível</p>
+                            <p class="text-slate-500 text-sm mb-6">Arquivos do tipo .<span x-text="previewType.toUpperCase()"></span> não podem ser visualizados diretamente no navegador.</p>
                             <a :href="previewUrl" download class="inline-flex items-center bg-[#00E500] hover:bg-green-500 text-black px-6 py-3 rounded-2xl font-black uppercase text-xs transition">
                                 Baixar Arquivo
                             </a>
@@ -989,20 +846,20 @@
              class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
              x-cloak>
 
-            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-white">
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-slate-800">
 
                 <div class="flex justify-between items-center mb-8">
                     <div>
-                        <h2 class="text-3xl font-black uppercase italic text-[#00E500]">
+                        <h2 class="text-3xl font-black uppercase italic text-slate-800">
                             Código da Parcela (SIGEF)
                         </h2>
-                        <p class="text-white/60 mt-2">
+                        <p class="text-slate-500 mt-2">
                             Insira o GUID/Código identificador da parcela no SIGEF.
                         </p>
                     </div>
 
                     <button @click="openSigefModal = false"
-                            class="text-white/40 hover:text-white text-3xl leading-none">
+                            class="text-slate-500 hover:text-slate-800 text-3xl leading-none">
                         ×
                     </button>
                 </div>
@@ -1012,7 +869,7 @@
                     @method('PATCH')
 
                     <div class="mb-6">
-                        <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                        <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                             Código SIGEF (GUID)
                         </label>
                         <input type="text"
@@ -1020,7 +877,7 @@
                                value="{{ $pasta->codigo_sigef }}"
                                placeholder="Ex: c03260c8-47c0-43db-9ab4-1a91e5210987"
                                class="w-full bg-white text-[#003366] px-5 py-3 rounded-2xl outline-none font-mono font-bold">
-                        <p class="text-white/40 text-xs mt-2">
+                        <p class="text-slate-500 text-xs mt-2">
                             Você pode encontrar esse código na URL do imóvel certificado no SIGEF.
                         </p>
                     </div>
@@ -1033,7 +890,7 @@
 
                         <button type="button"
                                 @click="openSigefModal = false"
-                                class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-black uppercase transition">
+                                class="flex-1 bg-red-600 hover:bg-red-700 text-slate-800 py-3 rounded-2xl font-black uppercase transition">
                             Cancelar
                         </button>
                     </div>
@@ -1046,20 +903,20 @@
              class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
              x-cloak>
 
-            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-white">
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl text-slate-800">
 
                 <div class="flex justify-between items-center mb-8">
                     <div>
-                        <h2 class="text-3xl font-black uppercase italic text-[#00E500]">
+                        <h2 class="text-3xl font-black uppercase italic text-slate-800">
                             Vincular CPF do Proprietário
                         </h2>
-                        <p class="text-white/60 mt-2">
+                        <p class="text-slate-500 mt-2">
                             Insira o CPF do proprietário para que o imóvel seja vinculado a ele automaticamente quando se cadastrar.
                         </p>
                     </div>
 
                     <button @click="openCpfModal = false"
-                            class="text-white/40 hover:text-white text-3xl leading-none">
+                            class="text-slate-500 hover:text-slate-800 text-3xl leading-none">
                         ×
                     </button>
                 </div>
@@ -1068,7 +925,7 @@
                     @csrf
 
                     <div class="mb-6">
-                        <label class="block text-white/70 uppercase text-xs font-bold mb-2">
+                        <label class="block text-slate-800/70 uppercase text-xs font-bold mb-2">
                             CPF (Somente Números)
                         </label>
                         <input type="text"
@@ -1087,7 +944,7 @@
 
                         <button type="button"
                                 @click="openCpfModal = false"
-                                class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-black uppercase transition">
+                                class="flex-1 bg-red-600 hover:bg-red-700 text-slate-800 py-3 rounded-2xl font-black uppercase transition">
                             Cancelar
                         </button>
                     </div>
@@ -1101,15 +958,15 @@
              x-transition
              class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
 
-            <div class="bg-[#003366] border border-white/10 rounded-[35px] p-10 w-full max-w-md shadow-2xl text-white text-center">
+            <div class="bg-[#003366] border border-white/10 rounded-[35px] p-10 w-full max-w-md shadow-2xl text-slate-800 text-center">
 
                 <h2 class="text-3xl font-black mb-4 text-red-500 uppercase italic">
                     Excluir Item?
                 </h2>
 
-                <p class="text-white/60 mb-10">
+                <p class="text-slate-500 mb-10">
                     Deseja realmente excluir
-                    <span class="font-black text-white" x-text="deleteName"></span>?
+                    <span class="font-black text-slate-800" x-text="deleteName"></span>?
                 </p>
 
                 <div class="flex gap-4">
@@ -1124,7 +981,7 @@
                     </form>
 
                     <button @click="deleteModal = false"
-                            class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-2xl font-black uppercase transition text-white border border-white/10">
+                            class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-2xl font-black uppercase transition text-slate-800 border border-white/10">
                         Cancelar
                     </button>
                 </div>
@@ -1137,14 +994,14 @@
              class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
              x-cloak>
 
-            <div class="bg-[#003366] border border-white/10 rounded-[35px] p-10 w-full max-w-md shadow-2xl text-white text-center">
+            <div class="bg-[#003366] border border-white/10 rounded-[35px] p-10 w-full max-w-md shadow-2xl text-slate-800 text-center">
 
                 <h2 class="text-3xl font-black mb-4 text-emerald-400 uppercase italic">
                     Finalizar Serviço?
                 </h2>
 
-                <p class="text-white/60 mb-10 leading-relaxed">
-                    Deseja realmente finalizar o serviço <span class="font-black text-white uppercase">{{ $pasta->nome }}</span>? Ele será movido para Serviços Prontos e seu cliente será notificado.
+                <p class="text-slate-500 mb-10 leading-relaxed">
+                    Deseja realmente finalizar o serviço <span class="font-black text-slate-800 uppercase">{{ $pasta->nome }}</span>? Ele será movido para Serviços Prontos e seu cliente será notificado.
                 </p>
 
                 <div class="flex gap-4">
@@ -1158,7 +1015,7 @@
                     </form>
 
                     <button @click="finalizeModal = false"
-                            class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-2xl font-black uppercase transition text-white border border-white/10">
+                            class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-2xl font-black uppercase transition text-slate-800 border border-white/10">
                         Cancelar
                     </button>
                 </div>
@@ -1171,14 +1028,14 @@
              class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
              x-cloak>
 
-            <div class="bg-[#003366] border border-white/10 rounded-[35px] p-10 w-full max-w-md shadow-2xl text-white text-center">
+            <div class="bg-[#003366] border border-white/10 rounded-[35px] p-10 w-full max-w-md shadow-2xl text-slate-800 text-center">
 
                 <h2 class="text-3xl font-black mb-4 text-yellow-400 uppercase italic">
                     Retornar para Pendente?
                 </h2>
 
-                <p class="text-white/60 mb-10 leading-relaxed">
-                    Deseja retornar o serviço <span class="font-black text-white uppercase">{{ $pasta->nome }}</span> para a lista de Pendentes?
+                <p class="text-slate-500 mb-10 leading-relaxed">
+                    Deseja retornar o serviço <span class="font-black text-slate-800 uppercase">{{ $pasta->nome }}</span> para a lista de Pendentes?
                 </p>
 
                 <div class="flex gap-4">
@@ -1192,7 +1049,7 @@
                     </form>
 
                     <button @click="revertModal = false"
-                            class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-2xl font-black uppercase transition text-white border border-white/10">
+                            class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-2xl font-black uppercase transition text-slate-800 border border-white/10">
                         Cancelar
                     </button>
                 </div>
@@ -1204,18 +1061,18 @@
              x-transition
              class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 modal-overlay"
              x-cloak>
-            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl max-w-4xl flex flex-col text-white max-h-[90vh]">
+            <div class="modal-container bg-[#003366] border border-white/10 rounded-[35px] p-8 shadow-2xl max-w-4xl flex flex-col text-slate-800 max-h-[90vh]">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-3xl font-black uppercase italic text-[#00E500]">
+                        <h2 class="text-3xl font-black uppercase italic text-slate-800">
                             Memorial Descritivo
                         </h2>
-                        <p class="text-white/60 text-xs mt-1 uppercase font-bold tracking-wider">
+                        <p class="text-slate-500 text-xs mt-1 uppercase font-bold tracking-wider">
                             Gerado a partir do perímetro SIGEF
                         </p>
                     </div>
                     <button @click="memorialModal = false"
-                            class="text-white/40 hover:text-white text-3xl leading-none">
+                            class="text-slate-500 hover:text-slate-800 text-3xl leading-none">
                         ×
                     </button>
                 </div>
@@ -1224,7 +1081,7 @@
                     <div x-show="loadingMemorial" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
                         <div class="flex flex-col items-center gap-3">
                             <div class="w-8 h-8 border-4 border-[#00E500] border-t-transparent rounded-full animate-spin"></div>
-                            <span class="text-xs uppercase font-bold tracking-widest text-[#00E500]">Gerando Memorial...</span>
+                            <span class="text-xs uppercase font-bold tracking-widest text-slate-800">Gerando Memorial...</span>
                         </div>
                     </div>
                     <div x-text="memorialTexto"></div>
@@ -1233,7 +1090,7 @@
                 <div class="flex flex-col sm:flex-row gap-4">
                     <button @click="copiarMemorial"
                             :disabled="loadingMemorial"
-                            class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white py-3.5 rounded-2xl font-black uppercase transition flex items-center justify-center gap-2 shadow-lg">
+                            class="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-slate-800 py-3.5 rounded-2xl font-black uppercase transition flex items-center justify-center gap-2 shadow-lg">
                         📋 Copiar Texto
                     </button>
                     <a href="{{ route('pasta.memorial-descritivo', [$pasta->id, 'download' => 'txt']) }}"
@@ -1241,7 +1098,7 @@
                         💾 Baixar TXT
                     </a>
                     <button @click="memorialModal = false"
-                            class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3.5 rounded-2xl font-black uppercase transition shadow-lg">
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-slate-800 py-3.5 rounded-2xl font-black uppercase transition shadow-lg">
                         Fechar
                     </button>
                 </div>
@@ -1613,11 +1470,11 @@
                 const isOculto = data.oculto;
                 const span = btn.querySelector('span');
                 if (isOculto) {
-                    btn.className = "p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 bg-amber-600 text-white hover:bg-amber-500 transition flex items-center justify-center";
+                    btn.className = "p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 bg-amber-600 text-slate-800 hover:bg-amber-500 transition flex items-center justify-center";
                     if (span) span.innerText = "🙈";
                     btn.title = "Este arquivo está oculto do cliente. Clique para mostrar.";
                 } else {
-                    btn.className = "p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition flex items-center justify-center";
+                    btn.className = "p-2 rounded-xl text-[10px] font-black shadow-lg border border-white/10 bg-white/5 text-slate-500 hover:text-slate-800 hover:bg-white/10 transition flex items-center justify-center";
                     if (span) span.innerText = "👁️";
                     btn.title = "Este arquivo está visível para o cliente. Clique para ocultar.";
                 }
@@ -1656,11 +1513,11 @@
                 const isOculto = data.oculto;
                 const span = btn.querySelector('span');
                 if (isOculto) {
-                    btn.className = "p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 bg-amber-600 text-white hover:bg-amber-500 transition flex items-center justify-center";
+                    btn.className = "p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 bg-amber-600 text-slate-800 hover:bg-amber-500 transition flex items-center justify-center";
                     if (span) span.innerText = "🙈 Oculta";
                     btn.title = "Esta pasta está oculta do cliente. Clique para mostrar.";
                 } else {
-                    btn.className = "p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition flex items-center justify-center";
+                    btn.className = "p-2 rounded-xl text-xs font-black shadow-lg border border-white/10 bg-white/5 text-slate-500 hover:text-slate-800 hover:bg-white/10 transition flex items-center justify-center";
                     if (span) span.innerText = "👁️ Visível";
                     btn.title = "Esta pasta está visível para o cliente. Clique para ocultar.";
                 }
@@ -1685,5 +1542,13 @@
         }
     </script>
 
-</body>
-</html>
+
+
+</div>
+@endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+@endpush

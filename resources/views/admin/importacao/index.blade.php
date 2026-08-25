@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
 <!-- Forçar o carregamento do Alpine via CDN para garantir funcionamento caso o Vite falhe -->
@@ -7,65 +7,54 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="importadorPastas()">
 
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-white shadow-sm inline-flex w-max pr-12">
         <div>
-            <h1 class="text-3xl font-black text-[#003366]">Importação de Trabalhos</h1>
-            <p class="mt-1 text-sm text-[#003366]/70 font-medium">
+            <h1 class="text-3xl font-black text-slate-800">Importação de Trabalhos</h1>
+            <p class="mt-1 text-sm text-slate-800/70 font-medium">
                 Sincronize arquivos para o sistema em lote.
             </p>
         </div>
     </div>
 
-    <!-- TABS -->
-    <div class="flex gap-4 mb-6">
-        <button @click="aba = 'nuvem'" :class="aba === 'nuvem' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] hover:bg-slate-50'" class="px-6 py-3 rounded-2xl font-black uppercase text-sm transition">
-            ☁️ Via Navegador (Nuvem)
-        </button>
-
-        <button @click="aba = 'sync'" :class="aba === 'sync' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] hover:bg-slate-50'" class="px-6 py-3 rounded-2xl font-black uppercase text-sm transition">
-            🔄 Sincronização Automática
-        </button>
-    </div>
-
     <!-- Interface Principal -->
-    <div class="bg-white rounded-[32px] shadow-sm border border-[#003366]/10 p-8 mb-8">
+    <div class="bg-white rounded-[32px] shadow-sm border border-slate-200 p-8 mb-8">
         
-        <!-- ABA NUVEM -->
-        <div x-show="aba === 'nuvem'" x-cloak>
+        <!-- CONTEUDO IMPORTACAO -->
+        <div>
             <!-- Botões de Modo de Importação -->
             <div class="flex flex-wrap gap-4 mb-6">
-                <button @click="tipoUpload = 'ano'" :class="tipoUpload === 'ano' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
+                <button @click="tipoUpload = 'ano'" :class="tipoUpload === 'ano' ? 'bg-[#002244] text-white shadow-lg' : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
                     1. Importar Ano Inteiro
                 </button>
-                <button @click="tipoUpload = 'categoria'" :class="tipoUpload === 'categoria' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
+                <button @click="tipoUpload = 'categoria'" :class="tipoUpload === 'categoria' ? 'bg-[#002244] text-white shadow-lg' : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
                     2. Importar Categoria Inteira
                 </button>
-                <button @click="tipoUpload = 'imovel'" :class="tipoUpload === 'imovel' ? 'bg-[#003366] text-white shadow-lg' : 'bg-white text-[#003366] border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
+                <button @click="tipoUpload = 'imovel'" :class="tipoUpload === 'imovel' ? 'bg-[#002244] text-white shadow-lg' : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-bold uppercase text-xs transition">
                     3. Importar Imóvel Específico
                 </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" x-show="tipoUpload !== 'ano'">
                 <div>
-                    <label class="block text-sm font-bold text-[#003366] mb-2 uppercase tracking-wide">
+                    <label class="block text-sm font-bold text-slate-800 mb-2 uppercase tracking-wide">
                         Ano
                     </label>
                     <input type="text" x-model="ano" :disabled="importando"
                            placeholder="Ex: 2026"
-                           class="w-full rounded-2xl border-slate-200 focus:border-[#003366] px-5 py-4 text-[#003366] font-medium text-lg placeholder:text-slate-400">
+                           class="w-full rounded-2xl border-slate-200 focus:border-[#003366] px-5 py-4 text-slate-800 font-medium text-lg placeholder:text-slate-400">
                 </div>
                 <div x-show="tipoUpload === 'imovel'">
-                    <label class="block text-sm font-bold text-[#003366] mb-2 uppercase tracking-wide">
+                    <label class="block text-sm font-bold text-slate-800 mb-2 uppercase tracking-wide">
                         Categoria
                     </label>
                     <input type="text" x-model="categoria" :disabled="importando"
                            placeholder="Ex: Topografia"
-                           class="w-full rounded-2xl border-slate-200 focus:border-[#003366] px-5 py-4 text-[#003366] font-medium text-lg placeholder:text-slate-400">
+                           class="w-full rounded-2xl border-slate-200 focus:border-[#003366] px-5 py-4 text-slate-800 font-medium text-lg placeholder:text-slate-400">
                 </div>
             </div>
 
             <div class="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
-                <label class="block text-sm font-bold text-[#003366] mb-4 uppercase tracking-wide">
+                <label class="block text-sm font-bold text-slate-800 mb-4 uppercase tracking-wide">
                     Status do Serviço (Como os imóveis serão criados?)
                 </label>
                 <div class="flex flex-wrap gap-6">
@@ -83,10 +72,10 @@
             <div class="mb-8 border-2 border-dashed border-slate-300 rounded-[32px] p-8 text-center" :class="importando ? 'opacity-50' : ''">
                 <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden" @change="prepararArquivos" :disabled="importando">
                 <label for="folderInput" class="cursor-pointer inline-flex flex-col items-center">
-                    <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center text-4xl mb-4 text-[#003366]">
-                        📁
-                    </div>
-                    <span class="text-xl font-black text-[#003366] mb-2" x-text="tipoUpload === 'ano' ? 'Selecione a pasta do Ano' : (tipoUpload === 'categoria' ? 'Selecione a pasta da Categoria' : 'Selecione a pasta do Imóvel')"></span>
+                    <div class="w-20 h-20 rounded-full bg-blue-50/50 border border-blue-100 flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                        </div>
+                    <span class="text-xl font-black text-slate-800 mb-2" x-text="tipoUpload === 'ano' ? 'Selecione a pasta do Ano' : (tipoUpload === 'categoria' ? 'Selecione a pasta da Categoria' : 'Selecione a pasta do Imóvel')"></span>
                     <span class="text-slate-500 text-sm">O navegador lerá todas as subpastas automaticamente.</span>
                 </label>
                 
@@ -97,7 +86,7 @@
 
             <button @click="iniciarUploadWeb" :disabled="(tipoUpload !== 'ano' && !ano) || (tipoUpload === 'imovel' && !categoria) || arquivos.length === 0 || importando || importacaoConcluida"
                     class="w-full px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-wide transition shadow-lg shadow-emerald-600/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                🚀 Iniciar Sincronização em Nuvem
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> Iniciar Sincronização em Nuvem
             </button>
         </div>
 
@@ -106,8 +95,8 @@
         <!-- ABA SYNC AUTOMATICO -->
         <div x-show="aba === 'sync'" x-cloak>
             <div class="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-3xl">
-                <h3 class="text-xl font-black text-[#003366] mb-4">Configurações do Robô Sincronizador</h3>
-                <p class="text-sm text-slate-600 mb-6">O robô roda no plano de fundo (a cada hora, ou conforme agendado no Windows) para buscar arquivos novos nas pastas de serviços <strong class="text-[#003366]">Pendentes</strong> e importá-los silenciosamente.</p>
+                <h3 class="text-xl font-black text-slate-800 mb-4">Configurações do Robô Sincronizador</h3>
+                <p class="text-sm text-slate-600 mb-6">O robô roda no plano de fundo (a cada hora, ou conforme agendado no Windows) para buscar arquivos novos nas pastas de serviços <strong class="text-slate-800">Pendentes</strong> e importá-los silenciosamente.</p>
                 
                 <div class="flex items-center gap-4 mb-6">
                     <label class="relative inline-flex items-center cursor-pointer">
@@ -118,17 +107,17 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-bold text-[#003366] mb-2 uppercase tracking-wide">
+                    <label class="block text-sm font-bold text-slate-800 mb-2 uppercase tracking-wide">
                         Caminho Raiz da Rede (Onde ficam os Anos)
                     </label>
                     <input type="text" x-model="syncRootDir"
                            placeholder="Ex: \\Getec-pc\f\Trabalhos Getec V2"
-                           class="w-full rounded-2xl border-slate-200 focus:border-[#003366] px-5 py-4 text-[#003366] font-medium text-lg placeholder:text-slate-400">
+                           class="w-full rounded-2xl border-slate-200 focus:border-[#003366] px-5 py-4 text-slate-800 font-medium text-lg placeholder:text-slate-400">
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4">
                     <button @click="salvarConfiguracaoSync" :disabled="salvandoSync"
-                            class="px-8 py-4 bg-[#003366] hover:bg-[#002244] text-white rounded-2xl font-black uppercase tracking-wide transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+                            class="px-8 py-4 bg-[#002244] hover:bg-[#002244] text-white rounded-2xl font-black uppercase tracking-wide transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
                         💾 Salvar Configurações
                     </button>
                     
@@ -140,10 +129,10 @@
                 </div>
 
                 <!-- Barra de Progresso da Sincronização Local (Global) -->
-                <div x-show="syncNowExecutando" x-cloak class="mt-6 bg-[#F5F7FA] rounded-2xl p-6 border border-[#003366]/10 space-y-2 animate-fade">
+                <div x-show="syncNowExecutando" x-cloak class="mt-6 bg-[#F5F7FA] rounded-2xl p-6 border border-slate-200 space-y-2 animate-fade">
                     <div class="flex items-center justify-between text-xs font-bold">
                         <span class="text-slate-600 uppercase tracking-wider">Progresso da Varredura Física</span>
-                        <span class="text-[#003366]" x-text="syncPercent + '% (' + syncCurrent + '/' + syncTotal + ')'">0%</span>
+                        <span class="text-slate-800" x-text="syncPercent + '% (' + syncCurrent + '/' + syncTotal + ')'">0%</span>
                     </div>
                     <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
                         <div class="bg-gradient-to-r from-[#003366] to-emerald-600 h-3 rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(16,185,129,0.3)]" :style="'width: ' + syncPercent + '%'"></div>
@@ -151,17 +140,17 @@
                     <div class="text-[10px] text-slate-500 truncate" x-text="syncLastFile ? 'Importando: ' + syncLastFile : 'Contando e catalogando arquivos do disco...'"></div>
                 </div>
 
-                <p x-show="syncMsg" x-cloak x-text="syncMsg" class="mt-4 font-bold text-sm text-[#003366]"></p>
+                <p x-show="syncMsg" x-cloak x-text="syncMsg" class="mt-4 font-bold text-sm text-slate-800"></p>
             </div>
         </div>
 
         <!-- Progresso da Importação -->
-        <div x-show="importando || importacaoConcluida || erroFatal" x-cloak x-transition class="mt-8 bg-[#F5F7FA] rounded-2xl p-8 border border-[#003366]/10 relative overflow-hidden">
+        <div x-show="importando || importacaoConcluida || erroFatal" x-cloak x-transition class="mt-8 bg-[#F5F7FA] rounded-2xl p-8 border border-slate-200 relative overflow-hidden">
             
             <div x-show="erroFatal" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 font-bold" x-text="erro"></div>
 
             <div class="flex items-center justify-between mb-4 relative z-10" x-show="!erroFatal">
-                <h3 class="text-2xl font-black text-[#003366]" x-text="importacaoConcluida ? 'Importação Concluída!' : 'Sincronizando arquivos...'"></h3>
+                <h3 class="text-2xl font-black text-slate-800" x-text="importacaoConcluida ? 'Importação Concluída!' : 'Sincronizando arquivos...'"></h3>
                 <span class="text-[#005B96] font-bold text-xl" x-text="Math.round(progresso) + '%'"></span>
             </div>
 
@@ -173,16 +162,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-medium text-slate-600 relative z-10">
                 <div>
                     <span class="text-slate-400">Processando:</span> 
-                    <span class="text-[#003366] font-bold truncate block" x-text="pastaAtualText"></span>
+                    <span class="text-slate-800 font-bold truncate block" x-text="pastaAtualText"></span>
                 </div>
                 <div class="md:text-right">
                     <span class="text-slate-400">Progresso:</span>
-                    <span class="text-[#003366] font-bold" x-text="processados + ' de ' + totalParaProcessar"></span>
+                    <span class="text-slate-800 font-bold" x-text="processados + ' de ' + totalParaProcessar"></span>
                 </div>
             </div>
 
             <div x-show="importacaoConcluida" class="mt-8 text-center relative z-10">
-                <a href="{{ route('admin.pastas.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-[#003366] hover:bg-[#002244] text-white rounded-xl font-bold transition">
+                <a href="{{ route('admin.pastas.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-[#002244] hover:bg-[#002244] text-white rounded-xl font-bold transition">
                     Ver Pastas
                 </a>
             </div>

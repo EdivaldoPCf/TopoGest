@@ -36,15 +36,43 @@ class BaseController extends Controller
             $query->where('nome', 'LIKE', "%{$nome}%");
         }
 
-        if ($this->ehDecimalValido($norte) && $this->ehDecimalValido($este)) {
+        $hasNorte = $this->ehDecimalValido($norte);
+        $hasEste = $this->ehDecimalValido($este);
+
+        if ($hasNorte && $hasEste) {
             $query->select('*')
-                ->selectRaw('SQRT(POW(norte - ?, 2) + POW(este - ?, 2)) AS distancia', [(float) $norte, (float) $este])
+                ->selectRaw('((norte - ?) * (norte - ?) + (este - ?) * (este - ?)) AS distancia', [(float) $norte, (float) $norte, (float) $este, (float) $este])
+                ->orderBy('distancia', 'asc');
+        } elseif ($hasNorte) {
+            $query->select('*')
+                ->selectRaw('((norte - ?) * (norte - ?)) AS distancia', [(float) $norte, (float) $norte])
+                ->orderBy('distancia', 'asc');
+        } elseif ($hasEste) {
+            $query->select('*')
+                ->selectRaw('((este - ?) * (este - ?)) AS distancia', [(float) $este, (float) $este])
                 ->orderBy('distancia', 'asc');
         }
 
-        $bases = $query->orderBy('nome')->paginate(20)->withQueryString();
+        if ($hasNorte || $hasEste) {
+            $bases = $query->paginate(20)->withQueryString();
+        } else {
+            $bases = $query->orderBy('nome')->paginate(20)->withQueryString();
+        }
+
+        if ($hasNorte || $hasEste) {
+            $bases->getCollection()->transform(function ($b) use ($norte, $este, $hasNorte, $hasEste) {
+                if ($hasNorte && $hasEste) {
+                    $b->distancia = sqrt(pow((float)$b->norte - (float)$norte, 2) + pow((float)$b->este - (float)$este, 2));
+                } elseif ($hasNorte) {
+                    $b->distancia = abs((float)$b->norte - (float)$norte);
+                } elseif ($hasEste) {
+                    $b->distancia = abs((float)$b->este - (float)$este);
+                }
+                return $b;
+            });
+        }
         $destaqueId = ($norte && $este && $bases->count() > 0) ? $bases->first()->id : null;
-        $filtroCoordenada = ($norte && $este);
+        $filtroCoordenada = ($norte || $este);
 
         return view('admin.bases.index', compact('bases', 'destaqueId', 'filtroCoordenada'));
     }
@@ -137,11 +165,12 @@ class BaseController extends Controller
 
         $basesProximas = Base::where('id', '!=', $base->id)
             ->select('*')
-            ->selectRaw('SQRT(POW(norte - ?, 2) + POW(este - ?, 2)) AS distancia', [$centroNorte, $centroEste])
+            ->selectRaw('((norte - ?) * (norte - ?) + (este - ?) * (este - ?)) AS distancia', [$centroNorte, $centroNorte, $centroEste, $centroEste])
             ->orderBy('distancia', 'asc')
             ->take(3)
             ->get()
-            ->map(function ($b) use ($utmZone, $isSouthern) {
+            ->map(function ($b) use ($utmZone, $isSouthern, $centroNorte, $centroEste) {
+                $b->distancia = sqrt(pow((float)$b->norte - $centroNorte, 2) + pow((float)$b->este - $centroEste, 2));
                 $lat = $b->latitude;
                 $lng = $b->longitude;
                 if (($lat === null || $lng === null) && $b->norte && $b->este) {

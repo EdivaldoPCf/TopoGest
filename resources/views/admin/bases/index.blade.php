@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Localizador de Base - TopoGest</title>
+@extends('layouts.admin')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+@push('styles')
     <!-- Leaflet & Proj4 -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -19,8 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@latest/Control.FullScreen.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-
-    <style>
+<style>
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -61,40 +52,20 @@
             }
         }
     </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
-</head>
+@endpush
 
-<body class="min-h-screen bg-gray-100 overflow-x-hidden">
-
-    <!-- Background -->
-    <div class="fixed inset-0 z-0">
-        <img src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
-             class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-black/40"></div>
-    </div>
-
-    <div class="relative z-10 max-w-7xl mx-auto p-4 md:p-10"
+@section('content')
+<div class="w-full animate-fade"
          x-data="{ modal:false, modalMapaBusca: false }">
 
         <!-- HEADER -->
         <div class="flex flex-col xl:flex-row justify-between gap-8 mb-10">
 
-            <!-- LOGO -->
-            <a href="{{ route('dashboard') }}"
-               class="flex items-center gap-4 group w-fit">
-
-                <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
-                         alt="TopoGest"
-                         class="w-full h-full object-contain p-2">
-                </div>
-
-                <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
-                         alt="TopoGest"
-                         class="relative z-10 h-8 w-auto">
-                </div>
-            </a>
+            <!-- TITLE -->
+            <div class="bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-slate-200 shadow-sm inline-block w-max pr-12">
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight">Painel de Bases</h2>
+                <p class="text-slate-600 mt-1 font-medium">Localize e cadastre coordenadas</p>
+            </div>
 
             <!-- BUSCAS -->
             <div class="flex flex-col gap-4 w-full xl:w-auto">
@@ -103,7 +74,7 @@
                 <form action="{{ route('admin.bases.buscar') }}"
                       method="GET"
                       id="searchFormCoords"
-                      class="glass rounded-3xl p-4 shadow-2xl border border-white/20">
+                      class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200">
 
                     <div class="flex flex-col md:flex-row gap-3 items-center">
 
@@ -112,14 +83,14 @@
                                name="norte"
                                id="inputNorte"
                                placeholder="Coordenada Norte"
-                               class="w-full md:w-52 bg-[#003366]/90 text-white px-5 py-3 rounded-2xl outline-none placeholder:text-white/60 font-semibold">
+                               class="w-full md:w-52 bg-white border border-slate-300 text-slate-800 px-5 py-3 rounded-2xl outline-none placeholder:text-slate-500 font-semibold">
 
                         <input type="number"
                                step="any"
                                name="este"
                                id="inputEste"
                                placeholder="Coordenada Este"
-                               class="w-full md:w-52 bg-[#003366]/90 text-white px-5 py-3 rounded-2xl outline-none placeholder:text-white/60 font-semibold">
+                               class="w-full md:w-52 bg-white border border-slate-300 text-slate-800 px-5 py-3 rounded-2xl outline-none placeholder:text-slate-500 font-semibold">
 
                         <div class="flex gap-2 w-full md:w-auto">
                             <button type="submit"
@@ -130,7 +101,7 @@
                             <button type="button"
                                     onclick="abrirModalMapa()"
                                     class="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase px-5 py-3 rounded-2xl transition shadow-lg whitespace-nowrap flex items-center justify-center gap-2">
-                                <span>📍</span> Mapa
+                                Mapa
                             </button>
                         </div>
 
@@ -140,14 +111,14 @@
                 <!-- Nome -->
                 <form action="{{ route('admin.bases.buscar') }}"
                       method="GET"
-                      class="glass rounded-3xl p-4 shadow-2xl border border-white/20">
+                      class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200">
 
                     <div class="flex flex-col md:flex-row gap-3">
 
                         <input type="text"
                                name="nome"
                                placeholder="Pesquisar por nome..."
-                               class="flex-1 bg-[#003366]/90 text-white px-5 py-3 rounded-2xl outline-none placeholder:text-white/60 font-semibold">
+                               class="flex-1 bg-white border border-slate-300 text-slate-800 px-5 py-3 rounded-2xl outline-none placeholder:text-slate-500 font-semibold">
 
                         <button type="submit"
                                 class="bg-[#004A7C] hover:bg-[#003055] text-white font-black uppercase px-8 py-3 rounded-2xl transition shadow-lg">
@@ -160,17 +131,17 @@
         </div>
 
         <!-- CONTAINER -->
-        <div class="glass rounded-[35px] border border-white/20 shadow-2xl p-6 md:p-10">
+        <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-6 md:p-10">
 
             <!-- TOPO -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
 
                 <div>
-                    <h1 class="text-3xl font-black text-white uppercase italic">
+                    <h1 class="text-3xl font-black text-slate-800 uppercase italic">
                         Bases Cadastradas
                     </h1>
 
-                    <p class="text-white/70 mt-1">
+                    <p class="text-slate-600 mt-1">
                         Gerencie e localize bases cadastradas no sistema.
                     </p>
                 </div>
@@ -187,7 +158,7 @@
                 <table class="w-full border-separate border-spacing-y-3">
 
                     <thead>
-                        <tr class="text-white uppercase text-sm">
+                        <tr class="text-slate-500 uppercase text-xs font-bold border-b border-slate-200 bg-slate-50">
                             <th class="text-left px-6 py-3">Base</th>
                             <th class="text-center px-6 py-3">Norte</th>
                             <th class="text-center px-6 py-3">Este</th>
@@ -212,7 +183,7 @@
                         <tr class="
                             {{ $isDestaque
                                 ? 'bg-green-500/20 border border-green-400'
-                                : 'bg-white/10 hover:bg-white/20'
+                                : 'hover:bg-slate-50'
                             }}
                             transition rounded-3xl
                         ">
@@ -226,14 +197,14 @@
                                     </span>
                                 @endif
 
-                                <span class="font-bold text-white uppercase">
+                                <span class="font-bold text-slate-800 uppercase">
                                     {{ $base->nome }}
                                 </span>
 
                             </td>
 
                             <!-- Norte -->
-                            <td class="text-center text-white font-semibold px-6">
+                            <td class="text-center text-slate-800 font-semibold px-6">
                                 @if(!empty($base->norte_original))
                                     {{ $base->norte_original }}
                                 @else
@@ -242,7 +213,7 @@
                             </td>
 
                             <!-- Este -->
-                            <td class="text-center text-white font-semibold px-6">
+                            <td class="text-center text-slate-800 font-semibold px-6">
                                 @if(!empty($base->este_original))
                                     {{ $base->este_original }}
                                 @else
@@ -269,7 +240,7 @@
                                     </a>
 
                                 @else
-                                    <span class="text-white/30">N/A</span>
+                                    <span class="text-slate-800/30">N/A</span>
                                 @endif
 
                             </td>
@@ -294,7 +265,7 @@
                                     @if($base->google_maps_url)
                                         <button type="button"
                                                 onclick="shareBaseLocation('{{ $base->nome }}', '{{ $base->google_maps_url }}')"
-                                                class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-black uppercase transition flex items-center justify-center gap-1.5 shadow-md">
+                                                class="bg-emerald-600 hover:bg-emerald-700 text-slate-800 px-5 py-2 rounded-xl text-xs font-black uppercase transition flex items-center justify-center gap-1.5 shadow-md">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l4.636-2.318M8.684 13.258l4.636 2.318M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
@@ -326,7 +297,7 @@
 
                         <tr>
                             <td colspan="6"
-                                class="text-center py-20 text-white/60 uppercase font-bold">
+                                class="text-center py-20 text-slate-800/60 uppercase font-bold">
                                 Nenhuma base encontrada.
                             </td>
                         </tr>
@@ -345,7 +316,7 @@
         <!-- BOTÃO VOLTAR -->
         <div class="mt-6">
             <a href="{{ route('dashboard') }}"
-               class="inline-flex items-center gap-2 text-white/70 hover:text-white transition">
+               class="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition">
 
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="w-5 h-5"
@@ -373,12 +344,12 @@
 
                 <div class="flex justify-between items-center mb-8">
 
-                    <h2 class="text-3xl text-white font-black uppercase italic">
+                    <h2 class="text-3xl text-slate-800 font-black uppercase italic">
                         Nova Base
                     </h2>
 
                     <button @click="modal=false"
-                            class="text-white/60 hover:text-white text-3xl leading-none">
+                            class="text-slate-800/60 hover:text-slate-800 text-3xl leading-none">
                         ×
                     </button>
                 </div>
@@ -392,7 +363,7 @@
 
                     <!-- Nome -->
                     <div>
-                        <label class="block text-white/70 uppercase text-sm font-bold mb-2">
+                        <label class="block text-slate-500 uppercase text-sm font-bold mb-2">
                             Nome da Base
                         </label>
 
@@ -406,7 +377,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                         <div>
-                            <label class="block text-white/70 uppercase text-sm font-bold mb-2">
+                            <label class="block text-slate-500 uppercase text-sm font-bold mb-2">
                                 Norte
                             </label>
 
@@ -418,7 +389,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-white/70 uppercase text-sm font-bold mb-2">
+                            <label class="block text-slate-500 uppercase text-sm font-bold mb-2">
                                 Este
                             </label>
 
@@ -434,14 +405,14 @@
                     <!-- Upload -->
                     <div>
 
-                        <label class="block text-white/70 uppercase text-sm font-bold mb-3">
+                        <label class="block text-slate-500 uppercase text-sm font-bold mb-3">
                             Arquivo ZIP
                         </label>
 
                         <div class="border-2 border-dashed border-white/20 rounded-3xl p-8 text-center hover:bg-white/5 relative">
 
                             <label class="relative w-full h-full flex items-center justify-center cursor-pointer">
-                                <div class="pointer-events-none text-white">
+                                <div class="pointer-events-none text-slate-800">
                                     Clique para selecionar um arquivo .zip ou arraste aqui
                                 </div>
 
@@ -487,14 +458,14 @@
 
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-3xl text-white font-black uppercase italic">
+                        <h2 class="text-3xl text-slate-800 font-black uppercase italic">
                             Selecionar Ponto no Mapa
                         </h2>
-                        <p class="text-white/70 mt-1">Clique em qualquer local no mapa para inserir o alfinete e localizar as bases mais próximas.</p>
+                        <p class="text-slate-600 mt-1">Clique em qualquer local no mapa para inserir o alfinete e localizar as bases mais próximas.</p>
                     </div>
 
                     <button type="button" onclick="fecharModalMapa()"
-                            class="text-white/60 hover:text-white text-4xl leading-none transition">
+                            class="text-slate-800/60 hover:text-slate-800 text-4xl leading-none transition">
                         &times;
                     </button>
                 </div>
@@ -513,7 +484,7 @@
 
                 <div class="flex flex-col sm:flex-row justify-end items-center gap-4 mt-6">
                     
-                    <div class="flex-1 w-full sm:w-auto text-white/80 font-mono text-sm bg-black/30 px-4 py-3 rounded-xl border border-white/10 text-center sm:text-left">
+                    <div class="flex-1 w-full sm:w-auto text-slate-800/80 font-mono text-sm bg-black/30 px-4 py-3 rounded-xl border border-white/10 text-center sm:text-left">
                         <span id="coordsDisplay">Aguardando seleção no mapa...</span>
                     </div>
 
@@ -527,7 +498,7 @@
                         <button type="button"
                                 id="btnBuscarPorPino"
                                 disabled
-                                class="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3 rounded-2xl font-black uppercase transition shadow-lg">
+                                class="flex-1 sm:flex-none bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-slate-800 px-8 py-3 rounded-2xl font-black uppercase transition shadow-lg">
                             Pesquisar
                         </button>
                     </div>
@@ -535,8 +506,10 @@
                 </div>
             </div>
         </div>
+@endsection
 
-    <script>
+@push('scripts')
+<script>
         let mapBusca = null;
         let pinoBusca = null;
         let selectedLat = null;
@@ -649,34 +622,9 @@
         });
 
         function shareBaseLocation(nome, url) {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Localização da Base: ' + nome,
-                    text: 'Confira a localização da base "' + nome + '" no Google Maps.',
-                    url: url
-                }).catch(err => {
-                    console.log('Erro ao compartilhar:', err);
-                });
-            } else {
-                navigator.clipboard.writeText(url).then(() => {
-                    Swal.fire({
-                        title: 'Link Copiado!',
-                        text: 'O link do Google Maps para a base "' + nome + '" foi copiado para a área de transferência.',
-                        icon: 'success',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        background: '#003366',
-                        color: '#fff',
-                        borderRadius: 20
-                    });
-                    setTimeout(() => {
-                        window.open(url, '_blank');
-                    }, 1000);
-                }).catch(err => {
-                    window.open(url, '_blank');
-                });
-            }
+            let text = 'Confira a localização da base "' + nome + '" no Google Maps: ' + url;
+            let whatsappUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+            window.open(whatsappUrl, '_blank');
         }
     </script>
-</body>
-</html>
+@endpush

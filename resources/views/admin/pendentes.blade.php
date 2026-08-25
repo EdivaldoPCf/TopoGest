@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitações ADM - TopoGest</title>
+@extends('layouts.admin')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <style>
-        ::-webkit-scrollbar {
+@push('styles')
+<style>
+::-webkit-scrollbar {
             width: 10px;
             height: 10px;
         }
@@ -51,79 +45,30 @@
             50% { transform: scale(1.2); opacity: .6; }
             100% { transform: scale(1); opacity: 1; }
         }
-    </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
-</head>
+</style>
+@endpush
 
-<body class="bg-gray-200 min-h-screen antialiased p-4 md:p-10">
+@section('content')
+<div class="w-full animate-fade">
 
-    <!-- BACKGROUND -->
-    <div class="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed"
-         style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
+
+    <div class="mb-8 bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-white shadow-sm inline-block w-max pr-12">
+        <h2 class="text-3xl font-black text-slate-800 tracking-tight">Painel</h2>
+        <p class="text-slate-600 mt-1 font-medium">Gestão</p>
     </div>
 
-    <!-- OVERLAY -->
-    <div class="fixed inset-0 bg-[#001B33]/40 z-0"></div>
 
-    <div class="relative z-10 max-w-7xl mx-auto space-y-10">
-
-        <!-- HEADER -->
-        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
-
-            <!-- LOGO -->
-            <a href="{{ route('dashboard') }}"
-               class="flex items-center group transition duration-300 hover:scale-105 w-fit">
-
-                <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
-                         alt="TopoGest"
-                         class="w-full h-full object-contain p-2">
-                </div>
-
-                <div class="relative ml-3 flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
-                         alt="TopoGest"
-                         class="relative z-10 h-8 w-auto">
-                </div>
-            </a>
-
-            <!-- TOP ACTIONS -->
-            <div class="flex flex-col md:flex-row gap-4 md:items-center">
-
-                <a href="{{ route('dashboard') }}"
-                   class="bg-white/20 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-2xl font-black uppercase tracking-wide shadow-xl hover:bg-white/30 transition-all flex items-center justify-center gap-3">
-
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-5 w-5"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor">
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M3 10l9-7 9 7M9 21V9h6v12" />
-                    </svg>
-
-                    Dashboard
-                </a>
-
-                <div class="bg-[#003366]/80 text-white px-6 py-3 rounded-2xl shadow-2xl border border-white/10 font-black uppercase tracking-wide">
-                    Gestão de Permissões
-                </div>
-            </div>
-        </div>
-
-        <!-- SEARCH PENDENTES -->
-        <div class="glass-card rounded-[35px] p-6 md:p-8">
+<!-- SEARCH PENDENTES -->
+        <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
 
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
 
                 <div>
-                    <h2 class="text-white text-3xl font-black uppercase italic tracking-tight">
+                    <h2 class="text-slate-800 text-3xl font-black uppercase italic tracking-tight">
                         Solicitações Pendentes
                     </h2>
 
-                    <p class="text-white/70 mt-2">
+                    <p class="text-slate-800/70 mt-2">
                         Gerencie solicitações de novos administradores.
                     </p>
                 </div>
@@ -140,9 +85,9 @@
                            name="search_pendentes"
                            value="{{ request('search_pendentes') }}"
                            placeholder="Pesquisar solicitações..."
-                           class="bg-[#003366] text-white placeholder-white/50 pl-14 pr-6 py-4 rounded-full w-full md:w-[400px] outline-none border border-white/20 shadow-xl focus:ring-4 focus:ring-blue-500/30 transition-all font-semibold">
+                           class="bg-slate-50 text-slate-800 placeholder-slate-400 pl-14 pr-6 py-4 rounded-full w-full md:w-[400px] outline-none border border-white/20 shadow-xl focus:ring-4 focus:ring-blue-500/30 transition-all font-semibold">
 
-                    <div class="absolute left-5 top-4 text-white/70">
+                    <div class="absolute left-5 top-4 text-slate-800/70">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="h-6 w-6"
                              fill="none"
@@ -164,7 +109,7 @@
                 <table class="w-full border-separate border-spacing-y-4 min-w-full lg:min-w-[900px]">
 
                     <thead>
-                        <tr class="text-white uppercase text-sm tracking-widest">
+                        <tr class="text-slate-800 uppercase text-sm tracking-widest">
                             <th class="text-left px-6">Nome</th>
                             <th class="text-left px-6">CPF</th>
                             <th class="text-left px-6">Email</th>
@@ -183,12 +128,12 @@
 
                                     <div class="flex items-center gap-4">
 
-                                        <div class="w-12 h-12 rounded-full bg-[#003366] text-white flex items-center justify-center font-black text-sm shadow-lg">
+                                        <div class="w-12 h-12 rounded-full bg-slate-50 text-slate-800 flex items-center justify-center font-black text-sm shadow-lg">
                                             {{ strtoupper(substr($solicitacao->name, 0, 2)) }}
                                         </div>
 
                                         <div>
-                                            <div class="text-[#003366] font-black text-lg leading-none">
+                                            <div class="text-slate-900 font-black text-lg leading-none">
                                                 {{ $solicitacao->name }}
                                             </div>
 
@@ -199,15 +144,15 @@
                                     </div>
                                 </td>
 
-                                <td class="py-5 px-6 font-bold text-[#003366] whitespace-nowrap">
+                                <td class="py-5 px-6 font-bold text-slate-900 whitespace-nowrap">
                                     {{ $solicitacao->cpf }}
                                 </td>
 
-                                <td class="py-5 px-6 text-[#003366] italic">
+                                <td class="py-5 px-6 text-slate-900 italic">
                                     {{ $solicitacao->email }}
                                 </td>
 
-                                <td class="py-5 px-6 text-[#003366]/70 font-semibold whitespace-nowrap">
+                                <td class="py-5 px-6 text-slate-900/70 font-semibold whitespace-nowrap">
                                     {{ $solicitacao->created_at->format('d/m/Y') }}
                                 </td>
 
@@ -216,13 +161,13 @@
                                     <div class="flex justify-center gap-3">
 
                                         <button onclick="openActionModal('confirmar', {{ $solicitacao->id }}, '{{ addslashes($solicitacao->name) }}')"
-                                                class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-2xl font-black uppercase text-xs shadow-lg transition-all hover:scale-105">
+                                                class="bg-green-600 hover:bg-green-700 text-slate-800 px-5 py-2 rounded-2xl font-black uppercase text-xs shadow-lg transition-all hover:scale-105">
 
                                             Confirmar
                                         </button>
 
                                         <button onclick="openActionModal('negar', {{ $solicitacao->id }}, '{{ addslashes($solicitacao->name) }}')"
-                                                class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-2xl font-black uppercase text-xs shadow-lg transition-all hover:scale-105">
+                                                class="bg-red-600 hover:bg-red-700 text-slate-800 px-5 py-2 rounded-2xl font-black uppercase text-xs shadow-lg transition-all hover:scale-105">
 
                                             Negar
                                         </button>
@@ -236,7 +181,7 @@
 
                             <tr>
                                 <td colspan="5"
-                                    class="text-center py-20 text-white/80 font-black uppercase tracking-wider">
+                                    class="text-center py-20 text-slate-800/80 font-black uppercase tracking-wider">
 
                                     Nenhuma solicitação pendente encontrada.
 
@@ -252,16 +197,16 @@
         </div>
 
         <!-- ADMINS -->
-        <div class="glass-card rounded-[35px] p-6 md:p-8">
+        <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
 
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
 
                 <div>
-                    <h2 class="text-white text-3xl font-black uppercase italic tracking-tight">
+                    <h2 class="text-slate-800 text-3xl font-black uppercase italic tracking-tight">
                         Administradores Atuais
                     </h2>
 
-                    <p class="text-white/70 mt-2">
+                    <p class="text-slate-800/70 mt-2">
                         Usuários com acesso administrativo ativo.
                     </p>
                 </div>
@@ -278,9 +223,9 @@
                            name="search_admins"
                            value="{{ request('search_admins') }}"
                            placeholder="Pesquisar administradores..."
-                           class="bg-[#003366] text-white placeholder-white/50 pl-14 pr-6 py-4 rounded-full w-full md:w-[400px] outline-none border border-white/20 shadow-xl focus:ring-4 focus:ring-blue-500/30 transition-all font-semibold">
+                           class="bg-slate-50 text-slate-800 placeholder-slate-400 pl-14 pr-6 py-4 rounded-full w-full md:w-[400px] outline-none border border-white/20 shadow-xl focus:ring-4 focus:ring-blue-500/30 transition-all font-semibold">
 
-                    <div class="absolute left-5 top-4 text-white/70">
+                    <div class="absolute left-5 top-4 text-slate-800/70">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="h-6 w-6"
                              fill="none"
@@ -302,7 +247,7 @@
                 <table class="w-full border-separate border-spacing-y-4 min-w-full lg:min-w-[900px]">
 
                     <thead>
-                        <tr class="text-white uppercase text-sm tracking-widest">
+                        <tr class="text-slate-800 uppercase text-sm tracking-widest">
                             <th class="text-left px-6">Nome</th>
                             <th class="text-left px-6">CPF</th>
                             <th class="text-left px-6">Email</th>
@@ -321,12 +266,12 @@
 
                                     <div class="flex items-center gap-4">
 
-                                        <div class="w-12 h-12 rounded-full bg-[#003366] text-white flex items-center justify-center font-black text-sm shadow-lg">
+                                        <div class="w-12 h-12 rounded-full bg-slate-50 text-slate-800 flex items-center justify-center font-black text-sm shadow-lg">
                                             {{ strtoupper(substr($admin->name, 0, 2)) }}
                                         </div>
 
                                         <div>
-                                            <div class="text-[#003366] font-black text-lg leading-none">
+                                            <div class="text-slate-900 font-black text-lg leading-none">
                                                 {{ $admin->name }}
                                             </div>
 
@@ -340,15 +285,15 @@
                                     </div>
                                 </td>
 
-                                <td class="py-5 px-6 font-bold text-[#003366] whitespace-nowrap">
+                                <td class="py-5 px-6 font-bold text-slate-900 whitespace-nowrap">
                                     {{ $admin->cpf }}
                                 </td>
 
-                                <td class="py-5 px-6 text-[#003366] italic">
+                                <td class="py-5 px-6 text-slate-900 italic">
                                     {{ $admin->email }}
                                 </td>
 
-                                <td class="py-5 px-6 text-[#003366]/70 font-semibold whitespace-nowrap">
+                                <td class="py-5 px-6 text-slate-900/70 font-semibold whitespace-nowrap">
                                     {{ $admin->created_at->format('d/m/Y') }}
                                 </td>
 
@@ -358,14 +303,14 @@
 
                                         @if(auth()->id() === $admin->id)
 
-                                            <span class="bg-[#003366] text-white px-6 py-2 rounded-2xl font-black uppercase text-xs shadow-lg">
+                                            <span class="bg-slate-50 text-slate-800 px-6 py-2 rounded-2xl font-black uppercase text-xs shadow-lg">
                                                 Você
                                             </span>
 
                                         @else
 
                                             <button onclick="openActionModal('remover', {{ $admin->id }}, '{{ addslashes($admin->name) }}')"
-                                                    class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-2xl font-black uppercase text-xs shadow-lg transition-all hover:scale-105">
+                                                    class="bg-orange-600 hover:bg-orange-700 text-slate-800 px-5 py-2 rounded-2xl font-black uppercase text-xs shadow-lg transition-all hover:scale-105">
 
                                                 Retirar Privilégio
                                             </button>
@@ -381,7 +326,7 @@
 
                             <tr>
                                 <td colspan="5"
-                                    class="text-center py-20 text-white/80 font-black uppercase tracking-wider">
+                                    class="text-center py-20 text-slate-800/80 font-black uppercase tracking-wider">
 
                                     Nenhum administrador encontrado.
 
@@ -401,7 +346,7 @@
     <div id="customModal"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
 
-        <div class="bg-[#003366] text-white rounded-[35px] p-8 md:p-10 max-w-lg w-full text-center shadow-2xl border border-white/10 scale-95 transition-all"
+        <div class="bg-slate-50 text-slate-800 rounded-[35px] p-8 md:p-10 max-w-lg w-full text-center shadow-2xl border border-white/10 scale-95 transition-all"
              id="modalBox">
 
             <div class="w-20 h-20 mx-auto rounded-full bg-white/10 flex items-center justify-center mb-6 border border-white/10">
@@ -425,19 +370,19 @@
             </h2>
 
             <p id="modalMessage"
-               class="text-lg text-white/90 leading-relaxed mb-8">
+               class="text-lg text-slate-800/90 leading-relaxed mb-8">
             </p>
 
             <div class="flex flex-col sm:flex-row justify-center gap-4">
 
                 <button id="btnConfirm"
-                        class="bg-green-500 hover:bg-green-600 text-white font-black uppercase px-8 py-3 rounded-2xl transition-all shadow-xl">
+                        class="bg-green-500 hover:bg-green-600 text-slate-800 font-black uppercase px-8 py-3 rounded-2xl transition-all shadow-xl">
                     Confirmar
                 </button>
 
                 <button id="btnCancel"
                         onclick="closeModal()"
-                        class="bg-red-500 hover:bg-red-600 text-white font-black uppercase px-8 py-3 rounded-2xl transition-all shadow-xl">
+                        class="bg-red-500 hover:bg-red-600 text-slate-800 font-black uppercase px-8 py-3 rounded-2xl transition-all shadow-xl">
                     Cancelar
                 </button>
 
@@ -563,7 +508,7 @@
             btnConfirm.disabled = false;
 
             btnConfirm.className =
-                "bg-[#00AEEF] hover:bg-blue-500 text-white font-black uppercase px-8 py-3 rounded-2xl transition-all shadow-xl";
+                "bg-[#00AEEF] hover:bg-blue-500 text-slate-800 font-black uppercase px-8 py-3 rounded-2xl transition-all shadow-xl";
 
             btnConfirm.onclick = () => {
 
@@ -589,11 +534,12 @@
             btnConfirm.disabled = false;
 
             btnConfirm.className =
-                "bg-red-600 hover:bg-red-700 text-white font-black uppercase px-8 py-3 rounded-2xl transition-all shadow-xl";
+                "bg-red-600 hover:bg-red-700 text-slate-800 font-black uppercase px-8 py-3 rounded-2xl transition-all shadow-xl";
 
             btnConfirm.onclick = closeModal;
         }
     </script>
 
-</body>
-</html>
+</div>
+@endsection
+

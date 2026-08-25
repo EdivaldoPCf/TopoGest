@@ -1,129 +1,41 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clientes - TopoGest</title>
+@extends('layouts.admin')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+@push('styles')
+<style>
+        ::-webkit-scrollbar{ width:10px; height:10px; }
+        ::-webkit-scrollbar-thumb{ background:#003366; border-radius:999px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+@endpush
 
-    <style>
-        ::-webkit-scrollbar{
-            width:10px;
-            height:10px;
-        }
+@section('content')
+<div class="w-full animate-fade" x-data="clientesPage()">
 
-        ::-webkit-scrollbar-thumb{
-            background:#003366;
-            border-radius:999px;
-        }
+    <!-- HEADER & SEARCH -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 w-full">
+        
+        <!-- TITLE -->
+        <div class="bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-slate-200 shadow-sm inline-block w-max pr-12">
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Módulo de Clientes</h2>
+            <p class="text-slate-600 mt-1 font-medium">Painel de Gestão</p>
+        </div>
 
-        [x-cloak]{
-            display:none!important;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
-</head>
-
-<body class="min-h-screen bg-[#eef3f8] overflow-x-hidden">
-
-    <!-- Background -->
-    <div class="fixed inset-0 z-0">
-        <div class="absolute inset-0 bg-cover bg-center"
-             style="background-image:url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}')"></div>
-
-        <div class="absolute inset-0 bg-white/80 backdrop-blur-[3px]"></div>
+        <!-- SEARCH -->
+        <div class="w-full lg:w-auto relative">
+            <input type="text" x-model="search" placeholder="Pesquisar..." class="w-full lg:w-[430px] h-14 rounded-2xl bg-white border border-slate-200 shadow-sm pl-14 pr-5 text-slate-800 font-semibold outline-none focus:ring-4 focus:ring-blue-500/10 transition">
+            <div class="absolute left-5 top-4 text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+        </div>
     </div>
 
-    <div
-        x-data="clientesPage()"
-        class="relative z-10 min-h-screen"
-    >
-
-        <!-- HEADER -->
-        <header class="px-6 lg:px-12 pt-8 pb-6">
-
-            <div class="max-w-[95%] mx-auto">
-
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-
-                    <!-- LOGO -->
-                    <a href="{{ route('dashboard') }}"
-                       class="flex items-center gap-4 group w-fit">
-
-                        <div class="relative">
-
-                            <div class="w-16 h-16 rounded-2xl bg-white shadow-2xl flex items-center justify-center group-hover:scale-105 transition">
-                                <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
-                                     class="w-full h-full object-contain p-2">
-                            </div>
-
-                            <div class="absolute -inset-1 rounded-2xl border border-white/40"></div>
-                        </div>
-
-                        <div>
-                            <h1 class="text-3xl font-black text-[#003366] tracking-tight">
-                                TopoGest
-                            </h1>
-
-                            <p class="text-sm text-[#003366]/70 font-semibold">
-                                Gestão de Clientes
-                            </p>
-                        </div>
-                    </a>
-
-                    <!-- SEARCH -->
-                    <div class="w-full lg:w-auto">
-
-                        <div class="relative">
-
-                            <input
-                                type="text"
-                                x-model="search"
-                                placeholder="Pesquisar nome, email, CPF ou telefone..."
-                                class="w-full lg:w-[430px] h-14 rounded-2xl bg-white/90 border border-white shadow-2xl pl-14 pr-5 text-[#003366] font-semibold outline-none focus:ring-4 focus:ring-[#003366]/10 transition"
-                            >
-
-                            <div class="absolute left-5 top-4 text-[#003366]/60">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     class="w-6 h-6"
-                                     fill="none"
-                                     viewBox="0 0 24 24"
-                                     stroke="currentColor">
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </header>
-
-        <!-- CONTENT -->
-        <main class="px-6 lg:px-12 pb-12">
-
-            <div class="max-w-[95%] mx-auto">
+        
 
                 <!-- CARD -->
-                <div class="bg-white/70 backdrop-blur-xl border border-white rounded-[32px] shadow-[0_20px_80px_rgba(0,0,0,0.08)] overflow-hidden">
+                <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden">
 
                     <!-- TOP -->
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-8 py-7 border-b border-slate-200/70">
@@ -649,5 +561,7 @@
 
     </script>
 
-</body>
-</html>
+
+
+</div>
+@endsection

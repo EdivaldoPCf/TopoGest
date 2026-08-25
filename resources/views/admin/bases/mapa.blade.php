@@ -1,112 +1,26 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa da Base - {{ $base->nome }}</title>
-
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Alpine -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Leaflet -->
+@push('styles')
+    <!-- Leaflet & Proj4 -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+    
+    <!-- Leaflet Plugins -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@latest/Control.FullScreen.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@latest/Control.FullScreen.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<style>
+.glass { background: rgba(255,255,255,0.18); backdrop-filter: blur(18px); }
+</style>
+@endpush
 
-    <style>
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #00E500;
-            border-radius: 999px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.08);
-        }
-
-        .glass {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-        }
-
-        .leaflet-popup-content-wrapper {
-            border-radius: 18px;
-            background: #003366;
-            color: white;
-            font-weight: bold;
-        }
-
-        .leaflet-popup-tip {
-            background: #003366;
-        }
-
-        .leaflet-control-zoom a {
-            background: #003366 !important;
-            color: white !important;
-            border: none !important;
-        }
-
-        #map {
-            width: 100%;
-            min-height: 600px !important;
-            height: 100% !important;
-        }
-
-        .distance-label {
-            background: rgba(0, 0, 0, 0.65);
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 0 10px rgba(0,0,0,0.4);
-        }
-
-        .animate-fade {
-            animation: fade .35s ease;
-        }
-
-        @keyframes fade {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
-</head>
-
-<body class="min-h-screen overflow-hidden bg-[#071018] text-white">
-
-    <!-- BACKGROUND -->
-    <div class="fixed inset-0 z-0">
-        <img src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
-             class="w-full h-full object-cover">
-
-        <div class="absolute inset-0 bg-black/55"></div>
-    </div>
-
-    <div class="relative z-10 h-screen p-4 md:p-6 flex flex-col gap-5 animate-fade">
+@section('content')
+<div class="h-[calc(100vh-6rem)] w-full flex flex-col gap-5 animate-fade">
 
         <!-- TOPO -->
-        <div class="glass rounded-[28px] border border-white/10 p-5 shadow-2xl">
+        <div class="bg-white rounded-[28px] border border-slate-200 p-5 shadow-sm">
 
             <div class="flex flex-col lg:flex-row justify-between gap-5">
 
@@ -114,10 +28,10 @@
                 <div class="flex items-center gap-5">
 
                     <!-- ÍCONE -->
-                    <div class="w-16 h-16 rounded-2xl bg-[#00E500]/20 border border-[#00E500]/30 flex items-center justify-center shadow-lg">
+                    <div class="w-16 h-16 rounded-2xl bg-[#003366]/10 border border-[#003366]/20 flex items-center justify-center shadow-lg">
 
                         <svg xmlns="http://www.w3.org/2000/svg"
-                             class="w-8 h-8 text-[#00E500]"
+                             class="w-8 h-8 text-slate-800"
                              fill="none"
                              viewBox="0 0 24 24"
                              stroke="currentColor">
@@ -134,25 +48,25 @@
                     <!-- DADOS -->
                     <div>
 
-                        <h1 class="text-2xl md:text-3xl font-black uppercase italic text-[#00E500] tracking-tight">
+                        <h1 class="text-2xl md:text-3xl font-black uppercase italic text-slate-800 tracking-tight">
                             {{ $base->nome }}
                         </h1>
 
-                        <div class="flex flex-col md:flex-row gap-2 md:gap-6 mt-2 text-sm text-white/70">
+                        <div class="flex flex-col md:flex-row gap-2 md:gap-6 mt-2 text-sm text-slate-500">
 
                             <span>
-                                <strong class="text-white">Norte:</strong>
+                                <strong class="text-slate-800">Norte:</strong>
                                 {{ number_format($base->norte, 3, ',', '.') }}
                             </span>
 
                             <span>
-                                <strong class="text-white">Este:</strong>
+                                <strong class="text-slate-800">Este:</strong>
                                 {{ number_format($base->este, 3, ',', '.') }}
                             </span>
 
                             @if($base->latitude && $base->longitude)
                                 <span>
-                                    <strong class="text-white">Lat/Lng:</strong>
+                                    <strong class="text-slate-800">Lat/Lng:</strong>
                                     {{ $base->latitude }}, {{ $base->longitude }}
                                 </span>
                             @endif
@@ -168,7 +82,7 @@
 
                     @if($base->google_maps_url)
                         <button onclick="shareBaseLocation('{{ $base->nome }}', '{{ $base->google_maps_url }}')"
-                                class="bg-emerald-600 hover:bg-emerald-700 transition px-5 py-3 rounded-2xl font-black uppercase text-xs shadow-lg flex items-center gap-1.5">
+                                class="bg-emerald-600 hover:bg-emerald-700 transition px-5 py-3 rounded-2xl font-black uppercase text-xs shadow-lg text-white flex items-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l4.636-2.318M8.684 13.258l4.636 2.318M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -177,14 +91,14 @@
                     @endif
 
                     <button onclick="toggleFullscreen()"
-                            class="bg-[#003366] hover:bg-[#004A7C] transition px-5 py-3 rounded-2xl font-black uppercase text-xs shadow-lg">
+                            class="bg-[#003366] hover:bg-[#004A7C] transition px-5 py-3 rounded-2xl font-black uppercase text-xs shadow-lg text-white">
 
                         Tela Cheia
 
                     </button>
 
                     <a href="{{ route('admin.bases.index') }}"
-                       class="bg-red-600 hover:bg-red-700 transition px-6 py-3 rounded-2xl font-black uppercase text-xs shadow-lg">
+                       class="bg-red-600 hover:bg-red-700 transition px-6 py-3 rounded-2xl font-black uppercase text-xs shadow-lg text-white">
 
                         Voltar
 
@@ -197,26 +111,22 @@
         </div>
 
         <!-- MAPA -->
-        <div class="relative flex-1 overflow-hidden rounded-[35px] border border-white/10 shadow-2xl">
+        <div class="relative flex-1 overflow-hidden rounded-[35px] border border-slate-200 shadow-sm">
 
             <!-- CARD INFO -->
-            <div class="absolute top-5 left-5 z-[1000] glass rounded-2xl border border-white/10 p-4 shadow-xl max-w-xs">
+            <div class="absolute top-5 left-5 z-[1000] bg-white rounded-2xl border border-slate-200 p-4 shadow-xl max-w-xs">
 
                 <div class="flex items-center gap-3 mb-3">
 
                     <div class="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
 
-                    <span class="uppercase text-xs font-black tracking-widest text-white/70">
-                        Base Localizada
-                    </span>
+                    <span class="uppercase text-xs font-black tracking-widest text-slate-800">Base Localizada</span>
 
                 </div>
 
-                <h3 class="font-black text-lg uppercase text-[#00E500]">
-                    {{ $base->nome }}
-                </h3>
+                <h3 class="font-black text-lg uppercase text-slate-800">{{ $base->nome }}</h3>
 
-                <p class="text-sm text-white/70 mt-2 leading-relaxed">
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">
                     Visualização geográfica da base topográfica cadastrada no sistema.
                 </p>
 
@@ -233,12 +143,12 @@
                 @endif
 
                 @if(isset($searchNorte) && isset($searchEste) && $searchNorte !== null && $searchEste !== null)
-                    <div class="mt-4 rounded-2xl border border-white/10 bg-[#00182f]/80 p-3 text-sm text-white/80">
-                        <div class="font-bold text-white uppercase text-xs tracking-widest mb-2">Ponto da Busca</div>
+                    <div class="mt-4 rounded-2xl border border-slate-200 bg-[#00182f]/80 p-3 text-sm text-slate-800">
+                        <div class="font-bold text-slate-800 uppercase text-xs tracking-widest mb-2">Ponto da Busca</div>
                         <div>Norte (UTM): {{ $searchNorte }}</div>
                         <div>Este (UTM): {{ $searchEste }}</div>
                         @if(isset($searchLat) && isset($searchLng) && is_numeric($searchLat) && is_numeric($searchLng))
-                            <div class="mt-2 text-xs text-white/60">
+                            <div class="mt-2 text-xs text-slate-500">
                                 Convertido para Lat/Lng: {{ number_format($searchLat, 6, ',', '.') }}, {{ number_format($searchLng, 6, ',', '.') }}
                             </div>
                         @else
@@ -246,13 +156,13 @@
                                 Conversão UTM inválida para Lat/Lng.
                             </div>
                         @endif
-                        <div class="text-xs text-white/60 mt-1">O mapa mostra o ponto de busca em UTM e a base mais próxima encontrada.</div>
+                        <div class="text-xs text-slate-500 mt-1">O mapa mostra o ponto de busca em UTM e a base mais próxima encontrada.</div>
                     </div>
                 @endif
 
                 <!-- Top 3 Bases Mais Próximas -->
                 @if(isset($basesProximas) && $basesProximas->count() > 0)
-                    <div class="mt-4 pt-4 border-t border-white/10">
+                    <div class="mt-4 pt-4 border-t border-slate-200">
                         <div class="font-bold text-[#38bdf8] uppercase text-[11px] tracking-widest mb-3 flex items-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#38bdf8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -290,8 +200,10 @@
         </div>
 
     </div>
+@endsection
 
-    <script>
+@push('scripts')
+<script>
 
         try {
             function parseCoord(value, fallback) {
@@ -500,36 +412,10 @@
         }
 
         function shareBaseLocation(nome, url) {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Localização da Base: ' + nome,
-                    text: 'Confira a localização da base "' + nome + '" no Google Maps.',
-                    url: url
-                }).catch(err => {
-                    console.log('Erro ao compartilhar:', err);
-                });
-            } else {
-                navigator.clipboard.writeText(url).then(() => {
-                    Swal.fire({
-                        title: 'Link Copiado!',
-                        text: 'O link do Google Maps para a base "' + nome + '" foi copiado para a área de transferência.',
-                        icon: 'success',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        background: '#003366',
-                        color: '#fff',
-                        borderRadius: 20
-                    });
-                    setTimeout(() => {
-                        window.open(url, '_blank');
-                    }, 1000);
-                }).catch(err => {
-                    window.open(url, '_blank');
-                });
-            }
+            let text = 'Confira a localização da base "' + nome + '" no Google Maps: ' + url;
+            let whatsappUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+            window.open(whatsappUrl, '_blank');
         }
 
     </script>
-
-</body>
-</html>
+@endpush

@@ -65,7 +65,9 @@ Route::get('/dashboard', function () {
         $query->where('cliente_id', $userId);
     })->where('status', 'pendente')->count();
 
-    return view('client.home', compact('totalPastas', 'totalArquivos', 'pendenciasAbertas'));
+    $pastas = $user->pastas()->with('arquivos')->get();
+      return view('client.home', compact('totalPastas', 'totalArquivos', 'pendenciasAbertas', 'pastas'));
+
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // --- Rotas Autenticadas (Acesso Geral: Admin e Cliente) ---
@@ -187,6 +189,12 @@ Route::middleware('auth')->group(function () {
 
     // Gestão de Marcos (Topografia)
     Route::get('/admin/marcos', [MarcoController::class, 'index'])->name('admin.marcos.index');
+
+    // Credenciais
+    Route::get('/admin/credenciais', [\App\Http\Controllers\Admin\CredencialController::class, 'index'])->name('credenciais.index');
+    Route::post('/admin/credenciais', [\App\Http\Controllers\Admin\CredencialController::class, 'store'])->name('credenciais.store');
+    Route::put('/admin/credenciais/{id}', [\App\Http\Controllers\Admin\CredencialController::class, 'update'])->name('credenciais.update');
+    Route::delete('/admin/credenciais/{id}', [\App\Http\Controllers\Admin\CredencialController::class, 'destroy'])->name('credenciais.destroy');
     Route::post('/admin/marcos', [MarcoController::class, 'store'])->name('admin.marcos.store');
     Route::delete('/admin/marcos/{id}', [MarcoController::class, 'destroy'])->name('admin.marcos.destroy');
     Route::post('/admin/marcos/destroy-multiple', [MarcoController::class, 'destroyMultiple'])->name('admin.marcos.destroy-multiple');

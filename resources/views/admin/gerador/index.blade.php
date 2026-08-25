@@ -1,34 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador Express de Planta e Memorial - TopoGest</title>
-
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Alpine -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- Leaflet.js -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- proj4js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
-
-    <!-- ID dinâmico para controle de orientação do papel -->
-    <style id="dynamic-page-style">
-        @page {
-            size: A4 landscape;
-            margin: 5mm;
-        }
-    </style>
-
-    <style>
-        [x-cloak] {
+@push('styles')
+<style>
+[x-cloak] {
             display: none !important;
         }
 
@@ -171,60 +145,23 @@
                 min-height: 0 !important;
             }
         }
-    </style>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}">
-</head>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</style>
+@endpush
 
-<body x-data="{ currentTab: 'dashboard', plantaAssinada: false, showSignModal: false, signStep: 'choose' }" class="min-h-screen overflow-x-hidden bg-[#E5E7EB] text-white">
+@section('content')
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade">
 
-    <!-- BACKGROUND -->
-    <div class="fixed inset-0 -z-10">
-        <img
-            src="{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}"
-            class="w-full h-full object-cover"
-            alt="Background">
 
-        <div class="absolute inset-0 bg-[#00111f]/50"></div>
-
-        <div class="absolute inset-0"
-             style="background:
-             radial-gradient(circle at top left, rgba(0,74,124,.35), transparent 35%),
-             radial-gradient(circle at bottom right, rgba(0,51,102,.40), transparent 35%);">
-        </div>
+    <!-- HEADER -->
+    <div class="mb-8 bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-white shadow-sm inline-block w-max pr-12">
+        <h2 class="text-3xl font-black text-slate-800 tracking-tight">TopoGest LTDA</h2>
+        <p class="text-slate-600 mt-1 font-medium">Denominação do Imóvel</p>
     </div>
 
-    <div id="main-wrapper" class="relative w-full max-w-7xl mx-auto px-4 md:px-8 py-8">
 
-        <!-- HEADER -->
-        <header class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-12 print:hidden">
-
-            <!-- LOGO -->
-            <a href="{{ route('dashboard') }}"
-               class="flex items-center gap-4 group w-fit">
-
-                <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
-                          alt="TopoGest"
-                          class="w-full h-full object-contain p-2">
-                </div>
-
-                <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
-                          alt="TopoGest"
-                          class="relative z-10 h-8 w-auto">
-                </div>
-            </a>
-
-            <!-- VOLTAR -->
-            <div class="flex items-center gap-4">
-                <a href="{{ route('admin.dashboard') }}"
-                   class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-2xl font-bold uppercase text-xs tracking-wider transition border border-white/5 shadow-md flex items-center gap-2">
-                    ⬅ Painel Administrativo
-                </a>
-            </div>
-        </header>
-
-        <!-- FLASH ERROR -->
+<!-- FLASH ERROR -->
         @if (session('error'))
             <div class="bg-red-500/25 border border-red-500/30 text-red-200 px-6 py-4 rounded-2xl mb-8 flex items-center gap-4 print:hidden animate-bounce">
                 <span>⚠️</span>
@@ -234,15 +171,15 @@
 
         @if(!isset($tempId))
             <!-- ======================= TELA DE UPLOAD ======================= -->
-            <div class="max-w-2xl mx-auto glass glow rounded-[35px] border border-white/10 p-8 md:p-12 shadow-2xl">
+            <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
                 <div class="text-center mb-8">
                     <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-3xl mb-4">
                         ⚡
                     </div>
-                    <h1 class="text-3xl font-black uppercase italic text-[#00E500] tracking-wide">
+                    <h1 class="text-3xl font-black uppercase italic text-slate-800 tracking-wide">
                         Gerador Planta e Memorial
                     </h1>
-                    <p class="text-white/60 text-sm mt-2">
+                    <p class="text-slate-500 text-sm mt-2">
                         Faça upload de uma planilha SIGEF padrão (.ods) para gerar automaticamente a planta de situação interativa, o memorial descritivo completo e o arquivo DXF para CAD de forma rápida e segura.
                     </p>
                 </div>
@@ -255,9 +192,9 @@
                             <div class="w-20 h-20 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl group-hover:scale-110 transition duration-300">
                                 📂
                             </div>
-                            <h3 class="text-xl font-bold uppercase italic text-white/90">Arrastar Planilha SIGEF</h3>
-                            <p class="text-sm text-white/60">Ou clique para selecionar o arquivo `.ods` no seu computador (máx 10MB)</p>
-                            <div id="file-name-display" class="hidden text-sm font-black text-[#00E500] bg-emerald-500/10 px-4 py-2 rounded-xl inline-block mt-2"></div>
+                            <h3 class="text-xl font-bold uppercase italic text-slate-800/90">Arrastar Planilha SIGEF</h3>
+                            <p class="text-sm text-slate-500">Ou clique para selecionar o arquivo `.ods` no seu computador (máx 10MB)</p>
+                            <div id="file-name-display" class="hidden text-sm font-black text-slate-800 bg-emerald-500/10 px-4 py-2 rounded-xl inline-block mt-2"></div>
                         </div>
                     </div>
 
@@ -266,7 +203,7 @@
                     </button>
                 </form>
 
-                <div class="mt-8 border-t border-white/10 pt-6 text-center text-xs text-white/40">
+                <div class="mt-8 border-t border-white/10 pt-6 text-center text-xs text-slate-500">
                     O arquivo ODS não é salvo permanentemente no banco. É processado sob demanda e limpo periodicamente.
                 </div>
             </div>
@@ -306,17 +243,17 @@
                  class="space-y-8">
 
                 <!-- Header de Situação -->
-                <div class="glass glow rounded-[35px] border border-white/10 p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 print:hidden">
+                <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-3xl shrink-0">
                             🗺️
                         </div>
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="uppercase tracking-[3px] text-xs text-[#00E500] font-black">Planta e Memorial Gerados</span>
-                                <span class="bg-emerald-500/25 text-[#00E500] text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">SIGEF Express</span>
+                                <span class="uppercase tracking-[3px] text-xs text-slate-800 font-black">Planta e Memorial Gerados</span>
+                                <span class="bg-emerald-500/25 text-slate-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">SIGEF Express</span>
                             </div>
-                            <h2 class="text-2xl font-black italic uppercase mt-1 text-white">
+                            <h2 class="text-2xl font-black italic uppercase mt-1 text-slate-800">
                                 {{ $identificacao['imovel'] ?? 'Imóvel sem denominação' }}
                             </h2>
                         </div>
@@ -326,7 +263,7 @@
                     <div class="flex flex-wrap gap-2 items-center">
                         <!-- Botão de Assinatura -->
                         <button @click="showSignModal = true; signStep = 'choose'"
-                                :class="plantaAssinada ? 'bg-emerald-600 border-emerald-500 hover:bg-emerald-500 text-white' : 'bg-orange-600 border-orange-500 hover:bg-orange-500 text-white'" 
+                                :class="plantaAssinada ? 'bg-emerald-600 border-emerald-500 hover:bg-emerald-500 text-slate-800' : 'bg-orange-600 border-orange-500 hover:bg-orange-500 text-slate-800'" 
                                 class="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition border shadow-md flex items-center gap-2">
                             <span x-text="plantaAssinada ? '🔏 Planta Assinada' : '🔑 Assinar Planta'"></span>
                         </button>
@@ -337,11 +274,11 @@
                             🖨️ Imprimir Planta
                         </button>
                         <button @click="currentTab = 'memorial_print'; document.body.className = 'print-memorial'; const memStyle = document.getElementById('dynamic-page-style'); if (memStyle) memStyle.innerHTML = '@page { size: A4 portrait; margin: 15mm; }'; setTimeout(() => { window.print(); }, 150);"
-                                class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition border border-white/10 shadow-md flex items-center gap-2">
+                                class="bg-blue-600 hover:bg-blue-500 text-slate-800 px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition border border-white/10 shadow-md flex items-center gap-2">
                             📄 Imprimir Memorial
                         </button>
                         <a href="{{ route('admin.gerador.index') }}"
-                           class="bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition border border-white/5 shadow-md flex items-center gap-2">
+                           class="bg-white/10 hover:bg-white/20 text-slate-800 px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition border border-white/5 shadow-md flex items-center gap-2">
                             🔄 Novo Upload
                         </a>
                     </div>
@@ -350,17 +287,17 @@
                 <!-- TABS DE NAVEGAÇÃO -->
                 <div class="flex border-b border-white/10 mb-6 print:hidden">
                     <button @click="currentTab = 'dashboard'" 
-                            :class="currentTab === 'dashboard' ? 'border-[#00E500] text-[#00E500]' : 'border-transparent text-white/60 hover:text-white'" 
+                            :class="currentTab === 'dashboard' ? 'border-[#00E500] text-slate-800' : 'border-transparent text-slate-500 hover:text-slate-800'" 
                             class="py-3 px-6 font-black uppercase text-xs tracking-wider border-b-2 transition">
                         🖥️ Painel Interativo
                     </button>
                     <button @click="currentTab = 'prancha'; setTimeout(() => { window.invalidateMaps(); }, 200)" 
-                            :class="currentTab === 'prancha' ? 'border-[#00E500] text-[#00E500]' : 'border-transparent text-white/60 hover:text-white'" 
+                            :class="currentTab === 'prancha' ? 'border-[#00E500] text-slate-800' : 'border-transparent text-slate-500 hover:text-slate-800'" 
                             class="py-3 px-6 font-black uppercase text-xs tracking-wider border-b-2 transition flex items-center gap-2">
                         📐 Prancha de Desenho (A4)
                     </button>
                     <button @click="currentTab = 'memorial_print'" 
-                            :class="currentTab === 'memorial_print' ? 'border-[#00E500] text-[#00E500]' : 'border-transparent text-white/60 hover:text-white'" 
+                            :class="currentTab === 'memorial_print' ? 'border-[#00E500] text-slate-800' : 'border-transparent text-slate-500 hover:text-slate-800'" 
                             class="py-3 px-6 font-black uppercase text-xs tracking-wider border-b-2 transition flex items-center gap-2">
                         📄 Memorial de Impressão (A4)
                     </button>
@@ -373,38 +310,38 @@
                     <div class="lg:col-span-2 space-y-6">
 
                         <!-- Metadados -->
-                        <div class="glass glow rounded-[35px] border border-white/10 p-6 md:p-8 grid grid-cols-2 gap-4">
+                        <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
                             <div>
-                                <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Denominação do Imóvel</p>
-                                <p class="text-sm font-black text-white mt-0.5">{{ $identificacao['imovel'] ?? 'Não informado' }}</p>
+                                <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Denominação do Imóvel</p>
+                                <p class="text-sm font-black text-slate-800 mt-0.5">{{ $identificacao['imovel'] ?? 'Não informado' }}</p>
                             </div>
                             <div>
-                                <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Proprietário / Detentor</p>
-                                <p class="text-sm font-black text-white mt-0.5">{{ $identificacao['detentor'] ?? 'Não informado' }}</p>
+                                <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Proprietário / Detentor</p>
+                                <p class="text-sm font-black text-slate-800 mt-0.5">{{ $identificacao['detentor'] ?? 'Não informado' }}</p>
                             </div>
                             <div>
-                                <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">CPF / CNPJ</p>
-                                <p class="text-sm font-black text-white mt-0.5">{{ $identificacao['cpf_cnpj'] ?? 'Não informado' }}</p>
+                                <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">CPF / CNPJ</p>
+                                <p class="text-sm font-black text-slate-800 mt-0.5">{{ $identificacao['cpf_cnpj'] ?? 'Não informado' }}</p>
                             </div>
                             <div>
-                                <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Município / UF</p>
-                                <p class="text-sm font-black text-white mt-0.5">{{ $identificacao['municipio'] ?? 'Não informado' }}</p>
+                                <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Município / UF</p>
+                                <p class="text-sm font-black text-slate-800 mt-0.5">{{ $identificacao['municipio'] ?? 'Não informado' }}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Área</p>
-                                <p class="text-sm font-black text-[#00E500] mt-0.5 font-mono" id="print-area-val-header">{{ $identificacao['area_ha'] ?? '0,0000' }} ha</p>
+                                <p class="text-sm font-black text-slate-800 mt-0.5 font-mono" id="print-area-val-header">{{ $identificacao['area_ha'] ?? '0,0000' }} ha</p>
                             </div>
                             <div>
-                                <p class="text-[9px] uppercase tracking-widest text-white/50 font-bold">Código SNCR/INCRA</p>
-                                <p class="text-sm font-black text-white mt-0.5 font-mono">{{ $identificacao['sncr'] ?? 'Não informado' }}</p>
+                                <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Código SNCR/INCRA</p>
+                                <p class="text-sm font-black text-slate-800 mt-0.5 font-mono">{{ $identificacao['sncr'] ?? 'Não informado' }}</p>
                             </div>
                         </div>
 
                         <!-- Mapa Container -->
-                        <div class="glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl relative">
+                        <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
                             <!-- Toggle Satellite Layer -->
                             <button id="btn-satelite" onclick="alternarCamada()"
-                                    class="absolute top-4 right-4 z-[1000] bg-black/60 hover:bg-black/80 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition border border-white/10 shadow-md">
+                                    class="absolute top-4 right-4 z-[1000] bg-black/60 hover:bg-black/80 text-slate-800 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition border border-white/10 shadow-md">
                                 🛰️ Satélite
                             </button>
 
@@ -415,31 +352,31 @@
 
                     <!-- Coluna Direita: Memorial Descritivo -->
                     <div class="lg:col-span-1">
-                        <div class="glass glow rounded-[35px] border border-white/10 overflow-hidden shadow-2xl h-full flex flex-col">
+                        <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
                             <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <span class="text-lg">📄</span>
-                                    <span class="uppercase tracking-[3px] text-xs text-[#00E500] font-black">Memorial Descritivo</span>
+                                    <span class="uppercase tracking-[3px] text-xs text-slate-800 font-black">Memorial Descritivo</span>
                                 </div>
-                                <button onclick="copiarMemorial()" id="btn-copiar" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2">
+                                <button onclick="copiarMemorial()" id="btn-copiar" class="bg-blue-600 hover:bg-blue-500 text-slate-800 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center gap-2">
                                     📋 Copiar
                                 </button>
                             </div>
                             <div class="p-6 flex-1 overflow-y-auto max-h-[500px]">
-                                <pre id="memorial-texto" class="text-xs font-mono bg-black/30 p-4 rounded-2xl overflow-x-auto border border-white/5 text-white/90 leading-relaxed whitespace-pre-wrap">{{ $memorialTexto }}</pre>
+                                <pre id="memorial-texto" class="text-xs font-mono bg-black/30 p-4 rounded-2xl overflow-x-auto border border-white/5 text-slate-800/90 leading-relaxed whitespace-pre-wrap">{{ $memorialTexto }}</pre>
                             </div>
                         </div>
                     </div>
 
                     <!-- Tabela Técnica de Vértices para a Tela -->
-                    <div class="col-span-full glass glow rounded-[35px] border border-white/10 p-6 md:p-8 shadow-2xl">
-                        <h3 class="text-lg font-black uppercase italic mb-4 text-white">
+                    <div class="bg-white rounded-[32px] border border-slate-200 shadow-sm p-5 md:p-8">
+                        <h3 class="text-lg font-black uppercase italic mb-4 text-slate-800">
                             Tabela de Dados Técnicos (Vértices)
                         </h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left border-collapse">
                                 <thead>
-                                    <tr class="border-b border-white/10 uppercase font-black text-xs text-white/60">
+                                    <tr class="border-b border-white/10 uppercase font-black text-xs text-slate-500">
                                         <th class="py-3 px-4">Vértice</th>
                                         <th class="py-3 px-4">Tipo</th>
                                         <th class="py-3 px-4">Norte (Y)</th>
@@ -449,7 +386,7 @@
                                         <th class="py-3 px-4">Limite</th>
                                     </tr>
                                 </thead>
-                                <tbody class="text-white/80">
+                                <tbody class="text-slate-800/80">
                                     @foreach($vertices as $v)
                                         <tr class="border-b border-white/5 hover:bg-white/5 transition">
                                             <td class="py-3 px-4 font-bold">{{ $v['codigo'] }}</td>
@@ -469,8 +406,8 @@
                                                 @endif
                                             </td>
                                             <td class="py-3 px-4 font-mono">{{ number_format((float) ($v['altitude'] ?? 0.0), 2, ',', '.') }} m</td>
-                                            <td class="py-3 px-4 text-xs text-white/60 font-medium">{{ $v['confrontante'] ?: 'Limite do Imóvel' }}</td>
-                                            <td class="py-3 px-4 text-xs text-white/50">{{ $v['limite'] ?: 'Cerca' }}</td>
+                                            <td class="py-3 px-4 text-xs text-slate-500 font-medium">{{ $v['confrontante'] ?: 'Limite do Imóvel' }}</td>
+                                            <td class="py-3 px-4 text-xs text-slate-500">{{ $v['limite'] ?: 'Cerca' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -587,7 +524,7 @@
                                             <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 border border-black bg-white flex items-center justify-center"><span class="w-0.5 h-0.5 bg-black"></span></span><span>Vértice tipo P</span></div>
                                             <div class="flex items-center gap-1"><span class="w-[10px] h-[1px] bg-red-800 border-y border-red-800"></span><span class="text-red-800">Linha ideal</span></div>
                                             
-                                            <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 border border-black bg-black flex items-center justify-center text-white text-[5px] font-bold">+</span><span>Vértice tipo V</span></div>
+                                            <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 border border-black bg-black flex items-center justify-center text-slate-800 text-[5px] font-bold">+</span><span>Vértice tipo V</span></div>
                                             <div class="flex items-center gap-1"><span class="w-[10px] h-[1px] bg-blue-500"></span><span class="text-blue-500">Curso d'água</span></div>
                                             
                                             <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 border border-black bg-yellow-300 rounded-full"></span><span>Vértice tipo O</span></div>
@@ -1478,7 +1415,7 @@
                 });
 
                 window.addEventListener('afterprint', () => {
-                    document.body.className = 'min-h-screen overflow-x-hidden bg-[#E5E7EB] text-white';
+                    document.body.className = 'min-h-screen overflow-x-hidden bg-[#E5E7EB] text-slate-800';
                 });
             </script>
         @endif
@@ -1489,27 +1426,27 @@
              class="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-sm p-4 flex items-center justify-center print:hidden" 
              x-cloak>
             
-            <div class="bg-[#0c1a24] border border-white/10 rounded-[35px] p-8 shadow-2xl max-w-md w-full text-white" @click.away="showSignModal = false">
+            <div class="bg-[#0c1a24] border border-white/10 rounded-[35px] p-8 shadow-2xl max-w-md w-full text-slate-800" @click.away="showSignModal = false">
                 
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-black uppercase italic text-[#00E500]">
+                    <h3 class="text-xl font-black uppercase italic text-slate-800">
                         Assinador Digital
                     </h3>
-                    <button @click="showSignModal = false" class="text-white/40 hover:text-white text-2xl leading-none">
+                    <button @click="showSignModal = false" class="text-slate-500 hover:text-slate-800 text-2xl leading-none">
                         ×
                     </button>
                 </div>
 
                 <!-- Passo 1: Escolha do Método -->
                 <div x-show="signStep === 'choose'" class="space-y-4">
-                    <p class="text-sm text-white/75 mb-4">Escolha a forma de assinatura eletrônica para validar juridicamente esta planta:</p>
+                    <p class="text-sm text-slate-800/75 mb-4">Escolha a forma de assinatura eletrônica para validar juridicamente esta planta:</p>
                     
                     <button @click="signStep = 'loading'; setTimeout(() => { signStep = 'cert-list'; }, 2000)" 
                             class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00E500] p-4 rounded-2xl transition flex items-start gap-4">
                         <div class="text-2xl mt-1">🔑</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-sm text-white">Certificado Digital ICP-Brasil (A3 / Token USB)</h4>
-                            <p class="text-xs text-white/50 mt-0.5 font-normal">Assine usando seu token físico ou cartão leitor conectado ao computador.</p>
+                            <h4 class="font-bold text-sm text-slate-800">Certificado Digital ICP-Brasil (A3 / Token USB)</h4>
+                            <p class="text-xs text-slate-500 mt-0.5 font-normal">Assine usando seu token físico ou cartão leitor conectado ao computador.</p>
                         </div>
                     </button>
 
@@ -1519,29 +1456,29 @@
                 <!-- Passo 2: Carregando/Buscando Token -->
                 <div x-show="signStep === 'loading'" class="text-center py-8 space-y-4">
                     <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-r-2 border-[#00E500]"></div>
-                    <p class="text-sm text-white/75">Lendo token USB e buscando certificados conectados...</p>
+                    <p class="text-sm text-slate-800/75">Lendo token USB e buscando certificados conectados...</p>
                 </div>
 
                 <!-- Passo 3: Listagem de Certificados Encontrados -->
                 <div x-show="signStep === 'cert-list'" class="space-y-4">
-                    <p class="text-xs text-white/60 mb-2">Selecione o certificado para assinar:</p>
+                    <p class="text-xs text-slate-500 mb-2">Selecione o certificado para assinar:</p>
                     
                     <div class="bg-white/5 border border-[#00E500] p-4 rounded-2xl flex items-center gap-3">
                         <input type="radio" checked id="cert1" class="accent-[#00E500]">
                         <label for="cert1" class="cursor-pointer">
-                            <h5 class="font-bold text-xs text-white">EDIVALDO RODRIGUES DA SILVA</h5>
-                            <p class="text-[10px] text-white/50 font-normal">CPF: ***.821.122-** | Emissor: AC SRF v5</p>
-                            <p class="text-[9px] text-[#00E500] mt-0.5 font-bold">ICP-Brasil A3 (Token Aladin)</p>
+                            <h5 class="font-bold text-xs text-slate-800">EDIVALDO RODRIGUES DA SILVA</h5>
+                            <p class="text-[10px] text-slate-500 font-normal">CPF: ***.821.122-** | Emissor: AC SRF v5</p>
+                            <p class="text-[9px] text-slate-800 mt-0.5 font-bold">ICP-Brasil A3 (Token Aladin)</p>
                         </label>
                     </div>
 
                     <div class="space-y-2 mt-4">
-                        <label class="text-[10px] text-white/50 uppercase font-bold block">Digite o PIN do Token:</label>
-                        <input type="password" placeholder="Digite o PIN do Token" class="w-full bg-black/40 border border-white/10 focus:border-[#00E500] rounded-xl px-4 py-2 text-sm text-white outline-none">
+                        <label class="text-[10px] text-slate-500 uppercase font-bold block">Digite o PIN do Token:</label>
+                        <input type="password" placeholder="Digite o PIN do Token" class="w-full bg-black/40 border border-white/10 focus:border-[#00E500] rounded-xl px-4 py-2 text-sm text-slate-800 outline-none">
                     </div>
 
                     <div class="flex gap-2 mt-6">
-                        <button @click="signStep = 'choose'" class="flex-1 bg-white/5 hover:bg-white/10 text-white py-3 rounded-xl font-bold uppercase text-xs transition">
+                        <button @click="signStep = 'choose'" class="flex-1 bg-white/5 hover:bg-white/10 text-slate-800 py-3 rounded-xl font-bold uppercase text-xs transition">
                             Voltar
                         </button>
                         <button @click="plantaAssinada = true; showSignModal = false; alert('Planta assinada digitalmente via Token A3 com sucesso!')" 
@@ -1555,5 +1492,11 @@
         </div>
 
     </div>
-</body>
-</html>
+
+</div>
+@endsection
+
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+@endpush
