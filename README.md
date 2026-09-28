@@ -83,6 +83,20 @@ If you need to run database or storage commands inside the container:
 docker compose exec app php artisan <command>
 ```
 
+## Pipeline e Deploy (CI/CD)
+
+O TopoGest utiliza um processo automatizado de integração e implantação contínua (CI/CD).
+
+O fluxo de atualização da aplicação segue:
+
+Commit → Push → Pipeline → Build → Testes → Deploy → Servidor
+
+Após o envio de uma nova versão ao repositório, o mecanismo de pipeline verifica a atualização, prepara uma nova versão da aplicação, executa os testes automatizados e, caso todas as etapas sejam concluídas com sucesso, realiza a implantação no servidor.
+
+O processo de implantação utiliza Docker e Docker Compose, incluindo a execução das migrations e uma verificação de saúde da aplicação antes da conclusão do deploy.
+
+Em caso de falha durante as etapas de validação, a versão em execução é preservada.
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
