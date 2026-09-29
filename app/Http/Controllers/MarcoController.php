@@ -38,7 +38,7 @@ class MarcoController extends Controller
         $sortDir = strtolower($sortDir) === 'desc' ? 'desc' : 'asc';
 
         if ($sortBy === 'numero') {
-            $query->orderByRaw("CAST(numero AS UNSIGNED) {$sortDir}");
+            $query->orderByRaw("CAST(numero AS BIGINT) {$sortDir}");
         } else {
             $query->orderBy($sortBy, $sortDir);
         }
@@ -48,7 +48,7 @@ class MarcoController extends Controller
             ->withQueryString();
         $ultimo = Marco::where('credencial', $credencial)
             ->where('tipo', $tipo)
-            ->orderByRaw('CAST(numero AS UNSIGNED) DESC')
+            ->orderByRaw('CAST(numero AS BIGINT) DESC')
             ->first();
 
         $totalBca = Marco::where('credencial', 'BCA')->count();
