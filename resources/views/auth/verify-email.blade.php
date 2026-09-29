@@ -63,7 +63,7 @@
             </a>
 
             <!-- Logout -->
-            <form method="POST" action="{{ route('logout', [], false) }}">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
 
                 <button type="submit"
@@ -191,7 +191,7 @@
 
                             <!-- Logout -->
                             <form method="POST"
-                                  action="{{ route('logout', [], false) }}"
+                                  action="{{ route('logout') }}"
                                   class="w-full md:w-auto">
 
                                 @csrf
