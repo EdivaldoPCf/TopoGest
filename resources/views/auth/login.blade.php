@@ -33,308 +33,139 @@
              style="background-image: url('{{ asset('images/background-topo.jpg') . '?v=' . @filemtime(public_path('images/background-topo.jpg')) }}');">
         </div>
 
-        <div class="absolute inset-0 bg-[#00111f]/55 backdrop-blur-[2px]"></div>
+        <div class="absolute inset-0 bg-[#001B2E]/80 backdrop-blur-[2px]"></div>
     </div>
 
     <!-- Container -->
     <div class="relative z-10 min-h-screen flex flex-col">
 
         <!-- Header -->
-        <header class="w-full px-6 md:px-12 py-6">
+        <header class="w-full px-6 md:px-12 py-6 relative z-20">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
-
                 <!-- Logo -->
-                <a href="{{ route('welcome') }}"
-                   class="group flex items-center gap-4 transition-all duration-300 hover:scale-105">
-
-                    <div class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-2xl transition group-hover:scale-105">
-                        <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}"
-                             alt="TopoGest"
-                             class="w-full h-full object-contain p-2">
-                    </div>
-
-                    <div class="relative flex items-center h-14 px-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                        <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}"
-                             alt="TopoGest"
-                             class="relative z-10 h-8 object-contain">
-                    </div>
+                <a href="{{ route('welcome') }}" class="group flex items-center gap-3 transition-transform duration-300 hover:scale-105">
+                    <img src="{{ asset('images/logo-icon.png') . '?v=' . @filemtime(public_path('images/logo-icon.png')) }}" alt="TopoGest" class="h-10 sm:h-12 w-auto object-contain">
+                    <img src="{{ asset('images/logo-text.png') . '?v=' . @filemtime(public_path('images/logo-text.png')) }}" alt="TopoGest" class="h-7 sm:h-8 w-auto object-contain transition-opacity duration-300 group-hover:opacity-80">
                 </a>
-
+                
                 <!-- Voltar -->
-                <button onclick="history.back()"
-                        class="hidden md:flex items-center gap-2 bg-[#003366]/90 backdrop-blur-md text-white px-8 py-3 rounded-2xl font-black shadow-2xl border border-white/10 hover:bg-[#002244] hover:scale-105 transition-all active:scale-95">
-
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         class="h-5 w-5"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor">
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M15 19l-7-7 7-7" />
+                <button onclick="history.back()" class="hidden md:flex items-center gap-2 text-white/90 hover:text-white border border-white/20 bg-white/5 hover:bg-white/10 px-5 py-2.5 rounded-xl font-medium transition-colors focus:ring-2 focus:ring-white/50 outline-none text-sm shadow-sm backdrop-blur-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                     </svg>
-
                     Voltar
                 </button>
-
             </div>
         </header>
 
         <!-- Main -->
-        <main class="flex-1 flex items-center justify-center px-6 md:px-12 pb-10">
-
-            <div class="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center">
-
-                <!-- Texto lateral -->
-                <div class="hidden lg:flex flex-col text-white">
-
-                    <span class="uppercase tracking-[0.35em] text-sm font-semibold opacity-80 mb-4">
-                        Plataforma Profissional
-                    </span>
-
-                    <h1 class="text-6xl font-black leading-none mb-6">
-                        Bem-vindo ao
-                        <span class="text-blue-300 italic">TopoGest</span>
-                    </h1>
-
-                    <p class="text-xl leading-relaxed text-white/80 max-w-xl">
-                        Gerencie serviços, clientes, solicitações administrativas
-                        e acompanhamento operacional com uma interface moderna,
-                        rápida e segura.
-                    </p>
-
-                    <div class="mt-10 flex items-center gap-4">
-
-                        <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-5 py-4">
-                            <div class="text-3xl font-black">100%</div>
-                            <div class="text-sm uppercase tracking-wider text-white/70">
-                                Controle
-                            </div>
-                        </div>
-
-                        <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-5 py-4">
-                            <div class="text-3xl font-black">24h</div>
-                            <div class="text-sm uppercase tracking-wider text-white/70">
-                                Disponível
-                            </div>
-                        </div>
-
-                        <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-5 py-4">
-                            <div class="text-3xl font-black">Seguro</div>
-                            <div class="text-sm uppercase tracking-wider text-white/70">
-                                Ambiente
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Card Login -->
-                <div class="w-full">
-
-                    <div class="bg-white/92 backdrop-blur-2xl border border-white/40 shadow-[0_25px_80px_rgba(0,0,0,0.35)] rounded-[40px] p-8 md:p-12">
-
-                        <!-- Mobile voltar -->
-                        <button onclick="history.back()"
-                                class="md:hidden mb-6 flex items-center gap-2 text-[#003366] font-bold">
-                            ← Voltar
-                        </button>
-
-                        <!-- Top -->
-                        <div class="text-center mb-10">
-
-                            <div class="flex justify-center mb-5">
-                                <div class="bg-[#003366] text-white px-8 py-3 rounded-2xl shadow-xl">
-                                    <h2 class="text-3xl font-black uppercase italic tracking-tight">
-                                        Entrar
-                                    </h2>
-                                </div>
-                            </div>
-
-                            <p class="text-gray-600 text-sm md:text-base">
-                                Faça login para acessar o painel administrativo.
-                            </p>
-                        </div>
-
-                        <!-- Erros -->
-                        @if ($errors->any())
-                            <div class="mb-8 bg-red-500/10 border border-red-500/30 text-red-700 rounded-2xl px-5 py-4 shadow-sm">
-                                <div class="flex items-center gap-3">
-
-                                    <div class="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-black">
-                                        !
-                                    </div>
-
-                                    <div>
-                                        <h3 class="font-black uppercase text-sm">
-                                            Erro de autenticação
-                                        </h3>
-
-                                        <p class="text-sm">
-                                            Usuário ou senha inválidos.
-                                        </p>
-                                    </div>
-
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Form -->
-                        <form method="POST"
-                              action="{{ route('login') }}"
-                              class="space-y-7">
-
-                            @csrf
-
-                            <!-- Login -->
-                            <div>
-
-                                <label for="login_input"
-                                       class="flex items-center gap-2 bg-[#003366] text-white px-5 py-2 rounded-t-2xl font-black text-sm uppercase tracking-wide shadow-md w-fit">
-
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         class="h-4 w-4"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              stroke-width="2"
-                                              d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm6 0a8 8 0 11-16 0 8 8 0 0116 0z" />
-                                    </svg>
-
-                                    Email / CPF / CNPJ
-                                </label>
-
-                                <div class="relative">
-
-                                    <input
-                                        type="text"
-                                        name="email"
-                                        id="login_input"
-                                        required
-                                        autofocus
-                                        autocomplete="username"
-                                        value="{{ old('email') }}"
-                                        placeholder="Digite seu email ou documento"
-                                        class="w-full bg-gray-100/90 border border-gray-300 rounded-b-2xl rounded-tr-2xl px-5 py-4 text-lg font-semibold text-[#003366] outline-none transition-all focus:ring-4 focus:ring-[#003366]/20 focus:border-[#003366] shadow-inner">
-
-                                    <div class="absolute right-5 top-1/2 -translate-y-1/2 text-[#003366]/50">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             class="h-6 w-6"
-                                             fill="none"
-                                             viewBox="0 0 24 24"
-                                             stroke="currentColor">
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M5.121 17.804A9 9 0 1118.364 4.56M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <!-- Password -->
-                            <div>
-
-                                <label for="password"
-                                       class="flex items-center gap-2 bg-[#003366] text-white px-5 py-2 rounded-t-2xl font-black text-sm uppercase tracking-wide shadow-md w-fit">
-
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         class="h-4 w-4"
-                                         fill="none"
-                                         viewBox="0 0 24 24"
-                                         stroke="currentColor">
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              stroke-width="2"
-                                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2h-1V9a5 5 0 00-10 0v2H6a2 2 0 00-2 2v6a2 2 0 002 2zm3-10V9a3 3 0 016 0v2H9z" />
-                                    </svg>
-
-                                    Senha
-                                </label>
-
-                                <div class="relative">
-
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        id="password"
-                                        required
-                                        autocomplete="current-password"
-                                        placeholder="Digite sua senha"
-                                        class="w-full bg-gray-100/90 border border-gray-300 rounded-b-2xl rounded-tr-2xl px-5 py-4 text-lg font-semibold text-[#003366] outline-none transition-all focus:ring-4 focus:ring-[#003366]/20 focus:border-[#003366] shadow-inner">
-
-                                    <button type="button"
-                                            id="togglePassword"
-                                            class="absolute right-5 top-1/2 -translate-y-1/2 text-[#003366]/60 hover:text-[#003366] transition">
-
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             id="eyeIcon"
-                                             class="h-6 w-6"
-                                             fill="none"
-                                             viewBox="0 0 24 24"
-                                             stroke="currentColor">
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0s-3-7-9-7-9 7-9 7 3 7 9 7 9-7 9-7z" />
-                                        </svg>
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                            <!-- Remember -->
-                            <div class="flex items-center justify-between flex-wrap gap-4">
-
-                                <label class="flex items-center gap-3 cursor-pointer group">
-                                    <input type="checkbox"
-                                           name="remember"
-                                           class="w-5 h-5 rounded border-gray-300 text-[#003366] focus:ring-[#003366]">
-
-                                    <span class="text-[#003366] font-semibold group-hover:text-[#001f3f] transition">
-                                        Lembrar acesso
-                                    </span>
-                                </label>
-
-                                <a href="{{ route('password.request') }}"
-                                   class="text-[#003366] font-black hover:underline hover:text-blue-900 transition">
-                                    Esqueci minha senha
-                                </a>
-
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="pt-4 space-y-4">
-
-                                <button type="submit"
-                                        class="w-full bg-[#003366] hover:bg-[#002244] text-white py-4 rounded-2xl text-2xl font-black uppercase shadow-[0_15px_35px_rgba(0,51,102,0.35)] transition-all hover:scale-[1.02] active:scale-[0.98] border-b-4 border-[#001122]">
-
-                                    Entrar
-                                </button>
-
-                                <a href="{{ route('register') }}"
-                                   class="w-full flex items-center justify-center bg-[#0f172a] hover:bg-slate-800 text-white py-4 rounded-2xl text-xl font-black uppercase shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
-
-                                    Criar Conta
-                                </a>
-
-                            </div>
-
-                        </form>
-
-                    </div>
-
-                </div>
-
+        <main class="flex-1 flex flex-col md:flex-row items-center justify-center px-4 md:px-12 pb-10 pt-4 md:pt-0 relative z-20 w-full max-w-7xl mx-auto gap-12 lg:gap-24">
+            
+            <!-- Texto lateral -->
+            <div class="w-full md:w-1/2 flex flex-col text-white mb-8 md:mb-0">
+                <span class="uppercase tracking-[0.2em] text-sm font-semibold text-blue-300 mb-4 flex items-center gap-2">
+                    <span class="w-8 h-px bg-blue-300/50"></span> Plataforma Profissional
+                </span>
+                
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] mb-6 tracking-tight">
+                    Bem-vindo ao <br class="hidden sm:block">
+                    <span class="text-[#34d399]">TopoGest</span>
+                </h1>
+                
+                <p class="text-lg sm:text-xl leading-relaxed text-white/80 max-w-lg">
+                    Gerencie serviços, clientes, solicitações administrativas e acompanhamento operacional com uma interface moderna, rápida e segura.
+                </p>
             </div>
 
+            <!-- Card Login -->
+            <div class="w-full md:w-1/2 max-w-md mx-auto">
+                <div class="bg-[#001B2E]/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.4)] rounded-3xl p-6 sm:p-10 relative overflow-hidden">
+                    
+                    <!-- Detalhe luminoso no topo do card -->
+                    <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#004A7C] to-transparent opacity-80"></div>
+
+                    <!-- Mobile voltar -->
+                    <button onclick="history.back()" class="md:hidden mb-6 flex items-center gap-2 text-white/70 hover:text-white font-medium text-sm transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                        Voltar
+                    </button>
+
+                    <!-- Top -->
+                    <div class="text-center mb-8">
+                        <h2 class="text-[28px] sm:text-[32px] font-bold text-white tracking-tight mb-2">ENTRAR</h2>
+                        <p class="text-white/60 text-sm">
+                            Faça login para acessar o painel administrativo.
+                        </p>
+                    </div>
+
+                    <!-- Erros -->
+                    @if ($errors->any())
+                        <div class="mb-6 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl px-4 py-3 text-sm shadow-sm">
+                            <div class="flex gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                <div>
+                                    <span class="font-bold block mb-1">Erro de autenticação</span>
+                                    Usuário ou senha inválidos.
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Form -->
+                    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                        @csrf
+                        
+                        <!-- Login -->
+                        <div class="space-y-1.5">
+                            <label for="login_input" class="block text-xs font-bold uppercase tracking-wider text-white/80 ml-1">
+                                Email / CPF / CNPJ
+                            </label>
+                            <div class="relative">
+                                <input type="text" name="email" id="login_input" required autofocus autocomplete="username" value="{{ old('email') }}" placeholder="Digite seu email ou documento" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-base text-white placeholder-white/30 outline-none transition-all focus:ring-2 focus:ring-[#004A7C] focus:border-[#004A7C] hover:bg-white/10 h-[52px]">
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="space-y-1.5">
+                            <label for="password" class="block text-xs font-bold uppercase tracking-wider text-white/80 ml-1">
+                                Senha
+                            </label>
+                            <div class="relative">
+                                <input type="password" name="password" id="password" required autocomplete="current-password" placeholder="Digite sua senha" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-base text-white placeholder-white/30 outline-none transition-all focus:ring-2 focus:ring-[#004A7C] focus:border-[#004A7C] hover:bg-white/10 h-[52px] pr-12">
+                                <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors focus:outline-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" id="eyeIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0s-3-7-9-7-9 7-9 7 3 7 9 7 9-7 9-7z" /></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember -->
+                        <div class="flex items-center justify-between pt-1 pb-2">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" name="remember" class="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-400 focus:ring-blue-400 focus:ring-offset-0 transition-colors">
+                                <span class="text-white/70 text-sm font-medium group-hover:text-white transition-colors">
+                                    Lembrar acesso
+                                </span>
+                            </label>
+                            <a href="{{ route('password.request') }}" class="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors hover:underline focus:outline-none focus:underline">
+                                Esqueci minha senha
+                            </a>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="pt-2 space-y-3">
+                            <button type="submit" class="w-full bg-[#004A7C] hover:bg-[#005B99] text-white h-[52px] rounded-xl font-bold uppercase tracking-wide transition-all focus:ring-2 focus:ring-white/50 focus:outline-none hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                                Entrar
+                            </button>
+                            <a href="{{ route('register') }}" class="w-full flex items-center justify-center bg-transparent hover:bg-white/5 border border-white/20 text-white h-[52px] rounded-xl font-bold uppercase tracking-wide transition-all focus:ring-2 focus:ring-white/50 focus:outline-none">
+                                Criar Conta
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
 
     </div>
