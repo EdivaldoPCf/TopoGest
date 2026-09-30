@@ -14,8 +14,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="#inicio" aria-label="Página Inicial" class="flex items-center group">
-                        <img class="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105" src="{{ asset('images/topogest-logo-horizontal.svg') }}" alt="TopoGest">
+                    <a href="#inicio" aria-label="Página Inicial" class="flex items-center gap-2.5 group">
+                        <img class="h-8 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105" src="{{ asset('images/logo-icon.png') }}?v={{ time() }}" alt="Símbolo TopoGest">
+                        <img class="h-6 sm:h-7 w-auto object-contain transition-opacity duration-300 group-hover:opacity-80" src="{{ asset('images/logo-text.png') }}?v={{ time() }}" alt="TopoGest">
                     </a>
                 </div>
                 
@@ -87,7 +88,7 @@
         <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center flex-grow pt-24 pb-12">
             
             <!-- Símbolo -->
-            <img src="{{ asset('images/topogest-symbol.svg') }}" alt="Símbolo TopoGest" class="h-20 md:h-[90px] w-auto mb-10 opacity-95 hover:scale-105 transition-transform duration-500">
+            <img src="{{ asset('images/logo-icon.png') }}?v={{ time() }}" alt="Símbolo TopoGest" class="h-20 md:h-[90px] w-auto mb-10 opacity-95 hover:scale-105 transition-transform duration-500">
             
             <!-- Título -->
             <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-[4rem] max-w-4xl leading-[1.1] md:leading-[1.15]">
@@ -300,7 +301,7 @@
                     <div class="relative">
                         <div class="absolute -inset-4 bg-gradient-to-br from-[#004A7C] to-[#34d399] rounded-full blur-2xl opacity-20"></div>
                         <div class="relative z-10 flex flex-col items-center justify-center p-8">
-                            <img src="{{ asset('images/topogest-symbol.svg') }}" alt="Símbolo TopoGest" class="w-40 md:w-56 h-auto object-contain drop-shadow-2xl opacity-80">
+                            <img src="{{ asset('images/logo-completa.png') }}?v={{ time() }}" alt="Marca TopoGest" class="w-48 md:w-64 h-auto object-contain drop-shadow-2xl opacity-90">
                         </div>
                     </div>
                 </div>
@@ -418,7 +419,8 @@
                 <!-- Marca -->
                 <div class="mb-8 md:mb-0 flex flex-col items-center md:items-start">
                     <div class="flex items-center gap-2 mb-3">
-                        <img src="{{ asset('images/topogest-logo-horizontal.svg') }}" alt="TopoGest" class="h-8 w-auto opacity-90">
+                        <img src="{{ asset('images/logo-icon.png') }}?v={{ time() }}" alt="Símbolo TopoGest" class="h-8 w-auto opacity-90">
+                        <img src="{{ asset('images/logo-text.png') }}?v={{ time() }}" alt="TopoGest" class="h-6 w-auto opacity-90">
                     </div>
                     <p class="text-slate-400 text-sm">Gestão & Topografia Digital</p>
                 </div>

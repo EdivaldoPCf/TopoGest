@@ -7,6 +7,15 @@
         ::-webkit-scrollbar-thumb { background: #003366; border-radius: 999px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,.05); }
         .tab-active { border-bottom: 3px solid #003366; color: #003366; font-weight: 900; }
+        .checkerboard {
+            background-color: #f8fafc;
+            background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+                              linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+                              linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+                              linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
 </style>
 @endpush
 
@@ -74,13 +83,19 @@
                 <input type="hidden" name="active_tab" value="imagens">
 
                 <div class="grid gap-8 lg:grid-cols-2">
-                    @foreach($imageFiles as $field => $info)
-                        <div class="rounded-3xl border border-slate-200 bg-slate-100 border border-slate-200 p-6 shadow-xl">
-                            <p class="text-xs uppercase tracking-[3px] text-slate-500 font-bold mb-4">{{ $info['label'] }}</p>
-                            <div class="mb-4 h-40 overflow-hidden rounded-3xl border border-slate-200 bg-slate-900/50">
-                                <img src="{{ asset('images/' . $info['name']) }}"
+                    @foreach([
+                        'background_topo' => ['label' => 'Background Principal', 'name' => 'background-topo.jpg', 'desc' => 'Imagem utilizada como fundo principal da página inicial.'],
+                        'logo_icon' => ['label' => 'Logo Ícone', 'name' => 'logo-icon.png', 'desc' => 'Símbolo da marca. Recomendado: PNG, WEBP ou SVG com fundo transparente.'],
+                        'logo_text' => ['label' => 'Logo Texto', 'name' => 'logo-text.png', 'desc' => 'Logotipo textual TopoGest. Recomendado: fundo transparente.'],
+                        'logo_completa' => ['label' => 'Logo Completa', 'name' => 'logo-completa.png', 'desc' => 'Versão completa da identidade visual. Recomendado: fundo transparente.']
+                    ] as $field => $info)
+                        <div class="rounded-3xl border border-slate-200 bg-slate-100 p-6 shadow-xl">
+                            <p class="text-xs uppercase tracking-[3px] text-slate-500 font-bold mb-1">{{ $info['label'] }}</p>
+                            <p class="text-xs text-slate-500 mb-4 h-8">{{ $info['desc'] }}</p>
+                            <div class="mb-4 h-40 overflow-hidden rounded-3xl border border-slate-200 {{ $field === 'background_topo' ? 'bg-slate-900/50' : 'checkerboard' }}">
+                                <img src="{{ asset('images/' . $info['name']) }}?v={{ time() }}"
                                      alt="{{ $info['label'] }}"
-                                     class="w-full max-h-40 object-contain rounded-3xl bg-slate-900/50">
+                                     class="w-full max-h-40 object-contain rounded-3xl">
                             </div>
                             <label class="block text-slate-800/80 font-semibold mb-2">
                                 Arquivo de imagem
